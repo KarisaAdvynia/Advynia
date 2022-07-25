@@ -6,7 +6,7 @@ Each patch was applied to a test ROM using Armips
 (https://github.com/Kingcom/armips), then the resulting offsets and hex data 
 were manually copied into Adv3Patch, for use when Advynia appllies the patches.
 
-Be warded that several patches use the vanilla sublevel region as freespace, 
+Be warned that several patches use the vanilla sublevel region as freespace, 
 which is noted within the patch. Advynia auto-relocates those sublevels if 
 needed, but if you're applying them manually, make sure you aren't overwriting 
 anything important!
