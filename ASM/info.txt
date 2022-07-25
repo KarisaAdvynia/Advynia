@@ -1,0 +1,14 @@
+I couldn't find a way to embed an assembler in Advynia as planned, so I needed 
+to apply the patches as hex code. For the sake of ensuring the patch source 
+is modifiable, I've included each patch in this folder with Advynia's source.
+
+Each patch was applied to a test ROM using Armips 
+(https://github.com/Kingcom/armips), then the resulting offsets and hex data 
+were manually copied into Adv3Patch, for use when Advynia appllies the patches.
+
+Be warded that several patches use the vanilla sublevel region as freespace, 
+which is noted within the patch. Advynia auto-relocates those sublevels if 
+needed, but if you're applying them manually, make sure you aren't overwriting 
+anything important!
+
+Karisa
