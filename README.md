@@ -17,3 +17,15 @@ Aiming to be a streamlined editor experience, providing what's needed for creati
     - shading to show which screens can be accessed in-game
     - button to count the current sublevel's red coins/flowers
     - warning if items may vanish due to an item memory glitch, manually and when saving
+
+## How to run
+If running a prebuilt release (<https://github.com/KarisaAdvynia/Advynia/releases>):
+- Download and run Advynia.exe (Windows) or Advynia.app (Mac), no installation needed.
+
+If running from source:
+- Install Python from <https://www.python.org/> (requires Python 3.10 or later)
+- Install PyQt6 from the command line with pip. This varies by operating system, but should be a variation of `pip install pyqt6`.
+    - On Windows 10: `py -m pip install pyqt6`
+- Run Advynia.py
+
+Advynia should run natively on any platform that supports Python/PyQt, but only the Windows layout is currently supported. It's functional on Mac, but looks awkward in the default Qt Mac theme; this is planned to be improved later.
