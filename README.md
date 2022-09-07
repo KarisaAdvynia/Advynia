@@ -27,5 +27,6 @@ If running from source:
 - Install PyQt6 from the command line with pip. This varies by operating system, but should be a variation of `pip install pyqt6`.
     - On Windows 10: `py -m pip install pyqt6`
 - Run Advynia.py
+    - Your computer may have multiple versions of Python installed; make sure it opens in Python 3.10+ by default
 
 Advynia should run natively on any platform that supports Python/PyQt, but only the Windows layout is currently supported. It's functional on Mac, but looks awkward in the default Qt Mac theme; this is planned to be improved later.
