@@ -34,7 +34,8 @@ If running from source:
 Advynia should run natively on any platform that supports Python/PyQt.
 
 ## Settings
-Settings are stored in Advynia.cfg, and can be modified manually while Advynia is closed.
+Settings are stored in Advynia.cfg in the app folder, and can be modified manually while Advynia is closed.
+- Note: In the Mac build, Advynia.app/Contents/MacOS/ is treated as the app folder, as opposed to the folder containing Advynia.app. This is unintentional.
 
 To reset a setting to default, delete the line corresponding to that setting; it will be restored the next time Advynia is opened. To reset all settings, delete the entire file.
 
