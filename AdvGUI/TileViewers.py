@@ -1,12 +1,15 @@
+"""SMA3 Tile Viewers
+Dialogs for displaying 8x8 and 16x16 tiles, and their shared base class."""
+
 # standard library imports
+from functools import partial
 import itertools
 
 # import from other files
+from AdvEditor import AdvWindow, Adv3Attr, Adv3Visual, Adv3Patch
 from AdvGame import GBA, SMA3
-from .QtGeneral import *
-
-# globals
-import AdvSettings, Adv3Attr, Adv3Visual, Adv3Patch
+from .GeneralQt import *
+from . import QtAdvFunc, HeaderEditor
 
 # Viewer dialog base class
 
@@ -18,7 +21,6 @@ class QTileViewer(QDialog):
         self.queuedupdate = True
         self.savedpos = None
         self.savedsize = None
-        self.actionkey = None
 
     def show(self):
         "Restore saved window position/size, and update graphics if queued."
@@ -33,7 +35,7 @@ class QTileViewer(QDialog):
 
     def closeEvent(self, event):
         "Save window position/size on close, and uncheck the toolbar button."
-        AdvSettings.editor.actions[self.actionkey].setChecked(False)
+        AdvWindow.editor.actions[self.actionkey].setChecked(False)
         self.savedpos = self.pos()
         self.savedsize = self.size()
         self.close()
@@ -55,11 +57,15 @@ class QTileViewer(QDialog):
 # Viewer dialog main classes
 
 class Q8x8TileViewer(QTileViewer):
+    """Dialog for displaying the currently loaded 8x8 tiles, and adjusting
+    related sublevel settings."""
+
+    actionkey = "Toggle 8x8"
+
     def __init__(self, parent):
         super().__init__(parent)
 
         self.setWindowTitle("8x8 Tile Viewer")
-        self.actionkey = "Toggle 8x8"
 
         self.page = 0
 
@@ -97,9 +103,7 @@ class Q8x8TileViewer(QTileViewer):
         radiobuttons = []
         for i, text in enumerate(("Layers", "Sprite Global", "Sprite Tileset")):
             radiobuttons.append(QRadioButton(text))
-            def _tempfunc(page):
-                return lambda : self.setLayoutPage(page)
-            radiobuttons[i].clicked.connect(_tempfunc(i))
+            radiobuttons[i].clicked.connect(partial(self.setLayoutPage, i))
         radiobuttons[0].setChecked(True)
 
         self.currenttile = QLabel()
@@ -149,7 +153,8 @@ class Q8x8TileViewer(QTileViewer):
                 self.updatestripesfromviewer)
 
         self.patchbutton = QPushButton("Override")
-        self.patchbutton.clicked.connect(Adv3Patch.applysublevelstripes)
+        self.patchbutton.clicked.connect(
+            lambda : Adv3Patch.applypatch("sublevelstripes"))
         # prevent button from being activated with enter
         self.patchbutton.setAutoDefault(False)
 
@@ -276,31 +281,34 @@ class Q8x8TileViewer(QTileViewer):
                 headertoupdate[key] = self.headerdropdowns[key].currentIndex()
 
         if headertoupdate:
-            AdvSettings.editor.setHeader(headertoupdate)
+            AdvWindow.editor.setHeader(headertoupdate)
             # calls updatefromsublevel in turn
+
+            HeaderEditor.setaction(headertoupdate, usemergeID=True)
         else:
             self.reloadgraphics()
 
     def updatestripesfromviewer(self):
         """Update the active sublevel's stripe IDs, using the current settings
         of the dropdowns. Then update and reload this window's graphics."""
-        stripestoupdate = []
+        stripestoupdate = set()
         for i in range(6):
             index = self.stripedropdowns[i].currentIndex()
             stripeID = SMA3.Constants.stripes[index][0]
-
+            Adv3Attr.sublevel.stripeIDs[i] = stripeID
             if Adv3Visual.spritegraphics.stripeIDs[i] != stripeID:
-                stripestoupdate.append((i, stripeID))
+                stripestoupdate.add(i)
 
         if stripestoupdate:
-            for i, stripeID in stripestoupdate:
-                # update sublevel
-                Adv3Attr.sublevel.stripeIDs[i] = stripeID
-                # update graphics
-                Adv3Visual.spritegraphics.loadstripe(
-                    Adv3Attr.filepath, i, stripeID)
+            AdvWindow.undohistory.addaction("Edit Sprite Tileset",
+                mergeID=("Stripe Slot " + str(tuple(stripestoupdate)[0])
+                         if len(stripestoupdate) == 1 else None),
+                updateset={"Sprite Graphics"}, reload=True)
             self.reloadgraphics()
-            AdvSettings.editor.reload({"Sprite Graphics"})
+            AdvWindow.statusbar.setActionText(
+                "Stripe slot " +
+                ",".join(str(i) for i in stripestoupdate) +
+                " updated.")
 
     def runqueuedupdate(self):
         self.updatefromsublevel()
@@ -310,11 +318,9 @@ class Q8x8TileViewer(QTileViewer):
         settings. Then reload this window's graphics."""
         for i in self.headerdropdowns:
             self.headerdropdowns[i].setCurrentIndex(Adv3Attr.sublevel.header[i])
-
-        for i, stripeID in enumerate(Adv3Visual.spritegraphics.stripeIDs):
+        for i, stripeID in enumerate(Adv3Attr.sublevel.stripeIDs):
             self.stripedropdowns[i].setCurrentIndex(
                 self.stripeIDtoindex[stripeID])
-
         self.reloadgraphics()
 
     def reloadgraphics(self):
@@ -409,17 +415,21 @@ class Q8x8TileViewer(QTileViewer):
         self.currenttile.setPixmap(pixmap.scaledToHeight(16))
 
     def world6patchcheck(self):
-        if self.headerdropdowns[1].currentIndex() > 0xF and\
-                not Adv3Attr.world6flag:
-            applied = Adv3Patch.applyworld6flag()
-            if not applied: self.headerdropdowns[1].setCurrentIndex(0xF)
+        if (self.headerdropdowns[1].currentIndex() > 0xF and
+                not Adv3Attr.world6flag):
+            applied = Adv3Patch.applypatch("world6flag")
+            if not applied:
+                self.headerdropdowns[1].setCurrentIndex(0xF)
 
 class Q16x16TileViewer(QTileViewer):
+    "Dialog for displaying and selecting layer 1 16x16 tiles."
+
+    actionkey = "Toggle 16x16"
+
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.setWindowTitle("16x16 Tile Viewer")
-        self.actionkey = "Toggle 16x16"
+        self.setWindowTitle("Layer 1 16x16 Tile Viewer")
 
         self.tile16x16items = {}
         self.tilenumitems = []
@@ -437,12 +447,13 @@ class Q16x16TileViewer(QTileViewer):
         self.currenttile = QLabel()
         self.currenttile.setPixmap(QTransparentPixmap(16, 16))
         self.tileinfo = QLabel()
-        self.tileinfo.setMinimumWidth(200)
+        self.tileinfo.setMinimumWidth(QtAdvFunc.basewidth(self.tileinfo) * 40)
         self.settileinfo(None)
 
         insertlabel = QLabel("Insert tile as object")
         self.insertbutton = QPushButton("Insert")
-        self.insertbutton.clicked.connect(self.insertselectedtile)
+        self.insertbutton.clicked.connect(
+            lambda : self.inserttile(self.selectedtile))
         self.insertbutton.setAutoDefault(False)
         self.insertbutton.setDisabled(True)
 
@@ -549,21 +560,14 @@ class Q16x16TileViewer(QTileViewer):
         self._selectedtile = value
         self.insertbutton.setDisabled(value is None)
 
-    def insertselectedtile(self):
-        self.inserttile(self.selectedtile)
-
     def inserttile(self, tileID):
         """Insert the current selected tile, if any, in the
         center of the view."""
-        if not Adv3Attr.object65:
-            applied = Adv3Patch.applyobject65()
-            if not applied:
-                return
 
-        scene = AdvSettings.editor.sublevelscene
         if tileID is not None:
             newobj = SMA3.Object(ID=0x65, adjwidth=1, adjheight=1, extID=tileID,
                                  extIDbytes=2)
+            scene = AdvWindow.sublevelscene
             scene.insertitems({newobj}, *scene.centertile())
 
     fliptext = ("", ", X-flip", ", Y-flip", ", XY-flip")
@@ -597,30 +601,30 @@ class Q16x16TileViewer(QTileViewer):
 
 # Dialog component classes
 
-class QTileGraphicsView(QGraphicsView):
+class QTileGraphicsView(QGraphicsViewTransparent):
     """Graphics view for the 16x16 Tile Viewer, and for non-stripe graphics in
     the 8x8 Tile Viewer."""
     def __init__(self, scene, startheight=0x100, zoom=1):
         super().__init__(scene)
 
         self.zoom = zoom
-        self.fixedwidth = int(scene.width()) * self.zoom +\
-            QApplication.style().pixelMetric(
-                QStyle.PixelMetric.PM_ScrollBarExtent) + 3
+        self.fixedwidth = (
+            int(scene.width()) * self.zoom +
+            self.verticalScrollBar().sizeHint().width() + 2)
         self.startheight = startheight
 
-        self.setStyleSheet("background:transparent;")
         self.scale(self.zoom, self.zoom)
         self.setMinimumHeight(self.zoom * 0x80)
         self.setMaximumHeight(int(scene.height()) * self.zoom + 2)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         self.setFixedWidth(self.fixedwidth)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
     def sizeHint(self):
         return QSize(self.fixedwidth, self.startheight)
 
-class Q8x8TileStripeView(QGraphicsView):
+class Q8x8TileStripeView(QGraphicsViewTransparent):
     """Graphics view for the 8x8 Tile Viewer, stripe graphics.
     Unlike the other views, this view is fixed size and doesn't have a scroll
     bar."""
@@ -629,10 +633,10 @@ class Q8x8TileStripeView(QGraphicsView):
 
         self.zoom = 2
 
-        self.setStyleSheet("background:transparent;")
         self.scale(self.zoom, self.zoom)
         self.setFixedSize(int(scene.width()) * self.zoom + 2,
                           int(scene.height()) * self.zoom + 2)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
 class Q8x8TileViewerItem(QGraphicsPixmapItem):
     """Pixmap item for each graphics scene in the 8x8 Tile Viewer. Sends hover

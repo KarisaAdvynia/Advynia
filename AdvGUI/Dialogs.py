@@ -1,12 +1,71 @@
-# import from other files
-from AdvGame import GBA, SMA3
-from .QtGeneral import *
+"""Dialogs
+Various minor dialog subclasses without enough code to receive their own
+module."""
 
-# globals
-import AdvMetadata, AdvSettings, Adv3Attr, Adv3Save, Adv3Patch
+# standard library imports
+import platform
+
+# import from other files
+import AdvMetadata, AdvEditor.ROM
+from AdvEditor import AdvWindow, Adv3Attr, Adv3Patch, Adv3Sublevel, Adv3Save
+from AdvGame import GBA, SMA3
+from . import PyQtImport
+from .GeneralQt import *
 
 class QDialogAbout(QDialog):
     "Dialog for describing the editor."
+
+    def __init__(self, *args):
+        super().__init__(*args)
+
+        self.setWindowTitle("About Advynia")
+
+        # init widgets
+        advyniaicon = QLabel()
+        advyniaicon.setPixmap(QPixmap(
+            AdvMetadata.datapath("icon", "Advynia3.png")))
+        advynianame = QLabel("".join((
+            "<b>", AdvMetadata.appnamefull, "</b>")))
+        advynianame.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextBrowserInteraction)
+        advyniadesc = QLabel("<br>".join((
+            "(Python " + platform.python_version() +
+            ", PyQt " + PyQtImport.PYQT_VERSION_STR + ")<hr>",
+            AdvMetadata.aboutadvynia,
+            )))
+        advyniadesc.setTextFormat(Qt.TextFormat.RichText)
+        advyniadesc.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextBrowserInteraction)
+        advyniadesc.setWordWrap(True)
+
+        licensebutton = QPushButton("License Info")
+        licensebutton.clicked.connect(QDialogLicenseInfo(self).exec)
+        confirmbutton = QPushButton("OK")
+        confirmbutton.clicked.connect(self.accept)
+        confirmbutton.setDefault(True)
+
+        # init layout
+        layoutMain = QVHBoxLayout()
+        self.setLayout(layoutMain)
+
+        layoutMain.addRow()
+        layoutMain[-1].addWidget(advyniaicon)
+        layoutMain[-1].addWidget(advynianame)
+        layoutMain[-1].addStretch()
+
+        layoutMain.addWidget(advyniadesc)
+
+        layoutMain.addRow()
+        layoutMain[-1].addStretch()
+        layoutMain[-1].addWidget(licensebutton)
+        layoutMain[-1].addWidget(confirmbutton)
+
+    def open(self):
+        self.setFocus()
+        super().open()
+
+class QDialogLicenseInfo(QDialog):
+    "Dialog for displaying GPL license notes."
 
     gpltext = '''
 This program is free software: you can redistribute it and/or modify 
@@ -26,39 +85,21 @@ this program.  If not, see
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.setWindowTitle("About Advynia")
+        self.setWindowTitle("GNU General Public License")
 
         # init widgets
-        advyniaicon = QLabel()
-        advyniaicon.setPixmap(QPixmap(
-            AdvMetadata.datapath("icon", "Advynia3.png")))
-        advynianame = QLabel("".join((
-            "<b>", AdvMetadata.appnamefull, "</b>")))
-        advynianame.setTextInteractionFlags(
+        label = QLabel(self.gpltext)
+        label.setTextFormat(Qt.TextFormat.RichText)
+        label.setTextInteractionFlags(
             Qt.TextInteractionFlag.TextBrowserInteraction)
-        advyniadesc = QLabel("".join((
-            AdvMetadata.aboutadvynia, "<br><hr><br>", self.gpltext)))
-        advyniadesc.setTextFormat(Qt.TextFormat.RichText)
-        advyniadesc.setTextInteractionFlags(
-            Qt.TextInteractionFlag.TextBrowserInteraction)
-        advyniadesc.setWordWrap(True)
-
-        confirmbutton = QPushButton("OK")
-        confirmbutton.clicked.connect(self.accept)
+        label.setWordWrap(True)
 
         # init layout
-        layoutMain = QVBoxLayout()
+        layoutMain = QVHBoxLayout()
         self.setLayout(layoutMain)
-        layoutTop = QHBoxLayout()
-        layoutMain.addLayout(layoutTop)
+        layoutMain.addWidget(label)
+        layoutMain.addAcceptRow(self, rejectbutton=False)
 
-        layoutTop.addWidget(advyniaicon)
-        layoutTop.addWidget(advynianame)
-        layoutTop.addStretch()
-
-        layoutMain.addWidget(advyniadesc)
-        layoutMain.addWidget(
-            confirmbutton, alignment=Qt.AlignmentFlag.AlignRight)
 
 class QDialogROMValidation(QMessageBox):
     "Dialog for displaying errors/warnings when loading a ROM."
@@ -106,7 +147,7 @@ class QDialogSaveValidation(QMessageBox):
 class QDialogPatchValidation(QDialog):
     "Dialog for warning the user that a patch is about to be applied."
     def __init__(self, name, desc):
-        super().__init__(AdvSettings.editor)
+        super().__init__(AdvWindow.editor)
 
         self.setWindowTitle("Patch Notice")
 
@@ -114,32 +155,20 @@ class QDialogPatchValidation(QDialog):
         label = QLabel(text.format(name=name, desc=desc))
         label.setWordWrap(True)
 
-        confirmbutton = QPushButton("Apply")
-        confirmbutton.clicked.connect(self.accept)
-        confirmbutton.setDefault(True)
-        cancelbutton = QPushButton("Cancel")
-        cancelbutton.clicked.connect(self.reject)
-
         # init layout
-        layoutMain = QVBoxLayout()
+        layoutMain = QVHBoxLayout()
         self.setLayout(layoutMain)
         layoutMain.addWidget(label)
         layoutMain.addWidget(QHorizLine())
 
-        layoutButtons = QHBoxLayout()
-        layoutMain.addLayout(layoutButtons)
-        layoutButtons.addWidget(QLabel(
-            "<i>Applied patches can't be reverted!</i>"))
-        layoutButtons.addSpacing(10)
-        layoutButtons.addStretch()
-        layoutButtons.addWidget(confirmbutton)
-        layoutButtons.addWidget(cancelbutton)
+        layoutMain.addAcceptRow(self, "Apply",
+            labeltext="<i>Applied patches can't be reverted!</i>")
 
         self.setFixedSize(self.sizeHint())
 
 class QDialogImportPatch(QDialog):
     def __init__(self, patchlist, sublevel):
-        super().__init__(AdvSettings.editor)
+        super().__init__(AdvWindow.editor)
 
         self.setWindowTitle("Patch Notice")
 
@@ -162,14 +191,8 @@ class QDialogImportPatch(QDialog):
             QRadioButton("Import without patches (may break!)")]
         self.radiobuttons[0].setChecked(True)
 
-        confirmbutton = QPushButton("OK")
-        confirmbutton.clicked.connect(self.accept)
-        confirmbutton.setDefault(True)
-        cancelbutton = QPushButton("Cancel")
-        cancelbutton.clicked.connect(self.reject)
-
         # init layout
-        layoutMain = QVBoxLayout()
+        layoutMain = QVHBoxLayout()
         self.setLayout(layoutMain)
         layoutMain.addWidget(warninglabel)
         layoutMain.addWidget(patchlabel)
@@ -177,14 +200,8 @@ class QDialogImportPatch(QDialog):
             layoutMain.addWidget(button)
         layoutMain.addWidget(QHorizLine())
 
-        layoutButtons = QHBoxLayout()
-        layoutMain.addLayout(layoutButtons)
-        layoutButtons.addWidget(QLabel(
-            "<i>Applied patches can't be reverted!</i>"))
-        layoutButtons.addSpacing(10)
-        layoutButtons.addStretch()
-        layoutButtons.addWidget(confirmbutton)
-        layoutButtons.addWidget(cancelbutton)
+        layoutMain.addAcceptRow(self, "Apply",
+            labeltext="<i>Applied patches can't be reverted!</i>")
 
         self.setFixedSize(self.sizeHint())
 
@@ -208,7 +225,7 @@ class QDialogImportPatch(QDialog):
 
 class QDialogSelectSublevel(QDialog):
     "Base class for load/save sublevel dialogs."
-    def __init__(self, parent):
+    def __init__(self, parent, swap=False):
         super().__init__(parent)
 
         # init widgets
@@ -221,17 +238,22 @@ class QDialogSelectSublevel(QDialog):
         cancelbutton.clicked.connect(self.reject)
 
         # init layout
-        self.layoutMain = QVBoxLayout()
-        self.setLayout(self.layoutMain)
+        layoutMain = QVHBoxLayout()
+        self.setLayout(layoutMain)
 
-        layoutrows = []
-        for i in range(2):
-            layoutrows.append(QHBoxLayout())
-            self.layoutMain.addLayout(layoutrows[-1])
-        layoutrows[0].addWidget(QLabel("Sublevel ID (00-F5):"))
-        layoutrows[0].addWidget(self.input)
-        layoutrows[1].addWidget(self.confirmbutton)
-        layoutrows[1].addWidget(cancelbutton)
+        layoutMain.addRow()
+        layoutMain[-1].addWidget(QLabel("Sublevel ID (00-F5):"))
+        layoutMain[-1].addWidget(self.input)
+        if swap:
+            layoutMain.addRow()
+            self.buttons = {}
+            for text in ("Overwrite", "Swap"):
+                self.buttons[text] = QRadioButton(text)
+                layoutMain[-1].addWidget(self.buttons[text])
+            self.buttons["Overwrite"].setChecked(True)
+        layoutMain.addRow()
+        layoutMain[-1].addWidget(self.confirmbutton)
+        layoutMain[-1].addWidget(cancelbutton)
 
         self.setFixedSize(self.sizeHint())
 
@@ -259,8 +281,10 @@ class QDialogLoadSublevel(QDialogSelectSublevel):
 
         self.confirmbutton.setText("Load")
 
-        self.accepted.connect(
-            lambda : AdvSettings.editor.loadSublevelID(self.sublevelID))
+    def open(self):
+        if not Adv3Sublevel.savecheck():
+            return
+        super().open()
 
     def accept(self):
         "Load sublevel, only if the input is a valid sublevel ID."
@@ -270,29 +294,18 @@ class QDialogLoadSublevel(QDialogSelectSublevel):
             return
 
         self.sublevelID = sublevelID
+        if not Adv3Sublevel.loadsublevelID(self.sublevelID):
+            return
         super().accept()
 
 class QDialogSaveSublevelAs(QDialogSelectSublevel):
     "Dialog for saving the current sublevel as a different ID."
     def __init__(self, *args):
-        super().__init__(*args)
+        super().__init__(*args, swap=True)
 
         self.setWindowTitle("Save Sublevel As")
 
         self.confirmbutton.setText("Save")
-
-        # add new widgets to layout
-        layoutSave = QHBoxLayout()
-        self.layoutMain.insertLayout(1, layoutSave)
-        self.buttons = {}
-        for text in ("Overwrite", "Swap"):
-            self.buttons[text] = QRadioButton(text)
-            layoutSave.addWidget(self.buttons[text])
-        self.buttons["Overwrite"].setChecked(True)
-
-        # fix keyboard tab order
-        QWidget.setTabOrder(self.input, self.buttons["Overwrite"])
-        QWidget.setTabOrder(self.buttons["Overwrite"], self.buttons["Swap"])
 
         self.setFixedSize(self.sizeHint())
 
@@ -314,35 +327,45 @@ class QDialogSaveSublevelAs(QDialogSelectSublevel):
             self.errormessage()
             return
 
-        if not Adv3Save.firstsavewarning(): return
-
         if self.buttons["Swap"].isChecked():
-            # swap new ID's and old ID's pointers
-            oldID = Adv3Attr.sublevel.ID
-            if newID == oldID:
-                QSimpleDialog(self, title="Error",
-                    text="Sublevel cannot be swapped with itself.").exec()
+            if not Adv3Save.savewrapper(self._swap, newID):
                 return
-            with GBA.Open(Adv3Attr.filepath, "r+b") as f:
-                for baseptr in (SMA3.Pointers.sublevelmainptrs,
-                                SMA3.Pointers.sublevelspriteptrs):
-                    ptrtable = f.readptr(baseptr)
-                    oldptroffset = ptrtable + 4*oldID
-                    newptroffset = ptrtable + 4*newID
-
-                    f.seek(oldptroffset)
-                    oldptr = f.read(4)
-                    f.seek(newptroffset)
-                    newptr = f.read(4)
-
-                    f.seek(oldptroffset)
-                    f.write(newptr)
-                    f.seek(newptroffset)
-                    f.write(oldptr)
 
         Adv3Attr.sublevel.ID = newID
-        AdvSettings.editor.saveSublevelAction()
+        if not Adv3Sublevel.savesublevel_action():
+            return
         super().accept()
+
+    def _swap(self, newID):
+        # swap new ID's and old ID's pointers
+        oldID = Adv3Attr.sublevel.ID
+        if newID == oldID:
+            QSimpleDialog(self, title="Error",
+                text="Sublevel cannot be swapped with itself.").exec()
+            return False
+
+        # swap sublevel-indexed patch data
+        tempsublevel = SMA3.Sublevel.importbyID(Adv3Attr.filepath, newID)
+        Adv3Patch.loadsublevelpatchattr(tempsublevel)
+        Adv3Save.savesublevelpatchattr(tempsublevel, oldID)
+
+        with GBA.Open(Adv3Attr.filepath, "r+b") as f:
+            for baseptr in (SMA3.Pointers.sublevelmainptrs,
+                            SMA3.Pointers.sublevelspriteptrs):
+                ptrtable = f.readptr(baseptr)
+                oldptroffset = ptrtable + 4*oldID
+                newptroffset = ptrtable + 4*newID
+
+                f.seek(oldptroffset)
+                oldptr = f.read(4)
+                f.seek(newptroffset)
+                newptr = f.read(4)
+
+                f.seek(oldptroffset)
+                f.write(newptr)
+                f.seek(newptroffset)
+                f.write(oldptr)
+        return True
 
 class QDialogClearSublevel(QDialog):
     "Dialog for clearing all or part of the currently loaded sublevel."
@@ -357,27 +380,16 @@ class QDialogClearSublevel(QDialog):
             checkbox = QCheckBox(key)
             self.checkboxes[key] = checkbox
 
-        confirmbutton = QPushButton("OK")
-        confirmbutton.clicked.connect(self.accept)
-        confirmbutton.setDefault(True)
-        cancelbutton = QPushButton("Cancel")
-        cancelbutton.clicked.connect(self.reject)
-
         # init layout
-        layoutMain = QVBoxLayout()
+        layoutMain = QVHBoxLayout()
         self.setLayout(layoutMain)
 
         layoutGrid = QGridLayout()
         layoutMain.addLayout(layoutGrid)
-
         for i, checkbox in enumerate(self.checkboxes.values()):
             layoutGrid.addWidget(checkbox, i&1, i&2)
 
-        layoutButtons = QHBoxLayout()
-        layoutMain.addLayout(layoutButtons)
-        layoutButtons.addStretch()
-        layoutButtons.addWidget(confirmbutton)
-        layoutButtons.addWidget(cancelbutton)
+        layoutMain.addAcceptRow(self)
 
         self.setFixedSize(self.sizeHint())
 
@@ -387,25 +399,54 @@ class QDialogClearSublevel(QDialog):
         super().open()
 
     def accept(self):
+        clearlist = [key for key in self.checkboxes
+                     if self.checkboxes[key].isChecked()]
         updateset = set()
-        if self.checkboxes["Objects"].isChecked():
+
+        if "Objects" in clearlist:
+            AdvWindow.selection.setSelectedObjects(None)
             Adv3Attr.sublevel.objects.clear()
-            AdvSettings.editor.sublevelscene.updateobjects()
-        if self.checkboxes["Sprites"].isChecked():
+            updateset |= {"Objects"}
+        if "Sprites" in clearlist:
+            AdvWindow.selection.setSelectedSpriteItems(None)
             Adv3Attr.sublevel.sprites.clear()
             updateset |= {"Sprites"}
-        if self.checkboxes["Screen Exits"].isChecked():
+        if "Screen Exits" in clearlist:
             Adv3Attr.sublevel.exits.clear()
             updateset |= {"Screen Exits"}
-        if self.checkboxes["Header"].isChecked():
+        if "Header" in clearlist:
             updatedict = {}
             for i in range(len(Adv3Attr.sublevel.header)):
                 updatedict[i] = SMA3.Constants.headerdefaults[i]
-            AdvSettings.editor.setHeader(updatedict)
+            AdvWindow.editor.setHeader(updatedict)
+            updateset |= {"Header"}
 
-        AdvSettings.editor.statusbar.updateByteText()
-        AdvSettings.editor.reload(updateset)
+        AdvWindow.statusbar.setActionText(
+            "Cleared " + ", ".join(clearlist).lower() + ".")
+        AdvWindow.statusbar.updateByteText()
+        AdvWindow.undohistory.addaction(
+            "Clear " + (clearlist[0] if len(clearlist) == 1 else "Sublevel"),
+            updateset=updateset, reload=True)
         super().accept()
+
+class QDialogSaveWarning(QDialog):
+    """Dialog for prompting to save unsaved changes.
+    Output: 1=Save, 0=Don't Save, 2=Cancel"""
+    def __init__(self, *args,
+            text="Would you like to save this sublevel before closing?"):
+        super().__init__(*args)
+
+        self.setWindowTitle("Unsaved Changes")
+
+        layoutMain = QVHBoxLayout()
+        self.setLayout(layoutMain)
+        layoutMain.addWidget(QLabel(text))
+        layoutMain.addAcceptRow(
+            self, accepttext="Save", rejecttext="Cancel")
+
+        thirdbutton = QPushButton("Don't Save")
+        thirdbutton.clicked.connect(lambda : self.done(2))
+        layoutMain[-1].insertWidget(2, thirdbutton)
 
 class QDialogROMInfo(QDialog):
     "Dialog listing info about the current ROM."
@@ -425,36 +466,37 @@ class QDialogROMInfo(QDialog):
                 (QLabel(value[0] + ":"), QLabel("<b>False<b>")))
 
         # init layout
-        layoutMain = QVBoxLayout()
+        layoutMain = QVHBoxLayout()
         self.setLayout(layoutMain)
 
-        layoutRow1 = QHBoxLayout()
-        layoutMain.addLayout(layoutRow1)
-        layoutRow1.addWidget(QLabel("Internal name/ID:"))
-        layoutRow1.addStretch()
-        layoutRow1.addWidget(self.labels["internalname"])
+        layoutMain.addRow()
+        layoutMain[-1].addWidget(QLabel("Internal name/ID:"))
+        layoutMain[-1].addStretch()
+        layoutMain[-1].addWidget(self.labels["internalname"])
 
-        layoutRow2 = QHBoxLayout()
-        layoutMain.addLayout(layoutRow2)
-        layoutRow2.addWidget(QLabel("Last saved version:"))
-        layoutRow2.addStretch()
-        layoutRow2.addWidget(self.labels["savedversion"])
+        layoutMain.addRow()
+        layoutMain[-1].addWidget(QLabel("Last saved version:"))
+        layoutMain[-1].addStretch()
+        layoutMain[-1].addWidget(self.labels["savedversion"])
 
         layoutMain.addWidget(QHorizLine())
 
         layoutMain.addWidget(QLabel("Applied Patches:"))
-        layoutPatches = QGridLayout()
+        layoutPatches = QVHBoxLayout()
         layoutMain.addLayout(layoutPatches)
         for i, (namelabel, statuslabel) in enumerate(self.patchlabels):
-            layoutPatches.addWidget(namelabel, i, 0)
-            layoutPatches.addWidget(statuslabel, i, 1,
-                                    Qt.AlignmentFlag.AlignRight)
+            layoutPatches.addRow()
+            layoutPatches[-1].addWidget(namelabel)
+            layoutPatches[-1].addStretch()
+            layoutPatches[-1].addWidget(statuslabel)
 
         layoutMain.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
 
     def open(self):
+        if not AdvEditor.ROM.exists(): return
+
         name, ID = GBA.readinternalname(Adv3Attr.filepath)
-        if ID: # pad title width
+        if ID:  # pad title width
             name = name.ljust(0xC) + ID
         self.labels["internalname"].setText(name)
         self.labels["savedversion"].setText(str(Adv3Attr.savedversion))
@@ -481,30 +523,20 @@ class QDialogInternalName(QDialog):
             self.lineedits[-1].setMaxLength(maxlength)
             self.lineedits[-1].setFixedWidth(maxlength*11 + 16)
 
-        confirmbutton = QPushButton("Save")
-        confirmbutton.clicked.connect(self.accept)
-        confirmbutton.setDefault(True)
-        cancelbutton = QPushButton("Cancel")
-        cancelbutton.clicked.connect(self.reject)
-
         # init layout
-        layoutMain = QVBoxLayout()
+        layoutMain = QVHBoxLayout()
         self.setLayout(layoutMain)
-        layoutRows = []
-        for i in range(3):
-            layoutRows.append(QHBoxLayout())
-            layoutMain.addLayout(layoutRows[-1])
 
-        layoutRows[0].addWidget(QLabel("Title (max 12 char)"))
-        layoutRows[0].addStretch()
-        layoutRows[0].addWidget(QLabel("ID (max 4 char)"))
+        layoutMain.addRow()
+        layoutMain[-1].addWidget(QLabel("Title (max 12 char)"))
+        layoutMain[-1].addStretch()
+        layoutMain[-1].addWidget(QLabel("ID (max 4 char)"))
 
-        layoutRows[1].addWidget(self.lineedits[0])
-        layoutRows[1].addWidget(self.lineedits[1])
+        layoutMain.addRow()
+        layoutMain[-1].addWidget(self.lineedits[0])
+        layoutMain[-1].addWidget(self.lineedits[1])
 
-        layoutRows[2].addStretch()
-        layoutRows[2].addWidget(confirmbutton)
-        layoutRows[2].addWidget(cancelbutton)
+        layoutMain.addAcceptRow(self, "Save")
 
         self.setFixedSize(self.sizeHint())
 
@@ -527,16 +559,14 @@ class QDialogInternalName(QDialog):
                 text="Only ASCII characters are allowed.").exec()
             return
 
-        if not Adv3Save.firstsavewarning(): return
-
         # update internal name
-        GBA.setinternalname(Adv3Attr.filepath, bytestowrite)
-        Adv3Save.updateversion()
+        Adv3Save.savewrapper(
+            GBA.setinternalname, Adv3Attr.filepath, bytestowrite)
 
         # update status bar
         for i in range(0x10):
             if bytestowrite[i] == 0: bytestowrite[i] = 0x20
-        AdvSettings.editor.statusbar.setActionText(
+        AdvWindow.statusbar.setActionText(
             "Internal name changed to: " + str(bytestowrite, encoding="ASCII"))
 
         super().accept()

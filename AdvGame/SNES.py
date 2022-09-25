@@ -1,10 +1,13 @@
+"""SNES General
+Classes and functions for reading/writing SNES ROMs."""
+
 # standard library imports
 import os
 
 # import from other files
-from . import General
+from . import AdvGame
 
-class Open(General.Open):
+class Open(AdvGame.Open):
     "Wrapper for Python's open() function, for reading SNES ROM images."
     def __init__(self, filepath, *args, **kwargs):
         "Account for the presence or absence of the SMC header."

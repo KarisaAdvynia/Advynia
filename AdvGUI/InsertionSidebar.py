@@ -1,16 +1,18 @@
+"""Main Window Insertion Sidebar"""
+
 # standard library imports
 import os
 
 # import from other files
+import AdvMetadata
+from AdvEditor import AdvSettings, AdvWindow, Adv3Attr
 from AdvGame import SMA3
 from .SublevelScene import QSMA3Layer1, QSMA3SpriteLayer
-from .QtGeneral import *
-
-# globals
-import AdvMetadata, AdvSettings, Adv3Attr
+from .GeneralQt import *
 
 class QInsertionSidebar(QDockWidget):
-    """Sidebar for listing and filtering objects/sprites to insert."""
+    """Main editor's sidebar, for listing and filtering objects/sprites to
+    insert."""
     def __init__(self, *args):
         super().__init__(*args)
 
@@ -20,17 +22,13 @@ class QInsertionSidebar(QDockWidget):
         self.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
         self.setTitleBarWidget(QWidget())   # remove title bar
 
-##        self.setSizePolicy(QSizePolicy(
-##            QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred))
-
         # init widgets
 
         self.scene = QGraphicsScene(0, 0, 0x90, 0x90)
         self.layer1 = QSMA3Layer1(
             self.scene, width=9, height=9, allowYoverflow=True)
         self.spritelayer = QSMA3SpriteLayer(self.scene)
-        self.view = QGraphicsView(self.scene)
-        self.view.setStyleSheet("background:transparent;")
+        self.view = QGraphicsViewTransparent(self.scene)
         self.view.setHorizontalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.view.setVerticalScrollBarPolicy(
@@ -61,7 +59,7 @@ class QInsertionSidebar(QDockWidget):
                 continue
             obj = SMA3.Object(**metadata.preview)
             self.objects.append(obj)
-            self.objectlist.addItem(" ".join(
+            self.objectlist.addItem(": ".join(
                 (obj.idstr(AdvSettings.extprefix), metadata.name)))
         self.objectlist.setCurrentRow(0)  # needs to be before connecting
         self.objectlist.itemSelectionChanged.connect(self.selectobject)
@@ -75,14 +73,14 @@ class QInsertionSidebar(QDockWidget):
                 continue
             spr = SMA3.Sprite(**metadata.preview)
             self.sprites.append(spr)
-            self.spritelist.addItem(" ".join(
+            self.spritelist.addItem(": ".join(
                 (spr.idstr(), metadata.name)))
         self.spritelist.setCurrentRow(0)  # needs to be before connecting
         self.spritelist.itemSelectionChanged.connect(self.selectsprite)
 
         for listwidget in self.objectlist, self.spritelist:
             listwidget.itemDoubleClicked.connect(
-                AdvSettings.editor.sublevelscene.quickinsertfromsidebar)
+                AdvWindow.sublevelscene.quickinsertfromsidebar)
 
         liststack = QTabWidget()
         liststack.tabBarClicked.connect(self.changetab)
@@ -91,27 +89,25 @@ class QInsertionSidebar(QDockWidget):
 
         base = QWidget()
         self.setWidget(base)
-        layoutMain = QVBoxLayout()
+        layoutMain = QVHBoxLayout()
         base.setLayout(layoutMain)
 
-        layoutPreview = QHBoxLayout()
-        layoutMain.addLayout(layoutPreview)
-        layoutPreview.addStretch(2)
-        layoutPreview.addWidget(self.view)
+        layoutMain.addRow()
+        layoutMain[-1].addStretch(2)
+        layoutMain[-1].addWidget(self.view)
 
         layoutMetaIcons = QVBoxLayout()
-        layoutPreview.addLayout(layoutMetaIcons)
+        layoutMain[-1].addLayout(layoutMetaIcons)
         layoutMetaIcons.addStretch()
         for label in self.metaicons:
             layoutMetaIcons.addWidget(label)
         self.setMetaIcons()
 
-        layoutPreview.addStretch(1)
+        layoutMain[-1].addStretch(1)
 
-        layoutFilter = QHBoxLayout()
-        layoutMain.addLayout(layoutFilter)
-        layoutFilter.addWidget(self.graphicstypelabel, 3)
-        layoutFilter.addWidget(filterbutton)
+        layoutMain.addRow()
+        layoutMain[-1].addWidget(self.graphicstypelabel, 3)
+        layoutMain[-1].addWidget(filterbutton)
 
         layoutMain.addWidget(liststack, stretch=109)  # high-priority stretch
         liststack.addTab(self.objectlist, "Objects")

@@ -51,7 +51,7 @@
 .org 0x08013882
     b 0x80138C0         ; skip world 6 palette checks
 
-.org 0x081C2354         ; use space from vanilla sublevel 00/3C sprite data
+.org 0x081C2354         ; use space from vanilla sublevel 00/3A sprite data
 @HighDigitTable:
     .fill 0x100
 .org @HighDigitTable+0x2D :: .byte 1   ; set flags for vanilla 6-1/6-6 sublevels

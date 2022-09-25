@@ -1,5 +1,5 @@
 appname = "Advynia"
-version = (0, 2, 0)
+version = (0, 3, 0)
 printtime = False
 
 aboutadvynia = '''
@@ -28,11 +28,16 @@ class ProgramVersion(tuple):
         part[:min(len(seq), 4)] = seq[:4]
         return super().__new__(cls, part)
 
+    def __bool__(self):
+        return self != (0, 0, 0, "")
+
     def __str__(self):
         "Convert the version to a string."
         output = [str(self[0]), ".", str(self[1])]
-        if self[2] or self[3]: output += ".", str(self[2])
-        if self[3]: output += "-", self[3]
+        if self[2] or self[3]:
+            output += ".", str(self[2])
+        if self[3]:
+            output += "-", self[3]
         return "".join(output)
 
     def __lt__(self, other):
@@ -41,15 +46,20 @@ class ProgramVersion(tuple):
                 return True
             elif self[i] > other[i]:
                 return False
-        return False  # equal
+        return False  # equal; text component is ignored
+
+    def __gt__(self, other):
+        for i in range(3):
+            if self[i] > other[i]:
+                return True
+            elif self[i] < other[i]:
+                return False
+        return False  # equal; text component is ignored
 
     def __le__(self, other):
-        for i in range(3):
-            if self[i] < other[i]:
-                return True
-            elif self[i] > other[i]:
-                return False
-        return True  # equal; text component is ignored
+        return not self > other
+    def __ge__(self, other):
+        return not self < other
 
 version = ProgramVersion(version)
 appnamefull = " ".join((appname, str(version)))
