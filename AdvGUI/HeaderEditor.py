@@ -1,9 +1,10 @@
-# import from other files
-from AdvGame import SMA3
-from .QtGeneral import *
+"""SMA3 Header Editor"""
 
-# globals
-import AdvSettings, Adv3Attr, Adv3Patch
+# import from other files
+from AdvEditor import AdvWindow, Adv3Attr, Adv3Patch, Adv3Sublevel
+import AdvEditor.Number
+from AdvGame import SMA3
+from .GeneralQt import *
 
 class QSMA3HeaderEditor(QDialog):
     "Dialog for editing the current sublevel's header settings."
@@ -29,7 +30,7 @@ class QSMA3HeaderEditor(QDialog):
 
             text = "".join((
                 format(i, "X"), ": ", name, " (",
-                "0"*len(format(maxvalue, "X")), "-", format(maxvalue, "X"), ")",
+                "0"*AdvEditor.Number.hexlen(maxvalue), "-", format(maxvalue, "X"), ")",
                 ))
             self.defaultlabeltext.append(text)
             self.labels.append(QLabel(text))
@@ -55,14 +56,8 @@ class QSMA3HeaderEditor(QDialog):
             "Disable use of pause menu items during this sublevel.")
         self.disableitemsbox.clicked.connect(self.disableitemscallback)
 
-        confirmbutton = QPushButton("OK")
-        confirmbutton.clicked.connect(self.accept)
-        confirmbutton.setDefault(True)
-        cancelbutton = QPushButton("Cancel")
-        cancelbutton.clicked.connect(self.reject)
-
         # init layout
-        layoutMain = QVBoxLayout()
+        layoutMain = QVHBoxLayout()
         self.setLayout(layoutMain)
 
         layoutGrid = QGridLayout()
@@ -85,27 +80,21 @@ class QSMA3HeaderEditor(QDialog):
         layoutGrid.addWidget(QVertLine(), 0, 19, -1, 1)
         layoutMain.addWidget(QHorizLine())
 
-        layoutMusic = QHBoxLayout()
-        layoutMain.addLayout(layoutMusic)
-        layoutMusic.addWidget(QLabel("<b>Music</b>"),
+        layoutMain.addRow()
+        layoutMain[-1].addWidget(QLabel("<b>Music</b>"),
                               alignment=Qt.AlignmentFlag.AlignCenter)
-        layoutMusic.addSpacing(10)
-        layoutMusic.addWidget(self.musiccheckbox)
-        layoutMusic.addSpacing(10)
-        layoutMusic.addWidget(self.musicdropdown)
-        layoutMusic.addWidget(self.disableitemsbox)
-        layoutMusic.addStretch()
+        layoutMain[-1].addSpacing(10)
+        layoutMain[-1].addWidget(self.musiccheckbox)
+        layoutMain[-1].addSpacing(10)
+        layoutMain[-1].addWidget(self.musicdropdown)
+        layoutMain[-1].addWidget(self.disableitemsbox)
+        layoutMain[-1].addStretch()
 
         layoutMain.addWidget(QHorizLine())
 
-        layoutButtons = QHBoxLayout()
-        layoutMain.addLayout(layoutButtons)
-        layoutButtons.addWidget(QLabel(
-            "<i>Graphics/palette settings can also be adjusted in the "
-            "8x8/Palette Viewers</i>"))
-        layoutButtons.addStretch()
-        layoutButtons.addWidget(confirmbutton)
-        layoutButtons.addWidget(cancelbutton)
+        layoutMain.addAcceptRow(self,
+            labeltext="<i>Graphics/palette settings can also be adjusted in the "
+            "8x8/Palette Viewers</i>")
 
         layoutMain.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
 
@@ -140,15 +129,10 @@ class QSMA3HeaderEditor(QDialog):
 
     def accept(self):
         # update any changed header settings, with appropriate callbacks
-        toupdate = {}
-        for i, new, old in zip(range(len(self.header)),
-                            self.header, Adv3Attr.sublevel.header):
-            if new != old:
-                toupdate[i] = new
+        toupdate = Adv3Sublevel.cmpheader(self.header)
         if toupdate:
-            AdvSettings.editor.setHeader(toupdate)
-            AdvSettings.editor.statusbar.setActionText(
-                "Sublevel header updated.")
+            AdvWindow.editor.setHeader(toupdate)
+            setaction(toupdate)
 
         # account for music override
         if self.musiccheckbox.isChecked():
@@ -201,7 +185,7 @@ class QSMA3HeaderEditor(QDialog):
         """Change layout to enable or disable the music override.
         Called during dialog open, and when the music checkbox is clicked."""
         if enabled and not Adv3Attr.musicoverride:
-            applied = Adv3Patch.applymusicoverride()
+            applied = Adv3Patch.applypatch("musicoverride")
             if not applied:
                 self.musiccheckbox.setChecked(False)
                 return
@@ -223,3 +207,22 @@ class QSMA3HeaderEditor(QDialog):
         headerID = 0xE | int(enabled)
         self.updateheaderbyte(0xD, headerID)
 
+def setaction(headertoupdate, usemergeID=False):
+    """Set the undo action and status bar action for a particular mapping of
+    header settings to update."""
+    mergeID = None
+    if not headertoupdate:
+        return
+    elif len(headertoupdate) == 1:
+        i = tuple(headertoupdate)[0]
+        actionstr = "Edit " + SMA3.Constants.headersettings[i]
+        if usemergeID:
+            mergeID = "Header Value " + str(i)
+        AdvWindow.statusbar.setActionText(
+            SMA3.Constants.headersettings[i].partition("/")[0].lower().capitalize() +
+            " updated.")
+    else:
+        actionstr = "Edit Header"
+        AdvWindow.statusbar.setActionText("Sublevel header updated.")
+    AdvWindow.undohistory.addaction(
+        actionstr, mergeID=mergeID, updateset={"Header"})

@@ -1,6 +1,13 @@
-import copy, math, os
+"""Metadata TSV Parser
+Imports Advynia's object/sprite metadata from TSV files."""
+
+# standard library imports
+import ast, copy, math
+
+# import from other files
 import AdvMetadata
-from AdvGame.SMA3.SpriteTilemapTextParser import processrawtilemap
+from AdvGame import SMA3
+from AdvGame.SpriteTilemapTextParser import processrawtilemap
 
 class Metadata:
     def __repr__(self):
@@ -8,7 +15,7 @@ class Metadata:
         for key in dir(self):
             if key.startswith("_"):
                 continue
-            output += [repr(key), ":", repr(self.__getattribute__(key)), ", "]
+            output += [repr(key), ":", repr(getattr(self, key)), ", "]
         output[-1] = "}>"
         return "".join(output)
 
@@ -90,29 +97,29 @@ def _importobjmetadata(file):
 
     output = ObjectMetadataMapping()
     for rawline in rawlines:
-        objID = eval(rawline["ID"])
-        extID = eval(rawline["extID"])
+        objID = ast.literal_eval(rawline["ID"])
+        extID = ast.literal_eval(rawline["extID"])
         output[(objID, extID)] = ObjectMetadata()
         metadata = output[(objID, extID)]
 
         for key in ObjectMetadata._objdata:
             if rawline[key]:
-                metadata.preview[key] = eval(rawline[key])
+                metadata.preview[key] = ast.literal_eval(rawline[key])
         for key in ObjectMetadata._tilesets:
             if rawline[key]:
                 metadata.tilesets.add(int(key, base=16))
         for key in ObjectMetadata._resizing:
             if rawline[key]:
-                metadata.resizing[key] = eval(rawline[key])
+                metadata.resizing[key] = ast.literal_eval(rawline[key])
         for key in ObjectMetadata._numkeys:
             if rawline[key]:
-                metadata.__setattr__(key, eval(rawline[key]))
+                setattr(metadata, key, ast.literal_eval(rawline[key]))
             elif key == "enabled":
                 pass
             else:
-                metadata.__setattr__(key, 0)
+                setattr(metadata, key, 0)
         for key in ObjectMetadata._strkeys:
-            metadata.__setattr__(key, rawline[key])
+            setattr(metadata, key, rawline[key])
 
         # Construct graphics type string, if not already present
         if metadata.enabled and not metadata.graphicstype:
@@ -168,18 +175,26 @@ def _importobjmetadata(file):
 
         # Determine valid resize directions
 
-        if metadata.resizing["wstep"] != 0 and\
-           metadata.resizing["wmin"] != metadata.resizing["wmax"]:
-            if metadata.resizing["wmax"] > 1:
-                metadata.resizing["horiz"] |= 1  # enable right
-            if metadata.resizing["wmin"] < 1:
-                metadata.resizing["horiz"] |= 2  # enable left
-        if metadata.resizing["hstep"] != 0 and\
-           metadata.resizing["hmin"] != metadata.resizing["hmax"]:
-            if metadata.resizing["hmax"] > 1:
-                metadata.resizing["vert"] |= 1  # enable right
-            if metadata.resizing["hmin"] < 1:
-                metadata.resizing["vert"] |= 2  # enable left
+        resizing = metadata.resizing
+
+        if resizing["wstep"] != 0 and resizing["wmin"] != resizing["wmax"]:
+            if resizing["wmax"] > 1:
+                resizing["horiz"] |= 1  # enable right
+            if resizing["wmin"] < 1:
+                resizing["horiz"] |= 2  # enable left
+        if resizing["hstep"] != 0 and resizing["hmin"] != resizing["hmax"]:
+            if resizing["hmax"] > 1:
+                resizing["vert"] |= 1  # enable down
+            if resizing["hmin"] < 1:
+                resizing["vert"] |= 2  # enable up
+
+        # change resize min/max from adjusted to unadjusted
+        if resizing["horiz"]:
+            resizing["wmin"] = SMA3.Object._unadjlength(resizing["wmin"])
+            resizing["wmax"] = SMA3.Object._unadjlength(resizing["wmax"])
+        if resizing["vert"]:
+            resizing["hmin"] = SMA3.Object._unadjlength(resizing["hmin"])
+            resizing["hmax"] = SMA3.Object._unadjlength(resizing["hmax"])
 
     return output
 
@@ -189,8 +204,8 @@ def _importsprmetadata(file):
 
     output = SpriteMetadataMapping()
     for rawline in rawlines:
-        sprID = eval(rawline["ID"])
-        extID = eval(rawline["extID"])
+        sprID = ast.literal_eval(rawline["ID"])
+        extID = ast.literal_eval(rawline["extID"])
         if extID is not None and ((sprID, None) in output):
             metadata = copy.deepcopy(output[(sprID, None)])
         else:
@@ -199,17 +214,17 @@ def _importsprmetadata(file):
 
         for key in SpriteMetadata._sprdata:
             if rawline[key]:
-                metadata.preview[key] = eval(rawline[key])
+                metadata.preview[key] = ast.literal_eval(rawline[key])
         for key in SpriteMetadata._numkeys:
             if rawline[key]:
-                metadata.__setattr__(key, eval(rawline[key]))
+                setattr(metadata, key, ast.literal_eval(rawline[key]))
             elif extID is not None or key == "enabled":
                 pass
             else:
-                metadata.__setattr__(key, 0)
+                setattr(metadata, key, 0)
         for key in SpriteMetadata._strkeys:
             if rawline[key]:
-                metadata.__setattr__(key, rawline[key])
+                setattr(metadata, key, rawline[key])
 
     for key, metadata in output.items():
         sprID, extID = key
@@ -342,9 +357,9 @@ def rotaterectbox(width, height, degrees):
                 
 
 ObjectMetadata = _importobjmetadata(
-    AdvMetadata.datapath("tsv", "ObjectMetadata.tsv"))
+    AdvMetadata.datapath("tsv", "SMA3ObjectMetadata.tsv"))
 SpriteMetadata = _importsprmetadata(
-    AdvMetadata.datapath("tsv", "SpriteMetadata.tsv"))
+    AdvMetadata.datapath("tsv", "SMA3SpriteMetadata.tsv"))
 
 ########
 

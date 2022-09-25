@@ -1,5 +1,4 @@
 """SMA3 Object Extra Data
-
 Data tables that were too long to reasonably fit among the SMA3 object
 functions."""
 

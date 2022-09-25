@@ -1,3 +1,6 @@
+"""SMA3 Object Functions
+For generating layer 1 tilemaps from sublevel object data."""
+
 # standard library imports
 import itertools, random
 
@@ -9,7 +12,7 @@ if __name__ == "__main__":
 
 # import from other files
 from AdvGame import SMA3
-from AdvGame.SMA3 import Constants, ObjectExtraData
+from AdvGame.SMA3 import ObjectExtraData
 
 class L1Tilemap(list):
     """Grid of 16x16 tile IDs representing a sublevel's layer 1.
@@ -23,8 +26,16 @@ class L1Tilemap(list):
         return sum(i in (1,0xFE,0xFF) for i in self.screens)
 
 class L1TilemapOverflowError(Exception):
+    "Raised when an object tried to generate a tile out of bounds."
     def __init__(self, obj, x, y):
-        self.obj, self.x, self.y = obj, x, y
+        self.obj = obj
+        self.x = x
+        self.y = y
+        self.dir = [0, 0]  # direction of overflow
+        if 0x80 <= self.y < 0xC0:
+            self.dir[1] = 1
+        elif 0xC0 <= self.y <= 0xFF:
+            self.dir[1] = -1
 
 class L1Constructor:
     """This constructor is only intended to be used once per instance.
@@ -78,17 +89,20 @@ class L1Constructor:
                             self.tilemap[oldY+y][oldX+x]
 
     def errorobject(self):
-        """Fallback object to ensure invalid negatively sized objects are still
-        editable. Generated tiles are red to emphasize the error."""
+        """Fallback object to ensure invalid-size objects are still editable.
+        Generated tiles are red to emphasize the error."""
         self.x = self.obj.x
         self.y = self.obj.y
         self.relX = 0
         self.relY = 0
-        if self.obj.ID == 0 and self.obj.extID is not None:
-            self.setTile(0x11E00+self.obj.extID)
-        else:
-            self.setRect(
-                0x11000+self.obj.ID, self.obj.adjwidth, self.obj.adjheight)
+        try:
+            if self.obj.ID == 0 and self.obj.extID is not None:
+                self.setTile(0x11E00+self.obj.extID)
+            else:
+                self.setRect(0x11000+self.obj.ID,
+                             self.obj.adjwidth, self.obj.adjheight)
+        except L1TilemapOverflowError:
+            pass
 
     ## Methods to be called by object functions
 
@@ -1036,7 +1050,8 @@ class L1Constructor:
 
         currentscreen = SMA3.coordstoscreen(self.x, self.y)
         linkscreen = (self.y&0xF)<<4 | self.x&0xF
-        if currentscreen == linkscreen or linkscreen >= Constants.maxscreen:
+        if (currentscreen == linkscreen or
+                linkscreen >= SMA3.Constants.maxscreen):
             return
 
         self.screenlink[linkscreen] = currentscreen
@@ -2002,7 +2017,7 @@ class L1Constructor:
         else:
             self.setTile(0x79E0)
     def obj67(self, width, height):
-        if self.tileset == 0xC:
+        if self.tileset & 0xF == 0xC:
             self.setRect(self._obj67randflowertile, width, height)
         else:
             self.setRect(self._landinterior, width, height)
@@ -2707,6 +2722,7 @@ class L1Constructor:
         tiles = random.choice(self.objE1captiles)
         self.setLine(lambda:self._objE1cap(tiles),
                      shift=self.shifthoriz, length=width)
+        self.obj.lastX = self.obj.x + self.relX - 1
         for x in range(1, width, 3):
             self.relX, self.relY = x, 1
             self.setLine(first=0x8D29,

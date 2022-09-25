@@ -1,11 +1,11 @@
 """SMA3 Constants
-
 Non-pointer constants."""
+
+crc32 = 0x40A48276
 
 maxlevel = 0x47
 maxsublevel = 0xF5
 maxsublevelscreenexit = 0xFF
-
 maxscreen = 0x7F
 maxtileX = 0xFF
 maxtileY = 0x7F
@@ -44,7 +44,7 @@ headerpalettes = (2, 4, 6, 0, 8, 0xB)
 headergraphics = (1, 3, 5, 7, 0xA)
 
 headernames = {
-    1:(
+    1: (
         "Cave + background walls",
         "Grass + background walls",
         "Submarine",
@@ -65,7 +65,7 @@ headernames = {
         "W6 Wasteland",
         "", "", "", "", "", "", "", "", "", "", "", "", "", "",
         ),
-    3:(
+    3: (
         "Cave waterfalls/lavafalls",
         "Tree trunks and bushes",
         "Submarine BG",
@@ -99,7 +99,7 @@ headernames = {
         "Evergreen forest",
         "Baby Bowser's room",
         ),
-    5:(
+    5: (
         "None",
         "Submarine water (A=01)",
         "(Layer 3 sprites TBD)",
@@ -129,15 +129,15 @@ headernames = {
         "Clouds/Goonies (A=0A)",
         "Bushes/flowers (butterfly A=0B)",
         "Dark room + Yoshi light circle",
-        "",
-        "",
-        "",
+        "(same as 13)",
+        "Large moon (variant)",
+        "SNES Kamek color wash?",
         "Bushes/clouds (A=0F)",
         "Froggy interior",
-        "",
+        "Clouds, replaces BG color",
         "Sunset (A=0F)",
         "Moon/stars with auras",
-        "",
+        "Castle windows/lights",
         "Bigger Boo/Milde explosion",
         "",
         "Light snow?",
@@ -149,7 +149,7 @@ headernames = {
         "Large clouds (variant)",
         "",
         ),
-    7:(
+    7: (
         "Stripes 20 21 2A 2B 5E 29", 
         "Stripes 20 21 5E 1C 31 29", 
         "Stripes 1F 2C 36 40 51 29", 
@@ -301,7 +301,7 @@ headernames = {
         "Stripes 1F 64 38 5C 1C 1C", 
         "Stripes 20 21 5E 1C 6A 6C",
         ),
-    0x9:(
+    9: (
         "None",
         "None?",
         "None?",
@@ -319,7 +319,7 @@ headernames = {
         "None?",
         "None?",
         ),
-    0xA:(
+    0xA: (
         "None (clear animated region)",
         "Water for L3=01",
         "Clouds for L2=0B/0F/1D",
@@ -340,7 +340,7 @@ headernames = {
         "Animations 03+0C",
         "2.5D lava for object FE",
         ),
-    0xB:(
+    0xB: (
         "None",
         "",
         "",
@@ -368,13 +368,13 @@ headernames = {
 # flags for whether each layer 2/3 ID is a background/foreground image (display)
 #  or another purpose (don't display)
 layer23enable = {
-    2:(
+    2: (
         1, 1, 1, 1, 1, 1, 1, 1,  # 00-07
         1, 1, 1, 1, 1, 1, 1, 1,  # 08-0F
         1, 1, 1, 1, 1, 1, 0, 1,  # 10-17
         1, 1, 1, 1, 1, 1, 1, 1,  # 18-1F
         ),
-    3:(
+    3: (
         1, 1, 0, -1, 1, 0, 0, 0,  # 00-07
         0, -1, 0, 0, 1, 1, 1, 1,  # 08-0F
         1, -1, 1, 1, 1, 1, 0, -1,  # 10-17
@@ -395,7 +395,7 @@ entranceanim = (
     "Screen edge, leftward",
     "Screen edge, downward",
     "Launch upward",
-    "Raphael's moon"
+    "Raphael's moon",
     )
 
 banditminigames = (
@@ -560,15 +560,33 @@ music = (
     "100% cutscene, part 2",
     )
 
+msgtypes = (
+    ("Level name",
+     "Text displayed when entering a level, as Yoshi jumps in."),
+    ("Standard message",
+     """Text typically displayed on a chalkboard-style green background.
+Used by message blocks, Kamek, minigames, and various other sources."""),
+    ("File select",
+     """Text displayed below the three save file icons.<br><i>Text above the 
+file icons is graphical and can be found in LZ77_YITitle_L0.bin.</i>"""),
+    ("Ending",
+     """The single message that appears after Yoshi defeats Bowser and saves 
+Baby Luigi and the stork, which has a unique format."""),
+    ("Story intro",
+     "Text displayed during the story sequences before the title screen."),
+    ("Credits",
+     "Text displayed during and after the credits."),
+    )
+
 sma3char = (
     "à", "â", "ç", "è", "é", "ê", "î", "ô", #00-07
     "ù", "û", "/", "œ", None, None, None, None, #08-0F
     "ä", "ö", "ü", "ß", "Ä", "Ö", "Ü", None, #10-17
-    "\{buttonRcrop0}", "\{buttonRcrop1}", "\{buttonA0}", "\{buttonA1}",
-    "\{buttonB0}", "\{buttonB1}", "\{buttonLcrop0}", "\{buttonLcrop1}", #18-1F
-    "\{select0}", "\{select1}", "\{select2}", "\{buttonL0}",
-    "\{buttonL1}", "\{buttonL2}", ":", ";", #20-27
-    "\{buttonR0}", "\{buttonR1}", "\{buttonR2}", "'",
+    "\{Rcrop0}", "\{Rcrop1}", "\{Abutton0}", "\{Abutton1}",
+    "\{Bbutton0}", "\{Bbutton1}", "\{Lcrop0}", "\{Lcrop1}", #18-1F
+    "\{select0}", "\{select1}", "\{select2}", "\{Lbutton0}",
+    "\{Lbutton1}", "\{Lbutton2}", ":", ";", #20-27
+    "\{Rbutton0}", "\{Rbutton1}", "\{Rbutton2}", "'",
     "\{upoutline}", "\{left}", "\{right}", "\{up}", #28-2F
     "\{down}", "\{start0}", "\{start1}", "\{start2}",
     "\{upcloud0}", "\{upcloud1}", "=", ",", #30-37
@@ -590,13 +608,87 @@ sma3char = (
     "G", "H", "I", "J", "K", "L", "M", "N", #B0-B7
     "O", "P", "Q", "R", "S", "T", "U", "V", #B8-BF
     "W", "X", "Y", "Z", "『", "』", "?", "!", #C0-C7
-    "、", "-", "\{dpad0}", "\{dpad1}", "\{···}", "。", "~", "\{, }", #C8-CF
-    " ", "“", "”", "·", "►", "\{yoshi0}", "\{yoshi1}", "×", #D0-D7
+    "、", "-", "\{dpad0}", "\{dpad1}", "\{...}", "。", "~", "\{, }", #C8-CF
+    " ", "“", "”", "·",
+    "\{triright}", "\{yoshi0}", "\{yoshi1}", "\{times}", #D0-D7
     "a", "b", "c", "d", "e", "f", "g", "h", #D8-DF
     "i", "j", "k", "l", "m", "n", "o", "p", #E0-E7
     "q", "r", "s", "t", "u", "v", "w", "x", #E8-EF
-    "y", "z", "◄", "\{. }",
+    "y", "z", "\{trileft}", "\{. }",
     "\{?cloud0}", "\{?cloud1}", "\{star0}", "\{star1}", #F0-F7
     "\{!switch0}", "\{!switch1}", "\{downoutline}", "\{heartL0}",
     "\{heartL1}", "\{heartR0}", "\{heartR1}", None, #F8-FF
     )
+
+sma3char_lookup = {}  # dict to convert character strings to IDs
+sma3char_maxlen = 1   # max character string length
+for i, charstr in enumerate(sma3char):
+    if charstr is not None:
+        sma3char_lookup[charstr] = i
+        if charstr[0] == "\\" and len(charstr) > sma3char_maxlen:
+            sma3char_maxlen = len(charstr)
+
+msgcommands = {
+    "Level name":(
+        (0xFE, "Set Y/X"),
+        (0xFF, "Set X only"),
+        ),
+    "Standard message": (
+        (0x01, "Erase line at y=0"),
+        (0x02, "Erase line at y=10"),
+        (0x03, "Erase line at y=20"),
+        (0x04, "Erase line at y=30"),
+        (0x05, "Start line at y=0"),
+        (0x06, "Start line at y=10"),
+        (0x07, "Start line at y=20"),
+        (0x08, "Start line at y=30"),
+        (0x0A, "Wait for down/A (sound/arrow)"),
+        (0x0E, "Erase + start line at y=40"),
+        (0x0F, "Wait for down/A"),
+        (0x11, "Scroll down 1px"),
+        (0x12, "Scroll down 2px"),
+        (0x13, "Scroll down 3px"),
+        (0x14, "Scroll down 4px"),
+        (0x30, "Reset scale"),
+        (0x31, "Horiz/vert scale 2x"),
+        (0x32, "Horiz/vert scale 3x"),
+        (0x33, "Horiz/vert scale 4x"),
+        (0x34, "Vertical scale 1x"),
+        (0x35, "Vertical scale 2x"),
+        (0x36, "Vertical scale 3x"),
+        (0x37, "Vertical scale 4x"),
+        (0x38, "Horizontal scale 1x"),
+        (0x39, "Horizontal scale 2x"),
+        (0x3A, "Horizontal scale 3x"),
+        (0x3B, "Horizontal scale 4x"),
+        (0x3D, "Lives hundreds digit"),
+        (0x3E, "Lives tens digit"),
+        (0x3F, "Lives ones digit"),
+        (0x50, "Activate menu (death)"),
+        (0x51, "Activate menu (Flip Cards)"),
+        (0x52, "Activate menu (egg config)"),
+        (0x60, "Large image"),
+        ),
+    "File select": (
+        (None, "Set X/Y"),
+        ),
+    "Ending": (
+        (0x00, "Restart current line"),
+        (0x0A, "Start new line"),
+        ),
+    "Story intro": (
+        (0x00, "Single 1x character"),
+        (0x01, "(skip byte)"),
+        (0x02, "Set Y (value*2)"),
+        (0x03, "Set X"),
+        (0x04, "Scale 2x, remove line gap"),
+        (0x05, "Single 2x character"),
+        (0x31, "Scale 2x, remove line gap"),
+        ),
+    "Credits": (
+        (0x00, "Single character"),
+        (0x01, "(skip byte)"),
+        (0x02, "Set Y (value*2)"),
+        (0x03, "Set X"),
+        ),
+    }

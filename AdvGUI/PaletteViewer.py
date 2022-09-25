@@ -1,84 +1,101 @@
+"""SMA3 Palette Viewer"""
+
 # standard library imports
 import math, os
 
 # import from other files
-from AdvGame import *
-from .QtGeneral import *
-
-# globals
-import AdvSettings, Adv3Attr, Adv3Visual
+from AdvEditor import AdvSettings, AdvWindow, Adv3Attr, Adv3Visual
+from AdvGame import AdvGame, SMA3
+from .GeneralQt import *
+from . import QtAdvFunc, HeaderEditor
 
 # Old viewer, to be recoded
 
 class QSMA3PaletteViewer(QDialog):
+    """Dialog for displaying the currently loaded palette, and adjusting
+    related sublevel settings."""
     def __init__(self, parent):
         super().__init__(parent)
 
         self.setWindowTitle("Palette Viewer")
 
-        layoutMain = QVBoxLayout()
+        self.savedpos = None
+
+        spacing = 4
+
+        layoutMain = QVHBoxLayout()
         self.setLayout(layoutMain)
 
-        sBGgradient = QHBoxLayout()
-        layoutMain.addLayout(sBGgradient)
-        sBGgradient.addWidget(QLabel("Background Gradient"))
+        layoutMain.addRow()
+        layoutMain[-1].setSpacing(spacing)
+        layoutMain[-1].addWidget(QLabel("Background Gradient"))
 
         layoutMain.addWidget(QHorizLine())
 
-        sPaletteGrid = QGridLayout()
-        layoutMain.addLayout(sPaletteGrid)
-        sPaletteGrid.addWidget(QLabel("<b>Layer Palettes</b>"), 0, 0,
-            Qt.AlignmentFlag.AlignCenter)
-        sPaletteGrid.addWidget(QLabel("<b>Sprite Palettes</b>"), 0, 2,
-            Qt.AlignmentFlag.AlignCenter)
-        sPaletteGrid.addWidget(QVertLine(), 0, 1, -1, 1)
-        sLayerPaletteGrid = QGridLayout()
-        sSpritePaletteGrid = QGridLayout()
-        sPaletteGrid.addLayout(sLayerPaletteGrid, 1, 0)
-        sPaletteGrid.addLayout(sSpritePaletteGrid, 1, 2)
+        layoutMain.addRow()
+        layoutLayerPalette = QGridLayout()
+        layoutSpritePalette = QGridLayout()
+        layoutMain[-1].addLayout(layoutLayerPalette)
+        layoutMain[-1].addWidget(QVertLine())
+        layoutMain[-1].addLayout(layoutSpritePalette)
+        layoutMain[-1].addStretch()
 
-        # add color boxes to layout
-        self.colorwidgets = []
-        for i in range(0x218):
-            self.colorwidgets.append(QSMA3PaletteColor(0, colorID=i))
+        layoutLayerPalette.addWidget(QLabel("<b>Layer Palettes</b>"),
+            0, 0, 1, 0x11, Qt.AlignmentFlag.AlignCenter)
+        layoutSpritePalette.addWidget(QLabel("<b>Sprite Palettes</b>"),
+            0, 0, 1, 0x11, Qt.AlignmentFlag.AlignCenter)
+        layoutLayerPalette.setSpacing(spacing)
+        layoutSpritePalette.setSpacing(spacing)
 
+        # color boxes
+        self.colorwidgets = [QSMA3PaletteColor(0, colorID=i)
+                             for i in range(0x218)]
         for i in range(0x18):
-            sBGgradient.addWidget(self.colorwidgets[i+0x200])
-        sBGgradient.addStretch()
+            layoutMain[0].addWidget(self.colorwidgets[i+0x200])
+        layoutMain[0].addStretch()
         for i in range(0x100):
-            sLayerPaletteGrid.addWidget(self.colorwidgets[i],
-                i//0x10, i%0x10 +1)
-            sSpritePaletteGrid.addWidget(self.colorwidgets[i+0x100],
-                i//0x10, i%0x10 +1)
+            r = i // 0x10 + 1
+            c = i % 0x10 + 1
+            layoutLayerPalette.addWidget(self.colorwidgets[i], r, c)
+            layoutSpritePalette.addWidget(self.colorwidgets[i+0x100], r, c)
+
+        # numeric labels
+        labels = []
+        font = QLabel().font()
+        font.setPointSize(font.pointSize() - 1)
+        for i in range(0x20):
+            label = QLabel(format(i, "X"))
+            label.setFont(font)
+            labels.append(label)
         for i in range(0x10):
-            sLayerPaletteGrid.addWidget(
-                QLabel(format(i, "X")), i, 0, Qt.AlignmentFlag.AlignRight)
-            sSpritePaletteGrid.addWidget(
-                QLabel(format(i+0x10, "X")), i, 0, Qt.AlignmentFlag.AlignRight)
+            layoutLayerPalette.addWidget(
+                labels[i], i+1, 0, Qt.AlignmentFlag.AlignRight)
+            layoutSpritePalette.addWidget(
+                labels[i+0x10], i+1, 0, Qt.AlignmentFlag.AlignRight)
 
         layoutMain.addWidget(QHorizLine())
 
-        sLower = QHBoxLayout()
-        layoutMain.addLayout(sLower)
+        layoutMain.addRow()
 
-        # Is there a better way than this wrapper layout, to prevent sColorInfo
-        # from centering?
-        sColorInfo0 = QVBoxLayout()
-        sLower.addLayout(sColorInfo0)
-        sColorInfo = QHBoxLayout()
-        sColorInfo0.addLayout(sColorInfo)
+        # Is there a better way than this wrapper layout, to prevent
+        #  layoutColorInfo from centering?
+        layoutColorInfo0 = QVBoxLayout()
+        layoutMain[-1].addLayout(layoutColorInfo0)
+        layoutColorInfo = QHBoxLayout()
+        layoutColorInfo0.addLayout(layoutColorInfo)
+        layoutColorInfo0.addStretch()
+
         self.currentcolor = QColorSquareLabel(0)
-        sColorInfo.addWidget(self.currentcolor)
+        layoutColorInfo.addWidget(self.currentcolor)
         self.colorinfo = QLabel("\n")
-        self.colorinfo.setFixedWidth(230)
-        sColorInfo.addWidget(self.colorinfo)
-        sColorInfo0.addStretch()
+        self.colorinfo.setFixedWidth(QtAdvFunc.basewidth(self.colorinfo) * 45)
+        layoutColorInfo.addWidget(self.colorinfo)
 
-        sLower.addWidget(QVertLine())
+        layoutMain[-1].addWidget(QVertLine())
 
         # Set up palette selection dropdowns
-        sDropdowns = QGridLayout()
-        sLower.addLayout(sDropdowns)
+        layoutDropdowns = QGridLayout()
+        layoutMain[-1].addLayout(layoutDropdowns)
         self.dropdowns = {}
         dropdowninfo = list(((i, SMA3.Constants.headersettings[i],
                               SMA3.Constants.headermaxvalues[i])
@@ -89,9 +106,9 @@ class QSMA3PaletteViewer(QDialog):
         for i, (key, name, maxvalue) in enumerate(dropdowninfo):
             self.dropdowns[key] = QComboBox()
             if i < 4:
-                sDropdowns.addWidget(self.dropdowns[key], i, 0)
+                layoutDropdowns.addWidget(self.dropdowns[key], i, 0)
             else:
-                sDropdowns.addWidget(self.dropdowns[key], i-4, 1)
+                layoutDropdowns.addWidget(self.dropdowns[key], i-4, 1)
 
             for j in range(maxvalue+1):
                 if maxvalue >= 0x10:
@@ -105,9 +122,9 @@ class QSMA3PaletteViewer(QDialog):
 
         exportbutton = QPushButton("Export")
         exportbutton.clicked.connect(QDialogExportPalette(self).open)
-        sDropdowns.addWidget(exportbutton, 3, 2)
+        layoutDropdowns.addWidget(exportbutton, 3, 2)
 
-        sLower.addStretch()
+        layoutMain[-1].addStretch()
 
 
         # disable the not-yet-implemented Palette Animation
@@ -116,9 +133,22 @@ class QSMA3PaletteViewer(QDialog):
         # set static window size determined by layout
         self.setFixedSize(self.sizeHint())
 
+    def show(self):
+        "Restore saved window position/size."
+        if self.savedpos is None:
+            self.setColorinfo(Adv3Visual.palette[0], 0)
+        else:
+            self.move(self.savedpos)
+        super().show()
+
     def closeEvent(self, event):
-        AdvSettings.editor.actions["Toggle Palette"].setChecked(False)
-        super().closeEvent(event)
+        AdvWindow.editor.actions["Toggle Palette"].setChecked(False)
+        self.savedpos = self.pos()
+        self.close()
+
+    def reject(self):
+        "Overridden to prevent Esc from closing the dialog."
+        pass
 
     def updatePalette(self):
         """Update the active sublevel's header IDs, using the current settings
@@ -126,18 +156,19 @@ class QSMA3PaletteViewer(QDialog):
         headertoupdate = {}
         for key in self.dropdowns:
             if key < len(SMA3.Constants.headersettings):
-                if Adv3Attr.sublevel.header[key] !=\
-                   self.dropdowns[key].currentIndex():
+                if (Adv3Attr.sublevel.header[key] !=
+                        self.dropdowns[key].currentIndex()):
                     headertoupdate[key] = self.dropdowns[key].currentIndex()
 
         if headertoupdate:
-            AdvSettings.editor.setHeader(headertoupdate)
+            AdvWindow.editor.setHeader(headertoupdate)
+            HeaderEditor.setaction(headertoupdate, usemergeID=True)
 
     def updateYoshiPalette(self):
-        AdvSettings.yoshipalID = self.dropdowns[0x48].currentIndex()
+        Adv3Visual.yoshipalID = self.dropdowns[0x48].currentIndex()
         Adv3Visual.palette.loadyoshipalette(
-            Adv3Attr.filepath, AdvSettings.yoshipalID)
-        AdvSettings.editor.reload("Sprite Graphics")
+            Adv3Attr.filepath, Adv3Visual.yoshipalID)
+        AdvWindow.editor.reload("Sprite Graphics")
         self.reloadPalette()
 
     def reloadPalette(self):
@@ -155,7 +186,7 @@ class QSMA3PaletteViewer(QDialog):
 
     def setColorinfo(self, color, colorID):
         """Update the layout region displaying the current color."""
-        red, green, blue = color15split(color)
+        red, green, blue = AdvGame.color15split(color)
         if colorID >= 0x200:
             text = ["Gradient Color ", format(colorID-0x200, "02X"),
                          " (", Adv3Visual.palette.colortype[0], ")"]
@@ -180,25 +211,15 @@ class QDialogExportPalette(QDialog):
         self.layersbutton = QRadioButton("Layers")
         self.spritesbutton = QRadioButton("Sprites")
         self.layersbutton.setChecked(True)
-        confirmbutton = QPushButton("Export")
-        confirmbutton.clicked.connect(self.accept)
-        confirmbutton.setDefault(True)
-        cancelbutton = QPushButton("Cancel")
-        cancelbutton.clicked.connect(self.reject)
 
         # init layout
-        mainlayout = QVBoxLayout()
-        self.setLayout(mainlayout)
-
-        layoutrows = []
-        for i in range(2):
-            layoutrows.append(QHBoxLayout())
-            mainlayout.addLayout(layoutrows[-1])
-        layoutrows[0].addWidget(self.layersbutton)
-        layoutrows[0].addWidget(self.spritesbutton)
-        layoutrows[0].addStretch()
-        layoutrows[1].addWidget(confirmbutton)
-        layoutrows[1].addWidget(cancelbutton)
+        layoutMain = QVHBoxLayout()
+        self.setLayout(layoutMain)
+        layoutMain.addRow()
+        layoutMain[-1].addWidget(self.layersbutton)
+        layoutMain[-1].addWidget(self.spritesbutton)
+        layoutMain[-1].addStretch()
+        layoutMain.addAcceptRow(self, "Export")
 
         self.setFixedSize(self.sizeHint())
 
@@ -223,7 +244,7 @@ class QDialogExportPalette(QDialog):
         if filepath:
             output = bytearray()
             for color15 in paletteslice:
-                for component in color15to24(color15):
+                for component in AdvGame.color15to24(color15):
                     output.append(component)
 
             with open(filepath, "wb") as f:
@@ -237,12 +258,12 @@ class QColorSquareLabel(QLabel):
                  border=True, bordercolor=0):
         super().__init__(*args)
         self.image = QImage(size, size, QImage.Format.Format_Indexed8)
-        self.image.setColor(0, color15toQRGB(color))
+        self.image.setColor(0, QtAdvFunc.color15toQRGB(color))
         self.image.fill(0)
 
         if border:
             self.bordercolor = bordercolor
-            self.image.setColor(1, color15toQRGB(bordercolor))
+            self.image.setColor(1, QtAdvFunc.color15toQRGB(bordercolor))
 
             # Why are pixel rows padded to the next multiple of 4 bytes?
             rowlength = math.ceil(size/4)*4 
@@ -256,7 +277,7 @@ class QColorSquareLabel(QLabel):
 
     def setColor(self, color15bit):
         self.color = color15bit
-        self.image.setColor(0, color15toQRGB(color15bit))
+        self.image.setColor(0, QtAdvFunc.color15toQRGB(color15bit))
         pixmap = QPixmap.fromImage(self.image)
         self.setPixmap(pixmap)
 

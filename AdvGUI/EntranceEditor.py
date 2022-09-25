@@ -1,12 +1,15 @@
+"""SMA3 Entrance Editor
+Dialogs for editing level entrances and screen exits, and their shared base
+class."""
+
 # standard library imports
 import copy
 
 # import from other files
+import AdvEditor.ROM
+from AdvEditor import AdvRecovery, AdvWindow, Adv3Attr, Adv3Save, Adv3Patch
 from AdvGame import GBA, SMA3
-from .QtGeneral import *
-
-# globals
-import AdvSettings, Adv3Attr, Adv3Save, Adv3Patch
+from .GeneralQt import *
 
 class QDialogSMA3Entrances(QDialog):
     "Base class for level entrance and screen exit dialogs."
@@ -55,6 +58,7 @@ class QDialogSMA3Entrances(QDialog):
         for key, text in (
             ("entrlist", "Level"),
             ("levelnum", ""),
+            ("entrname", "Entrance data:"),
             (0, "Sublevel:"), (1, "X"), (2, "Y"), (3, ""),
             (4, "Camera byte 4?"), (5, "Camera byte 5?"),
             ("destscreen", ""),
@@ -105,44 +109,38 @@ class QDialogSMA3Entrances(QDialog):
         layoutMain = QHBoxLayout()
         self.setLayout(layoutMain)
 
-        layoutLeft = QVBoxLayout()
-        layoutMain.addLayout(layoutLeft)
+        layoutL = QVHBoxLayout()
+        layoutMain.addLayout(layoutL)
         layoutMain.addWidget(QVertLine())
-        layoutRight = QVBoxLayout()
-        layoutMain.addLayout(layoutRight)
+        layoutR = QVHBoxLayout()
+        layoutMain.addLayout(layoutR)
 
-        layoutL0 = QHBoxLayout()
-        layoutLeft.addLayout(layoutL0)
-        layoutL0.addWidget(self.labels["entrlist"])
+        layoutL.addRow()
+        layoutL[-1].addWidget(self.labels["entrlist"])
         if not screenexits:
-            layoutL0.addWidget(self.lineeditbytes["entrlist"])
-            layoutL0.addWidget(self.labels["levelnum"])
-        layoutL0.addStretch()
+            layoutL[-1].addWidget(self.lineeditbytes["entrlist"])
+            layoutL[-1].addWidget(self.labels["levelnum"])
+        layoutL[-1].addStretch()
 
-        layoutLeft.addWidget(self.entrlistwidget)
+        layoutL.addWidget(self.entrlistwidget)
 
-        layoutLEnd = QHBoxLayout()
-        layoutLeft.addLayout(layoutLEnd)
-        layoutLEnd.addStretch()
+        layoutL.addRow()
+        layoutL[-1].addStretch()
         if screenexits:
-            layoutLEnd.addWidget(self.buttons["Delete"])
+            layoutL[-1].addWidget(self.buttons["Delete"])
         else:
-            layoutLEnd.addWidget(self.buttons["+"])
-            layoutLEnd.addWidget(self.buttons["-"])
-        layoutLEnd.addStretch()
+            layoutL[-1].addWidget(self.buttons["+"])
+            layoutL[-1].addWidget(self.buttons["-"])
+        layoutL[-1].addStretch()
 
-        layoutR = []
-        def _layoutRnewline():
-            layoutR.append(QHBoxLayout())
-            layoutRight.addLayout(layoutR[-1])
-        _layoutRnewline()
-        layoutR[-1].addWidget(QLabel("Entrance data:"))
+        layoutR.addRow()
+        layoutR[-1].addWidget(self.labels["entrname"])
         layoutR[-1].addStretch(1000)
         layoutR[-1].addWidget(self.buttons["Copy"])
         layoutR[-1].addWidget(self.buttons["Paste"])
-        layoutRight.addWidget(QHorizLine())
+        layoutR.addWidget(QHorizLine())
 
-        _layoutRnewline()
+        layoutR.addRow()
         layoutR[-1].addWidget(self.labels[0])
         layoutR[-1].addWidget(self.lineeditbytes[0])
         layoutR[-1].addSpacing(10)
@@ -153,35 +151,35 @@ class QDialogSMA3Entrances(QDialog):
         layoutR[-1].addWidget(self.lineeditbytes[2])
         layoutR[-1].addSpacing(10)
         layoutR[-1].addWidget(self.labels["destscreen"])
-        _layoutRnewline()
+        layoutR.addRow()
         layoutR[-1].addWidget(self.labels[3])
         layoutR[-1].addWidget(self.lineeditbytes[3])
         layoutR[-1].addWidget(self.animdropdown)
-        _layoutRnewline()
+        layoutR.addRow()
         layoutR[-1].addWidget(self.labels[4])
         layoutR[-1].addWidget(self.lineeditbytes[4])
         layoutR[-1].addSpacing(10)
         layoutR[-1].addWidget(self.labels[5])
         layoutR[-1].addWidget(self.lineeditbytes[5])
-        _layoutRnewline()
+        layoutR.addRow()
         layoutR[-1].addWidget(self.labels["bandit"])
         layoutR[-1].addWidget(self.banditcheckbox)
         layoutR[-1].addWidget(self.banditdropdown)
 
-        layoutRight.addStretch()
+        layoutR.addStretch()
 
         if screenexits:
-            layoutRight.addWidget(QHorizLine())
-            _layoutRnewline()
+            layoutR.addWidget(QHorizLine())
+            layoutR.addRow()
             layoutR[-1].addWidget(self.labels["newscreen"])
             layoutR[-1].addWidget(self.lineeditbytes["newscreen"])
-            _layoutRnewline()
+            layoutR.addRow()
             layoutR[-1].addWidget(self.buttons["Add"])
             layoutR[-1].addWidget(self.buttons["Move"])
             layoutR[-1].addWidget(self.buttons["Duplicate"])
 
-        layoutRight.addWidget(QHorizLine())
-        _layoutRnewline()
+        layoutR.addWidget(QHorizLine())
+        layoutR.addRow()
         layoutR[-1].addStretch(1000)
         layoutR[-1].addWidget(self.buttons["Confirm"])
         layoutR[-1].addWidget(self.buttons["Cancel"])
@@ -340,7 +338,7 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
     def __init__(self, *args, maxmidpoints=4):
         super().__init__(*args)
         
-        self.setWindowTitle("Edit Level Main/Midway Entrances")
+        self.setWindowTitle("Edit Level Entrances")
 
         self.lineeditbytes["entrlist"].setValue(0)
         self.lineeditbytes["entrlist"].editingFinished.connect(
@@ -356,6 +354,8 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
         self.maxmidpoints = maxmidpoints
 
     def open(self):
+        if not AdvEditor.ROM.exists(): return
+
         if Adv3Attr.midway6byte:
             midwaylen = 6
         else:
@@ -371,10 +371,21 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
         super().open()
 
     def accept(self):
+        startptrs = Adv3Save.savewrapper(self.saveentrances)
+        if startptrs is None:
+            # saving failed
+            return
+
+        statustext = ("Saved main entrances to {mainptr}, "
+                      "midway entrances to {midwayptr}.")
+        AdvWindow.statusbar.setActionText(statustext.format(
+            mainptr=format(startptrs[0], "08X"),
+            midwayptr=format(startptrs[1], "08X")))
+
+        super().accept()
+
+    def saveentrances(self):
         "Save level entrances to ROM."
-
-        if not Adv3Save.firstsavewarning(): return
-
         # determine 4 or 6-byte midways
         if Adv3Attr.midway6byte:
             midwaylen = 6
@@ -383,7 +394,7 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
             for level in self.midwayentrances:
                 for entr in level:
                     if entr[4] or entr[5]:
-                        applied = Adv3Patch.applymidway6byte()
+                        applied = Adv3Patch.applypatch("midway6byte")
                         if not applied:
                             return
                         midwaylen = 6
@@ -430,7 +441,7 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
                     newlen -= 1
             offsets = offsets[0:newlen]
 
-            # save entrances
+            # write entrances to ROM
             GBA.erasedata(Adv3Attr.filepath, *entrances.datablock)
             startptr = Adv3Save.saveDataToROM(data, ())
             startptrs.append(startptr)
@@ -448,20 +459,14 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
                 ptrs.endmarker = True
                 GBA.erasedata(Adv3Attr.filepath, *entrances.ptrs.datablock)
                 newtableptr = Adv3Save.saveDataToROM(
-                    bytes(ptrs), SMA3.Pointers.entrancemainptrs)
+                    ptrs.tobytearray(nullptr=1), SMA3.Pointers.entrancemainptrs)
             else:
                 ptrs.endmarker = False
                 GBA.overwritedata(
                     Adv3Attr.filepath, bytes(ptrs),
                     GBA.readptr(Adv3Attr.filepath, ptrtoptrtable[0]))
 
-        statustext = ("Saved main entrances to {mainptr}, "
-                      "midway entrances to {midwayptr}.")
-        AdvSettings.editor.statusbar.setActionText(statustext.format(
-            mainptr=format(startptrs[0], "08X"),
-            midwayptr=format(startptrs[1], "08X")))
-
-        super().accept()
+        return startptrs
 
     def reloadsidebar(self):
         row = self.entrlistwidget.currentRow()
@@ -502,9 +507,13 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
         if row == 0:
             self.setEntranceLayout("levelmain")
             self.loadentrance(self.mainentrances[self.levelID])
+            self.labels["entrname"].setText("Main Entrance:")
         elif row >= 0:
             self.setEntranceLayout("normal")
             self.loadentrance(self.midwayentrances[self.levelID][row-1])
+            self.labels["entrname"].setText("".join((
+                "Midway Entrance ", str(row-1), ":"
+                )))
 
     # button functions
 
@@ -557,10 +566,11 @@ class QDialogSMA3ScreenExits(QDialogSMA3Entrances):
     def accept(self):
         if Adv3Attr.sublevel.exits != self.exits:
             Adv3Attr.sublevel.exits = copy.deepcopy(self.exits)
-            AdvSettings.editor.statusbar.setActionText("Screen exits updated.")
-            AdvSettings.editor.statusbar.updateByteText()
 
-            AdvSettings.editor.reload("Screen Exits")
+            AdvWindow.statusbar.setActionText("Screen exits updated.")
+            AdvWindow.statusbar.updateByteText()
+            AdvWindow.undohistory.addaction("Edit Screen Exits",
+                updateset={"Screen Exits"}, reload=True)
         super().accept()
 
     def reloadsidebar(self):
