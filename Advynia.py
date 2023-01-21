@@ -1,9 +1,10 @@
 """Advynia
 Application file. Run this to launch Advynia.
-Requires PyQt6 installed; see AdvGUI.PyQtImport"""
+Requires Python 3.10 or later.
+Also requires PyQt6 installed; see AdvGUI.PyQtImport"""
 
 # standard library imports
-import os, sys
+import sys
 
 # import from other files
 import AdvMetadata, AdvEditor.ROM
@@ -30,7 +31,7 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
-    # don't use default Mac style
+    # Mac-specific: don't use default Mac style
     if app.style().name() == "macos":
         app.setStyle("Fusion")
 
