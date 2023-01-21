@@ -1,5 +1,5 @@
 appname = "Advynia"
-version = (0, 3, 0)
+version = (0, 4, 0)
 printtime = False
 
 aboutadvynia = '''
@@ -10,14 +10,12 @@ For more information, join the Discord:
 <a href="https://discord.gg/mS5EcyRb8W">https://discord.gg/mS5EcyRb8W</a>
 '''
 
-export3ext = "Advynia SMA3 Export (*.a3l)"
-
 import os
 
 appdir = os.path.dirname(__file__)
 datadir = os.path.join(appdir, "AdvData")
 def datapath(*relpath):
-    "Generate an absolute path to Advynia's graphics folder."
+    "Generate an absolute path to Advynia's data folder."
     return os.path.join(datadir, *relpath)
 
 ################################################################################
@@ -32,7 +30,6 @@ class ProgramVersion(tuple):
         return self != (0, 0, 0, "")
 
     def __str__(self):
-        "Convert the version to a string."
         output = [str(self[0]), ".", str(self[1])]
         if self[2] or self[3]:
             output += ".", str(self[2])
@@ -40,26 +37,15 @@ class ProgramVersion(tuple):
             output += "-", self[3]
         return "".join(output)
 
+    # ignore text components when comparing
     def __lt__(self, other):
-        for i in range(3):
-            if self[i] < other[i]:
-                return True
-            elif self[i] > other[i]:
-                return False
-        return False  # equal; text component is ignored
-
+        return self[0:3] < other[0:3]
     def __gt__(self, other):
-        for i in range(3):
-            if self[i] > other[i]:
-                return True
-            elif self[i] < other[i]:
-                return False
-        return False  # equal; text component is ignored
-
+        return self[0:3] > other[0:3]
     def __le__(self, other):
-        return not self > other
+        return self[0:3] <= other[0:3]
     def __ge__(self, other):
-        return not self < other
+        return self[0:3] >= other[0:3]
 
 version = ProgramVersion(version)
 appnamefull = " ".join((appname, str(version)))

@@ -3,9 +3,10 @@ Handles detecting and applying Advynia's assembly patches."""
 
 # standard library imports
 from collections.abc import Iterable
+import itertools
 
 # import from other files
-import AdvEditor.ROM
+import AdvEditor.Export, AdvEditor.ROM
 from AdvEditor import AdvSettings, AdvWindow, Adv3Attr, Adv3Save, Adv3Visual
 from AdvEditor.PatchData import patches, patchhexdata
 from AdvGame import GBA, SMA3
@@ -23,7 +24,7 @@ def applypatch(patchkey: str, warndialog=True):
         # load warning dialog, unless it was disabled for this function call,
         #  this patch, or all patches
         from AdvGUI.Dialogs import QDialogPatchValidation
-        if not QDialogPatchValidation(name, desc).exec():
+        if not QDialogPatchValidation(patchkey, name, desc).exec():
             return False
 
     # apply patch, by passing patch function to save wrapper
@@ -53,15 +54,13 @@ def detectpatches():
     """Detect which Advynia patches have been applied to the current ROM,
     and set their flags accordingly."""
     with GBA.Open(Adv3Attr.filepath, "rb") as f:
+        # huffmantolz77
+        Adv3Attr.huffmantolz77 = detectpatches_bytes4(f, 0x081116CA,
+            bytes.fromhex("1D F0 FD FF"), bytes.fromhex("1D F0 FF FF"))
+
         # midway6byte
-        f.seek(0x08002ED4)
-        bytes4 = f.read(4)
-        if bytes4 == bytes.fromhex("80 00 09 68"):
-            Adv3Attr.midway6byte = False
-        elif bytes4 == bytes.fromhex("44 00 80 00"):
-            Adv3Attr.midway6byte = True
-        else:
-            Adv3Attr.midway6byte = None
+        Adv3Attr.midway6byte = detectpatches_bytes4(f, 0x08002ED4,
+            bytes.fromhex("80 00 09 68"), bytes.fromhex("44 00 80 00"))
 
         # musicoverride
         f.seek(0x0802C2D6)
@@ -79,24 +78,48 @@ def detectpatches():
         Adv3Attr.object65 = bool(f.read(1)[0])
 
         # sublevelstripes
-        f.seek(0x080137A0)
-        word = f.readint(4)
-        if word == 0x299E:
-            Adv3Attr.sublevelstripes = False
-        elif word == 0x2AAC:
-            Adv3Attr.sublevelstripes = True
-        else:
-            Adv3Attr.sublevelstripes = None
+        Adv3Attr.sublevelstripes = detectpatches_bytes4(f, 0x080137A0,
+            0x299E.to_bytes(4, "little"), 0x2AAC.to_bytes(4, "little"))
 
         # world6flag
-        f.seek(0x08013484)
-        bytes4 = f.read(4)
-        if bytes4 == bytes.fromhex("0D 49 40 18"):
-            Adv3Attr.world6flag = False
-        elif bytes4 == bytes.fromhex("0E 48 00 88"):
-            Adv3Attr.world6flag = True
-        else:
-            Adv3Attr.world6flag = None
+        Adv3Attr.world6flag = detectpatches_bytes4(f, 0x08013484,
+            bytes.fromhex("0D 49 40 18"), bytes.fromhex("0E 48 00 88"))
+
+def detectpatches_bytes4(f, ptr, vanillabytes, patchedbytes):
+    f.seek(ptr)
+    bytes4 = f.read(4)
+    if bytes4 == vanillabytes:
+        return False
+    elif bytes4 == patchedbytes:
+        return True
+
+def detectpatches_sublevel(sublevel):
+    """Detect which patches are required to import the given sublevel, if
+    not already applied."""
+    newpatches = []
+    if not Adv3Attr.world6flag and sublevel.header[1] >= 0x10:
+        newpatches.append("world6flag")
+    if not Adv3Attr.musicoverride and sublevel.music:
+        newpatches.append("musicoverride")
+    if not Adv3Attr.sublevelstripes and sublevel.stripeIDs:
+        with GBA.Open(Adv3Attr.filepath) as f:
+            expectedstripes = SMA3.loadstripeIDs(f, sublevel.header[7])
+        if sublevel.stripeIDs != expectedstripes:
+            newpatches.append("sublevelstripes")
+    if not Adv3Attr.object65 and sublevel.obj65_7byte:
+        newpatches.append("object65")
+    return newpatches
+
+def detectpatches_midway(midways):
+    """Detect whether the 6-byte midway entrance patch is required to import
+    the given midway entrances, if not already applied."""
+    if Adv3Attr.midway6byte:
+        return False
+    for level in midways:
+        for entr in level:
+            if entr[4] != 0 or entr[5] != 0:
+                return True
+    return False
 
 def loadsublevelpatchattr(sublevel):
     with GBA.Open(Adv3Attr.filepath, "rb") as f:
@@ -125,10 +148,34 @@ def _movevanillasublevel(sublevelID):
         return True
     with GBA.Open(Adv3Attr.filepath, "rb") as f:
         sublevel.importspritetileset(f, Adv3Attr.sublevelstripes)
-    saved = Adv3Save.saveSublevelToROM(sublevel, sublevelID)
+    saved = Adv3Save.savesubleveltoROM(sublevel, sublevelID)
     return saved
 
 # specific patch code
+
+def applyhuffmantolz77():
+    _writehexdata("huffmantolz77")
+
+    # reinsert all Huffman compressed data blocks as LZ77
+    with GBA.Open(Adv3Attr.filepath, "r+b") as f:
+        toinsert = []
+        for ptrref in itertools.chain(
+                SMA3.Pointers.Huffman_graphics.values(),
+                SMA3.Pointers.Huffman_tilemaps.values()):
+            # import data and convert to LZ77
+            ptr = f.readptr(ptrref)
+            data = f.read_decompress(ptr)
+            toinsert.append((GBA.compressLZ77(data), ptrref))
+
+            # erase old data
+            oldlength = f.tell() - ptr
+            f.seek(ptr)
+            f.write(bytes(oldlength))
+
+    # insert compressed data
+    AdvEditor.Export._insertcompresseddata(toinsert)
+
+    return True
 
 def applymidway6byte():
     _writehexdata("midway6byte")
@@ -196,7 +243,7 @@ def applysublevelstripes():
         f.write(newstripeIDs)
 
     # save new graphics pointer table
-    Adv3Save.saveDataToROM(bytes(newgfxptrs), SMA3.Pointers.levelgfxstripe)
+    Adv3Save.savedatatoROM(bytes(newgfxptrs), SMA3.Pointers.levelgfxstripe)
 
     # ensure currently loaded sublevel includes stripes
     Adv3Attr.sublevel.stripeIDs = Adv3Visual.spritegraphics.stripeIDs[:]

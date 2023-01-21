@@ -2,7 +2,7 @@
 Main graphics scene code."""
 
 # standard library imports
-import copy
+import copy, os
 
 # import from other files
 import AdvEditor
@@ -56,7 +56,7 @@ class QSMA3SublevelScene(QGraphicsScene):
         for item in (QResizeHandle(1, baseheight=0x10),
                      QResizeHandle(2, basewidth=0x10)):
             self.resizehandles.append(item)
-            self.addItem(item)            
+            self.addItem(item)
 
     # Information methods
 
@@ -88,12 +88,12 @@ class QSMA3SublevelScene(QGraphicsScene):
         image = QImage(0x1000, 0x800, QImage.Format.Format_ARGB32)
         self.render(QPainter(image))
 
-        filepath = "".join(
-            ("Sublevel", format(Adv3Attr.sublevel.ID, "02X"),
-             ".png"))
+        filepath = "".join((
+            os.path.splitext(Adv3Attr.filepath)[0], "-Sublevel",
+            format(Adv3Attr.sublevel.ID, "02X"), ".png"))
         image.save(filepath)
 
-        AdvWindow.statusbar.setActionText("Saved screenshot to "+filepath)
+        AdvWindow.statusbar.setActionText("Saved screenshot to " + filepath)
 
     def updateobjects(self, updateobjs=frozenset()):
         """updateobjs: collection of modified objects, to retrieve tiles

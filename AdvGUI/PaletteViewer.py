@@ -1,7 +1,7 @@
 """SMA3 Palette Viewer"""
 
 # standard library imports
-import math, os
+import itertools, math, os
 
 # import from other files
 from AdvEditor import AdvSettings, AdvWindow, Adv3Attr, Adv3Visual
@@ -9,9 +9,8 @@ from AdvGame import AdvGame, SMA3
 from .GeneralQt import *
 from . import QtAdvFunc, HeaderEditor
 
-# Old viewer, to be recoded
 
-class QSMA3PaletteViewer(QDialog):
+class QSMA3PaletteViewer(QDialogBase):
     """Dialog for displaying the currently loaded palette, and adjusting
     related sublevel settings."""
     def __init__(self, parent):
@@ -19,9 +18,12 @@ class QSMA3PaletteViewer(QDialog):
 
         self.setWindowTitle("Palette Viewer")
 
+        self.queuedupdate = True
         self.savedpos = None
 
         spacing = 4
+
+        ## need to rewrite to split init widgets/init layout, like other windows
 
         layoutMain = QVHBoxLayout()
         self.setLayout(layoutMain)
@@ -77,58 +79,76 @@ class QSMA3PaletteViewer(QDialog):
 
         layoutMain.addRow()
 
-        # Is there a better way than this wrapper layout, to prevent
-        #  layoutColorInfo from centering?
-        layoutColorInfo0 = QVBoxLayout()
-        layoutMain[-1].addLayout(layoutColorInfo0)
-        layoutColorInfo = QHBoxLayout()
-        layoutColorInfo0.addLayout(layoutColorInfo)
-        layoutColorInfo0.addStretch()
+        # color info sector
+        layoutColorInfo = QVHBoxLayout()
+        layoutMain[-1].addLayout(layoutColorInfo)
+        layoutColorInfo.addRow()
+        layoutColorInfo.addStretch()
 
         self.currentcolor = QColorSquareLabel(0)
-        layoutColorInfo.addWidget(self.currentcolor)
+        layoutColorInfo[-1].addWidget(self.currentcolor)
         self.colorinfo = QLabel("\n")
         self.colorinfo.setFixedWidth(QtAdvFunc.basewidth(self.colorinfo) * 45)
-        layoutColorInfo.addWidget(self.colorinfo)
+        layoutColorInfo[-1].addWidget(self.colorinfo)
+
+        exportbutton = QPushButton("Export")
+        exportbutton.setAutoDefault(False)
+        exportbutton.clicked.connect(QDialogExportPalette(self).open)
+        layoutColorInfo.addRow()
+        layoutColorInfo[-1].addWidget(exportbutton)
+        layoutColorInfo[-1].addStretch()
 
         layoutMain[-1].addWidget(QVertLine())
 
-        # Set up palette selection dropdowns
-        layoutDropdowns = QGridLayout()
-        layoutMain[-1].addLayout(layoutDropdowns)
+        # header setting line edits/dropdowns
+        layoutHeader = QVHBoxLayout()
+        layoutMain[-1].addLayout(layoutHeader)
+        layoutHeaderGrid = QGridLayout()
+        layoutHeaderGrid.addWidget(QVertLine(), 0, 2, 3, 1)
+        layoutPaletteAnim = QHBoxLayout()
+        layoutHeader.addRow()
+        layoutHeader[-1].addLayout(layoutHeaderGrid)
+        layoutHeader[-1].addStretch()
+        layoutHeader.addLayout(layoutPaletteAnim)
+
+        labels = {}
+        self.lineedits = {}
         self.dropdowns = {}
-        dropdowninfo = list(((i, SMA3.Constants.headersettings[i],
-                              SMA3.Constants.headermaxvalues[i])
-                              for i in SMA3.Constants.headerpalettes))
-        dropdowninfo.append((0x48, "Yoshi Palette", 7))
-        # dropdown keys match header setting keys,
+        headerinfo = list(
+            (i, SMA3.Constants.headersettings[i],
+             SMA3.Constants.headermaxvalues[i])
+            for i in SMA3.Constants.headerpalettes)
+        headerinfo.append((0x48, "Yoshi Palette (display)", 7))
+        # widget keys match header setting keys,
         #  except Yoshi Palette, which is not a header setting
-        for i, (key, name, maxvalue) in enumerate(dropdowninfo):
-            self.dropdowns[key] = QComboBox()
-            if i < 4:
-                layoutDropdowns.addWidget(self.dropdowns[key], i, 0)
-            else:
-                layoutDropdowns.addWidget(self.dropdowns[key], i-4, 1)
-
-            for j in range(maxvalue+1):
-                if maxvalue >= 0x10:
-                    self.dropdowns[key].addItem(name + " " + format(j, "02X"))
-                else:
-                    self.dropdowns[key].addItem(name + " " + format(j, "X"))
-            if key == 0x48:
-                self.dropdowns[key].activated.connect(self.updateYoshiPalette)
-            else:
+        for i, ((key, name, maxvalue), (x, y)) in enumerate(zip(
+                headerinfo,
+                ((0, 0), (0, 1), (0, 2), (3, 0), (3, 1), (None, None), (3, 2))
+                )):
+            if key == 0xB:
+                labels[key] = QLabel(name + ":")
+                self.dropdowns[key] = QComboBox()
+                layoutPaletteAnim.addWidget(labels[key])
+                layoutPaletteAnim.addWidget(self.dropdowns[key])
+                layoutPaletteAnim.addStretch()
+                for j in range(maxvalue+1):
+                    self.dropdowns[key].addItem("".join((
+                        format(j, "02X"), ": ",
+                        SMA3.Constants.headernames[0xB][j])))
                 self.dropdowns[key].activated.connect(self.updatePalette)
-
-        exportbutton = QPushButton("Export")
-        exportbutton.clicked.connect(QDialogExportPalette(self).open)
-        layoutDropdowns.addWidget(exportbutton, 3, 2)
+            else:
+                labels[key] = QLabel("".join((
+                    name, " ", AdvEditor.Number.hexstr_0tomax(maxvalue), ":"
+                    )))
+                self.lineedits[key] = QLineEditByte("0", maxvalue=maxvalue)
+                layoutHeaderGrid.addWidget(labels[key], y, x)
+                layoutHeaderGrid.addWidget(self.lineedits[key], y, x+1)
+                if key == 0x48:
+                    self.lineedits[key].editingFinished.connect(self.updateYoshiPalette)
+                else:
+                    self.lineedits[key].editingFinished.connect(self.updatePalette)
 
         layoutMain[-1].addStretch()
-
-
-        # disable the not-yet-implemented Palette Animation
-        self.dropdowns[0xB].setDisabled(True)
 
         # set static window size determined by layout
         self.setFixedSize(self.sizeHint())
@@ -140,6 +160,9 @@ class QSMA3PaletteViewer(QDialog):
         else:
             self.move(self.savedpos)
         super().show()
+        if self.queuedupdate:
+            self.runqueuedupdate()
+            self.queuedupdate = False
 
     def closeEvent(self, event):
         AdvWindow.editor.actions["Toggle Palette"].setChecked(False)
@@ -150,22 +173,35 @@ class QSMA3PaletteViewer(QDialog):
         "Overridden to prevent Esc from closing the dialog."
         pass
 
+    def queueupdate(self):
+        if not self.isVisible():
+            self.queuedupdate = True
+            return
+        else:
+            self.runqueuedupdate()
+
+    def runqueuedupdate(self):
+        self.updatefromsublevel()
+        self.reloadPalette()
+
     def updatePalette(self):
         """Update the active sublevel's header IDs, using the current settings
         of the dropdowns. Then reload this window's palette."""
         headertoupdate = {}
-        for key in self.dropdowns:
+        for key, widget in itertools.chain(
+                self.lineedits.items(), self.dropdowns.items()):
             if key < len(SMA3.Constants.headersettings):
-                if (Adv3Attr.sublevel.header[key] !=
-                        self.dropdowns[key].currentIndex()):
-                    headertoupdate[key] = self.dropdowns[key].currentIndex()
+                value = (widget.value if isinstance(widget, QLineEditByte)
+                         else widget.currentIndex())
+                if (Adv3Attr.sublevel.header[key] != value):
+                    headertoupdate[key] = value
 
         if headertoupdate:
             AdvWindow.editor.setHeader(headertoupdate)
             HeaderEditor.setaction(headertoupdate, usemergeID=True)
 
     def updateYoshiPalette(self):
-        Adv3Visual.yoshipalID = self.dropdowns[0x48].currentIndex()
+        Adv3Visual.yoshipalID = self.lineedits[0x48].value
         Adv3Visual.palette.loadyoshipalette(
             Adv3Attr.filepath, Adv3Visual.yoshipalID)
         AdvWindow.editor.reload("Sprite Graphics")
@@ -178,11 +214,14 @@ class QSMA3PaletteViewer(QDialog):
         for i in range(0x18):
             self.colorwidgets[i+0x200].setColor(Adv3Visual.palette.BGgradient[i])
 
-    def updateDropdowns(self):
-        """Update dropdowns with the currently active sublevel's header
-        settings."""
+    def updatefromsublevel(self):
+        """Update header selector widgets with the currently active sublevel's
+        header settings."""
         for i in SMA3.Constants.headerpalettes:
-            self.dropdowns[i].setCurrentIndex(Adv3Attr.sublevel.header[i])
+            if i in self.dropdowns:
+                self.dropdowns[i].setCurrentIndex(Adv3Attr.sublevel.header[i])
+            else:
+                self.lineedits[i].setValue(Adv3Attr.sublevel.header[i])
 
     def setColorinfo(self, color, colorID):
         """Update the layout region displaying the current color."""
@@ -201,7 +240,7 @@ class QSMA3PaletteViewer(QDialog):
         self.currentcolor.setColor(color)
         self.colorinfo.setText("".join(text))
 
-class QDialogExportPalette(QDialog):
+class QDialogExportPalette(QDialogBase):
     def __init__(self, *args):
         super().__init__(*args)
 
@@ -247,8 +286,7 @@ class QDialogExportPalette(QDialog):
                 for component in AdvGame.color15to24(color15):
                     output.append(component)
 
-            with open(filepath, "wb") as f:
-                f.write(output)
+            open(filepath, "wb").write(output)
             super().accept()
 
 class QColorSquareLabel(QLabel):
@@ -266,7 +304,7 @@ class QColorSquareLabel(QLabel):
             self.image.setColor(1, QtAdvFunc.color15toQRGB(bordercolor))
 
             # Why are pixel rows padded to the next multiple of 4 bytes?
-            rowlength = math.ceil(size/4)*4 
+            rowlength = self.image.bytesPerLine()
             pixelarray = self.image.bits().asarray(size*rowlength)
             for i in range(size):
                 pixelarray[i] = 1  # first row

@@ -9,7 +9,7 @@ from AdvGame import AdvGame
 def basewidth(widget):
     """Return a dynamic character width of the widget's font, used for
     cross-platform fixed widget widths."""
-    return widget.fontMetrics().horizontalAdvance("_") 
+    return widget.fontMetrics().horizontalAdvance("_")
 
 def color15toQRGB(color):
     "Convert a 15-bit RGB color to a 24-bit qRgb color."

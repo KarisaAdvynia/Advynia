@@ -2,13 +2,9 @@
 with any particular console."""
 
 # standard library imports
-import copy, math
-
-# Misc classes
-
-class ListData(list):
-    "List subclass to assign arbitrary atributes."
-    pass
+import copy, itertools, math, os
+from collections.abc import Iterable, Callable
+from typing import Any
 
 # General import/export functions
 
@@ -22,8 +18,7 @@ def importdata(filepath, offset=0, length=None):
 
 def exportdatatofile(filepath, data):
     "Export bytes to a new file."
-    with open(filepath, "wb") as f:
-        f.write(data)
+    open(filepath, "wb").write(data)
 
 class Open:
     """Wrapper for Python's open() function. Used as a base class for
@@ -96,10 +91,10 @@ class GameGraphics(list):
         if not rawdata:
             return
         if len(rawdata) % tilesize != 0:
-            raise ValueError("Graphics data length " + hex(len(rawdata)) +\
+            raise ValueError("Graphics data length " + hex(len(rawdata)) +
                   " does not correspond to an integer number of tiles.")
-        for i in range(len(rawdata) // tilesize):
-            self.append(rawdata[i*tilesize : (i+1)*tilesize])
+        for i in range(0, len(rawdata), tilesize):
+            self.append(rawdata[i:i+tilesize])
 
     def replacegraphics(self, graphics, byteoffset=0):
         if byteoffset % self.tilesize != 0:
@@ -109,17 +104,52 @@ class GameGraphics(list):
         endindex = startindex + len(graphics)
         if len(self) < endindex:
             self.extend([None] * (endindex - len(self)))
-        self[startindex : startindex+len(graphics)] = graphics
+        self[startindex:endindex] = graphics
+
+class PtrRef(int):
+    """Class representing one or more references to a ROM pointer.
+    Used to load data from potentially variable locations.
+    Can be iterated, if all pointers are needed (such as when relocating data).
+    Otherwise acts as the first pointer.
+    """
+
+    def __new__(cls, *ptrs, vdest=None):
+        obj = super().__new__(cls, ptrs[0])
+        obj.ptrs = list(ptrs)
+        obj.vdest = vdest
+        return obj
+
+    def __repr__(self):
+        # add leading 0 if odd digits
+        digits = max(len(format(ptr, "X")) for ptr in itertools.chain(
+            self.ptrs, [self.vdest]))
+        if digits & 1: digits += 1
+        formatstr = "0" + str(digits) + "X"
+
+        output = [self.__class__.__name__, "(",
+            ", ".join(("0x" + format(ptr, formatstr)) for ptr in self.ptrs)]
+        if self.vdest is not None:
+            output += [", vdest=0x", format(self.vdest, formatstr)]
+        output.append(")")
+        return "".join(output)
+
+    def __getitem__(self, index):
+        return self.ptrs.__getitem__(index)
+
+    def __iter__(self):
+        return iter(self.ptrs)
 
 class SharedPointerList(list):
     """Represents a list of imported mutable data, where due to shared pointers
     in the source data, multiple indexes can refer to the same item.
     These linksets (sets of indexes referring to a single item) are tracked,
     to allow for exporting data without duplicating it."""
-    def __init__(self, ptrtable, importfunc):
+    def __init__(self, ptrtable: Iterable[int], importfunc: Callable[[int], Any]):
         """Create a new shared pointer list, using the provided pointer table
         and import function.
-        importfunc(ptr) should take 1 argument, and return an item to append."""
+        importfunc(ptr) should take 1 argument from ptrtable, and return an item
+        to append."""
+
         self.linksets = []
 
         ptrmap = {}
@@ -195,23 +225,27 @@ class SharedPointerList(list):
         "Return a compact string containing the indexes in a linkset."
         if len(self.linksets[index]) == 1:
             return "None"
-        output = []
-        prev = None
-        chain = False
-        for i in sorted(self.linksets[index]):
-            if i - 1 == prev:
-                chain = True
-            else:
-                if prev is not None:
-                    if chain:
-                        output += ["-", format(prev, formatstr)]
-                        chain = False
-                    output.append(",")
-                output.append(format(i, formatstr))
-            prev = i
-        if chain:
-            output += ["-", format(prev, formatstr)]
-        return "".join(output)
+        return collectionstr(self.linksets[index], formatstr)
+
+def collectionstr(collection, formatstr=""):
+    "Return a compact string representing a collection of formatted numbers."
+    output = []
+    prev = None
+    chain = False
+    for i in sorted(collection):
+        if i - 1 == prev:
+            chain = True
+        else:
+            if prev is not None:
+                if chain:
+                    output += ["-", format(prev, formatstr)]
+                    chain = False
+                output.append(",")
+            output.append(format(i, formatstr))
+        prev = i
+    if chain:
+        output += ["-", format(prev, formatstr)]
+    return "".join(output)
 
 def color15split(color):
     "Split a 15-bit GBA/GBC/SNES RGB color into components."
@@ -241,5 +275,5 @@ def color15to24(color):
     highest 3 bits of the 5-bit input, to ensure an equal distribution in
     the 0-255 range. Multiplying by 33 (0b100001) is equivalent to creating
     an adjacent copy of the 5-bit input."""
-    
+
     return (i*33//4 for i in color15split(color))

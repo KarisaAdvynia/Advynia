@@ -16,6 +16,7 @@ layergraphics = None
 spritegraphics = None
 palette = None
 yoshipalID = 0
+layer0only = False
 cache8_layers = [None]*0x600
 cache8_spriteglobal = [None]*0x280
 cache8_stripes = {}
@@ -51,6 +52,10 @@ def loadgraphics(sublevel):
     resetcaches()
 
 def updatestripesfromsublevel():
+    if not Adv3Attr.sublevel.stripeIDs:
+        # current sublevel might be from file; import stripeIDs from current ROM
+        with GBA.Open(Adv3Attr.filepath) as f:
+            Adv3Attr.sublevel.importspritetileset(f, Adv3Attr.sublevelstripes)
     for i, newID in enumerate(Adv3Attr.sublevel.stripeIDs):
         if newID != spritegraphics.stripeIDs[i]:
             spritegraphics.loadstripe(Adv3Attr.filepath, i, newID)
@@ -66,7 +71,7 @@ def loadpalette(sublevel):
         layer3image=header[5],
         BGpalID=header[0],
         spritepalID=header[8],
-        # palette animation = header[0xB],
+        animID=header[0xB],
         yoshipalID=yoshipalID,
         showredcoins=AdvSettings.visual_redcoins,
         )
@@ -163,7 +168,7 @@ def get8x8(tileID, paletterow=1, xflip=False, yflip=False,
         image = QGBA8x8Tile(graphics[tileID],
                             palette.row(paletterow))
     if xflip or yflip:
-        image = image.mirrored(horizontal=xflip, vertical=yflip)
+        image.mirror(horizontal=xflip, vertical=yflip)
 
     pixmap = QPixmap.fromImage(image)
     cache[tileID][propindex] = pixmap
@@ -175,8 +180,8 @@ def get16x16(tileID):
 
     if tileID in cache16:
         return cache16[tileID]
-    elif tileID >= 0x10000 or tileID == 0x10 or\
-            tileID not in Adv3Attr.tilemapL1_8x8:
+    elif (tileID >= 0x10000 or tileID == 0x0010 or
+            tileID not in Adv3Attr.tilemapL1_8x8):
         # out of bounds tile ID, draw special 16x16 tile
         if tileID == 0x10EFF:
             image = QNumberedTile16("EFF", qRgb(255, 0, 0), shape="octagon")
@@ -189,19 +194,19 @@ def get16x16(tileID):
         elif tileID == 0x10EFB:
             image = QNumberedTile16("EFB", qRgb(0, 189, 189), shape="octagon")
         elif 0x10E00 <= tileID < 0x10F00:
-            # extended object filler tile
+            # extended object filler tile (purple)
             image = QNumberedTile16(format(tileID&0xFFF, "02X"),
                 qRgb(132, 0, 255), shape="square")
         elif 0x10000 <= tileID < 0x10100:
-            # standard object filler tile
+            # standard object filler tile (blue)
             image = QNumberedTile16(format(tileID&0xFF, "02X"),
                 qRgb(0, 0, 255), shape="square")
         elif 0x10600 <= tileID < 0x10700:
-            # 16x16 viewer label tile
+            # 16x16 viewer label tile (magenta)
             image = QNumberedTile16(format(tileID&0xFF, "02X"),
                 qRgb(255, 0, 255), shape="square")
         else:
-            # red error tile
+            # error tile (red)
             image = QNumberedTile16(format(tileID&0xFFF, "02X"),
             qRgb(255, 0, 64), shape="square")
         pixmap = QPixmap.fromImage(image)
@@ -212,6 +217,8 @@ def get16x16(tileID):
             tilemap8 = Adv3Attr.tilemapL1_8x8[tileID]
             for i in range(4):
                 tileprop = tilemap8[i]
+                if layer0only and not Adv3Attr.tilemapL0flags[tileID][i]:
+                    continue
                 painter.drawPixmap(
                     (i&1)<<3, (i&2)<<2, get8x8(*GBA.splittilemap(tileprop)))
 
@@ -230,23 +237,44 @@ def get16x16(tileID):
 
 def getstaticrect(width, height, tileID, paletterow=1, xflip=False, yflip=False,
                   sprite=False, stripeID=None):
+    """Draw a rectangle of 8x8 tiles from the currently loaded graphics/palette,
+    and return it as a QPixmap."""
+
     offset = 0x10
     if sprite and (stripeID is None):
         offset = 0x20
+    func = lambda x, y : get8x8(
+        tileID + (x>>3) + (y>>3)*offset, paletterow,
+        False, False, sprite, stripeID)
+
+    return _getstaticrect_base(func, width, height, xflip, yflip)
+
+def getstaticrect_direct(width, height, tileID, graphics, palette,
+                         xflip=False, yflip=False, offset=0x20):
+    """Draw a rectangle of 8x8 tiles from the provided graphics/palette,
+    and return it as a QPixmap."""
+
+    func = lambda x, y : QPixmap.fromImage(
+        QGBA8x8Tile(graphics[tileID + (x>>3) + (y>>3)*offset], palette))
+    return _getstaticrect_base(func, width, height, xflip, yflip)
+
+def _getstaticrect_base(pixmapfunc, width, height, xflip, yflip):
+    "Base function for shared code between the getstaticrect variants."
 
     image = QImage(width, height, QImage.Format.Format_ARGB32)
     image.fill(0)
     with QPainter(image) as painter:
         for y in range(0, height, 8):
             for x in range(0, width, 8):
-                painter.drawPixmap(x, y, get8x8(
-                    tileID + (x>>3) + (y>>3)*offset, paletterow,
-                    False, False, sprite, stripeID))
+                painter.drawPixmap(x, y, pixmapfunc(x, y))
     if xflip or yflip:
-        image = image.mirrored(horizontal=xflip, vertical=yflip)
+        image.mirror(horizontal=xflip, vertical=yflip)
     return QPixmap.fromImage(image)
 
 def getdynamicrect(width, height, ptr, paletterow, xflip=False, yflip=False):
+    """Draw a rectangle of 8x8 tiles extracted directly from the ROM, using the
+    currently loaded palette, and return it as a QPixmap."""
+
     image = QImage(width, height, QImage.Format.Format_ARGB32)
     image.fill(0)
     with QPainter(image) as painter:
@@ -258,7 +286,7 @@ def getdynamicrect(width, height, ptr, paletterow, xflip=False, yflip=False):
                 painter.drawImage(x, y,
                     QGBA8x8Tile(graphics[x>>3], palette.row(paletterow)))
     if xflip or yflip:
-        image = image.mirrored(horizontal=xflip, vertical=yflip)
+        image.mirror(horizontal=xflip, vertical=yflip)
     return QPixmap.fromImage(image)
 
 # Sprite pixmap generation
@@ -320,7 +348,7 @@ def getspritepixmap(sprID, parity):
                     painter.drawImage(-offsetX + 3, -offsetY, QNumberedTile16(
                         str(Adv3Attr.sublevel.header[0xE]),
                         QtAdvFunc.color15toQRGB(0x7FF0),
-                        "superstar", textcolorindex=1)) 
+                        "superstar", textcolorindex=1))
         except (KeyError, IndexError):
             # stripe graphics not loaded, or tile ID overflowed
             pixmap = None
@@ -334,9 +362,3 @@ def getspritepixmap(sprID, parity):
         offsetX, offsetY = 0, 0
 
     return pixmap, offsetX, offsetY
-
-# this global export method needs to be moved somewhere
-def exportgraphics():
-    SMA3.exportgraphics(Adv3Attr.filepath)
-    AdvWindow.statusbar.setActionText(
-        "Exported all graphics and compressed tilemaps.")

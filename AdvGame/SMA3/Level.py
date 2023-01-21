@@ -2,7 +2,7 @@
 Classes and functions for SMA3 levels and sublevels."""
 
 # standard library imports
-import os
+import itertools
 
 ##if __name__ == "__main__":
 ##    # allow testing as if it's from the Advynia main directory
@@ -12,7 +12,7 @@ import os
 
 # import from other files
 from AdvGame import AdvGame, GBA, SNES
-from AdvGame.SMA3 import Pointers, Constants
+from AdvGame.SMA3 import Pointers, PointersSNES, Constants
 
 # Misc info
 
@@ -46,7 +46,7 @@ def coordstoscreen(x, y):
 class Sublevel:
     """Representation of a sublevel's data. Includes header, objects, sprites,
     and screen exits, and functions for import/export."""
-    def __init__(self, obj65_7byte=False):
+    def __init__(self, *, obj65_7byte=False):
         # initialize a null sublevel
         self.ID = None
         self.header = [0]*0xF
@@ -185,42 +185,30 @@ class Sublevel:
 
     def importspritedata(self, f):
         "Import a sublevel's sprite data from a file object."
-        while (sprite32bit := int.from_bytes(f.read(4), "little")) !=\
-               0xFFFFFFFF:
+        while (rawbytes := f.read(4)) != b"\xff\xff\xff\xff":
+            if not rawbytes:
+                # prevent infinite loop
+                raise ValueError("Reached end of byte stream when importing "
+                                 "sprite data.")
+            sprite32bit = int.from_bytes(rawbytes, "little")
             spr = Sprite(
                 ID = sprite32bit & 0x1FF,
                 y = (sprite32bit >> 9) & 0x7F,
                 x = (sprite32bit >> 16) & 0xFF,
-                param = sprite32bit >> 24
+                extID = sprite32bit >> 24
                 )
             self.sprites.append(spr)
 
     def importspritetileset(self, f, sublevelstripes=False):
         spritetileset = self.ID if sublevelstripes else self.header[7]
-        f.seek(f.readptr(Pointers.levelgfxstripeIDs) + spritetileset*6)
-        self.stripeIDs = bytearray(f.read(6))
+        self.stripeIDs = loadstripeIDs(f, spritetileset)
 
     def exportmaindata(self):
         "Export a sublevel's main data (header, objects, exits) to a bytearray."
         output = bytearray()
 
         # process header values
-        bitoffset = 0
-        newbyte = 0
-        for i, bitcount in enumerate(self.headerbitcounts):
-            for j in reversed(range(bitcount)):
-                # read from highest to lowest bit
-                bit = self.header[i]>>j & 1
-                newbyte = newbyte<<1 | bit
-                bitoffset += 1
-                if bitoffset == 8:
-                    output.append(newbyte)
-                    bitoffset = 0
-                    newbyte = 0
-        if bitoffset:
-            # finish incomplete final byte
-            newbyte <<= (8-bitoffset)
-            output.append(newbyte)
+        output += self._headertobytes(self.header, self.headerbitcounts)
 
         # process objects
         for obj in self.objects:
@@ -233,6 +221,27 @@ class Sublevel:
             output += entrance
         output.append(0xFF)
 
+        return output
+
+    @staticmethod
+    def _headertobytes(header, headerbitcounts):
+        output = bytearray()
+        bitoffset = 0
+        newbyte = 0
+        for i, bitcount in enumerate(headerbitcounts):
+            for j in reversed(range(bitcount)):
+                # read from highest to lowest bit
+                bit = header[i]>>j & 1
+                newbyte = newbyte<<1 | bit
+                bitoffset += 1
+                if bitoffset == 8:
+                    output.append(newbyte)
+                    bitoffset = 0
+                    newbyte = 0
+        if bitoffset:
+            # finish incomplete final byte
+            newbyte <<= (8-bitoffset)
+            output.append(newbyte)
         return output
 
     def exportspritedata(self):
@@ -275,7 +284,7 @@ class SublevelFromSNES(Sublevel):
         sublevel.ID = sublevelID
 
         with SNES.Open(filepath, "rb") as f:
-            f.seek(0x01B08F)
+            f.seek(PointersSNES.sublevelptrs)
             ptrtable = f.readint(3)
             f.seek(ptrtable + 6*sublevelID)
             mainptr = f.readint(3)
@@ -295,6 +304,12 @@ class SublevelFromSNES(Sublevel):
         self.extractheader(headerraw, self.headerbitcountsSNES)
         self.importobjectdata(f)
         self.importexitdata(f, entrlength=4)
+        for entr in self.exits.values():
+            # fix Bandit minigame sublevel IDs
+            if 0xDE <= entr.sublevel <= 0xE7:
+                entr.sublevel += 0x18
+                if 0xDE <= entr.anim <= 0xE7:
+                    entr.anim += 0x18
 
     def importspritedata(self, f):
         while (sprite16bit := int.from_bytes(f.read(2), "little")) != 0xFFFF:
@@ -310,6 +325,10 @@ class SublevelFromSNES(Sublevel):
         spritetileset = self.header[7]
         f.seek(0x00B039 + spritetileset*6)
         self.stripeIDs = bytearray(f.read(6))
+
+def loadstripeIDs(f, spritetileset):
+    f.seek(f.readptr(Pointers.levelgfxstripeIDs) + spritetileset*6)
+    return bytearray(f.read(6))
 
 class Object:
     """An object from a sublevel's main data.
@@ -332,7 +351,7 @@ class Object:
 
         # if kwargs, construct an object manually
         for key, value in kwargs.items():
-            self.__setattr__(key, value)
+            setattr(self, key, value)
 
     @property
     def adjwidth(self): return self._adjlength(self.width)
@@ -384,7 +403,7 @@ class Object:
             pass
 
     def __bytes__(self):
-        "Convert an object back to its in-game byte sequence."
+        # convert an object back to its in-game byte sequence
         output = [self.ID,
                   self.y & 0xF0 | self.x >> 4,
                   (self.y & 0xF) << 4 | self.x & 0xF]
@@ -427,7 +446,7 @@ class Sprite:
         self.ID = 0
         self.x = 0
         self.y = 0
-        self.param = 0
+        self.extID = 0
 
         # if kwargs, construct a sprite manually
         for key, value in kwargs.items():
@@ -448,20 +467,23 @@ class Sprite:
             pass
 
     def __bytes__(self):
-        "Convert a sprite back to its in-game byte sequence."
-        output = (self.ID&0xFF, self.y<<1 | self.ID>>8, self.x, self.param)
+        # convert a sprite back to its in-game byte sequence
+        output = [self.ID&0xFF, self.y<<1 | self.ID>>8, self.x, 0]
+        if self.extID:
+            output[3] = self.extID
         return bytes(output)
 
     def idstr(self):
-        return format(self.ID, "03X")
+        text = format(self.ID, "03X")
+        if self.extID:
+            text += ["(", format(self.extID, "02X"), ")"]
+        return "".join(text)
 
     def __str__(self):
-        text = [self.idstr()]
-        if self.param:
-            text += ["(", format(self.param, "02X"), ")"]
-        text += [" x", format(self.x, "02X"),
-                 " y", format(self.y, "02X")]
-        return "".join(text)
+        return "".join((
+            self.idstr(),
+            " x", format(self.x, "02X"),
+            " y", format(self.y, "02X")))
     def __repr__(self):
         return "<SMA3.Sprite: " + self.__str__() + ">"
 
@@ -505,101 +527,282 @@ class Entrance(bytearray):
 
 # SMA3 level entrances
 
-def importmainentrances(filepath, maxlevelID=0x47):
-    entrptrs = GBA.PointerTable.importtable(
-        filepath, Pointers.entrancemainptrs[0],
-        vstart=Pointers.entrancemainptrsvanilla, vlen=0x46)
-    mainentrances = AdvGame.ListData()
-    mainentrances.ptrs = entrptrs
-    datablock = None
+class MainEntrances(list):
+    "List of all levels' main entrances."
 
-    with GBA.Open(filepath, "rb") as f:
+    ptrref = Pointers.entrancemainptrs
+
+    @classmethod
+    def importfromROM(cls, filepath, maxlevelID=0x47):
+        "Create a new instance using main entrances from the ROM."
+
+        entrptrs = GBA.PointerTable.importtable(
+            filepath, cls.ptrref, vstart=cls.ptrref.vdest, vlen=0x46)
+        mainentrances = cls()
+        mainentrances.ptrs = entrptrs
+        datablock = None
+
+        with GBA.Open(filepath, "rb") as f:
+            for levelID in range(maxlevelID+1):
+                try:
+                    # import entrance
+                    ptr = entrptrs[levelID]
+                    f.seek(ptr)
+                    mainentrances.append(Entrance(f.read(6)))
+
+                    # expand datablock if needed
+                    if not datablock:
+                        datablock = [ptr, 6]
+                    elif ptr < datablock[0]:
+                        datablock[1] += datablock[0] - ptr
+                        datablock[0] = ptr
+                    elif ptr+6 > datablock[0] + datablock[1]:
+                        datablock[1] = ptr+6 - datablock[0]
+                except (ValueError, IndexError):
+                    # pointer isn't valid, or index higher than vanilla table
+                    mainentrances.append(Entrance())
+
+            # account for Advynia-added end-of-data marker
+            f.seek(sum(datablock))
+            if f.read(4) == b"\xFF\xFF\xFF\xFF":
+                datablock[1] += 4
+
+        mainentrances.datablock = datablock
+        return mainentrances
+
+    @classmethod
+    def importfromSNES(cls, filepath):
+        with SNES.Open(filepath, "rb") as f:
+            # read offsets to table
+            offsets = []
+            f.seek(PointersSNES.entrancemainoffsets)
+            f.seek(f.readint(3))
+            for levelID in range(Constants.maxlevel+1):
+                offsets.append(f.readint(2))
+
+            f.seek(PointersSNES.entrancemaintable)
+            entrtable = f.readint(3)
+
+            mainentrances = cls()
+            for offset in offsets:
+                if offset % 4:  # misaligned offset -> probably not valid
+                    mainentrances.append(Entrance())
+                else:
+                    try:
+                        f.seek(entrtable + offset)
+                        mainentrances.append(Entrance(f.read(4)))
+                    except ValueError:
+                        mainentrances.append(Entrance())
+
+        swapExtraSecret(mainentrances)
+
+        return mainentrances
+
+    @classmethod
+    def importfrombytes(cls, bytedata, offsets, entrancelen=6):
+        """Create a new instance from byte data, given a sequence of offsets to
+        each entrance."""
+
+        mainentrances = cls()
+        for offset in offsets:
+            if offset is not None:
+                mainentrances.append(Entrance(
+                    bytedata[offset : offset + entrancelen]))
+            else:
+                 mainentrances.append(Entrance())
+
+        # ensure all level IDs are included, if offset table was shorter
+        while len(mainentrances) < Constants.maxlevel + 1:
+            mainentrances.append(Entrance())
+
+        return mainentrances
+
+    def tobytearray(self, *, entrancelen=6, endmarker=True):
+        """Convert to a byte sequence. Also return the offsets necessary to
+        generate level-indexed pointers."""
+
+        bytedata = bytearray()
+        offsets = []
+        for entr in self:
+            if entr:
+                offsets.append(len(bytedata))
+                bytedata += entr[0:entrancelen]
+            else:
+                offsets.append(None)
+        if endmarker:
+            bytedata += b"\xFF\xFF\xFF\xFF"
+
+        return bytedata, offsets
+
+class MidwayEntrances(list):
+    "List containing a list of midway entrances per level."
+
+    ptrref = Pointers.entrancemidwayptrs
+
+    @classmethod
+    def importfromROM(cls, filepath, maxlevelID=0x47, maxmidpoints=4,
+                      midwaylen=4):
+        """Create a new instance using midway entrances from the ROM,
+        auto-splitting by level based on the distance between pointers."""
+
+        # import midway entrance pointers
+        midwayptrs = GBA.PointerTable.importtable(
+            filepath, cls.ptrref, vstart=cls.ptrref.vdest, vlen=0x46)
+        midwayentrances = cls()
+        midwayentrances.midwaylen = midwaylen
+        midwayentrances.ptrs = midwayptrs
+        datablock = None
         for levelID in range(maxlevelID+1):
-            try:
-                # import entrance
-                ptr = entrptrs[levelID]
-                f.seek(ptr)
-                mainentrances.append(Entrance(f.read(6)))
+            midwayentrances.append([])
 
-                # expand datablock if needed
-                if not datablock:
-                    datablock = [ptr, 6]
-                elif ptr < datablock[0]:
-                    datablock[1] += datablock[0] - ptr
-                    datablock[0] = ptr
-                elif ptr+6 > datablock[0] + datablock[1]:
-                    datablock[1] = ptr+6 - datablock[0]
-            except (ValueError, IndexError):
-                # pointer isn't valid, or index higher than vanilla table
-                mainentrances.append(Entrance())
+        # sort pointers
+        # also remove 0 (vanilla filler pointer) if present, and add 0xFFFFFFFF
+        sortedptrs = sorted((set(midwayptrs) | {0xFFFFFFFF}) - {0})
 
-        # account for Advynia-added end-of-data marker
-        f.seek(sum(datablock))
-        if f.read(4) == b"\xFF\xFF\xFF\xFF":
-            datablock[1] += 4
+        with GBA.Open(filepath, "rb") as f:
+            # use sortedptrs to import midway entrances, without duplicating
+            for ptr, nextptr in itertools.pairwise(sortedptrs):
+                levelID = midwayptrs.index(ptr)
 
-    mainentrances.datablock = datablock
-    return mainentrances
+                try:
+                    f.seek(ptr)
+                    midwaycount = min((nextptr - ptr) // midwaylen, maxmidpoints)
+                    for i in range(midwaycount):
+                        entr = Entrance(f.read(midwaylen))
+                        if entr[0:4] == b"\xFF\xFF\xFF\xFF":
+                            break
+                        midwayentrances[levelID].append(entr)
 
-def importmidwayentrances(filepath, maxlevelID=0x47, maxmidpoints=4,
-                          midwaylen=4):
-    """Import midway entrances, auto-splitting by level based on the distance
-    between pointers."""
-    # import midway entrance pointers
-    midwayptrs = GBA.PointerTable.importtable(
-        filepath, Pointers.entrancemidwayptrs,
-        vstart=Pointers.entrancemidwayptrsvanilla, vlen=0x46)
-    midwayentrances = AdvGame.ListData()
-    midwayentrances.ptrs = midwayptrs
-    datablock = None
-    for levelID in range(maxlevelID+1):
-        midwayentrances.append([])
+                    # expand datablock if needed
+                    if not datablock:
+                        datablock = [ptr, 0]
+                    if ptr < datablock[0]:
+                        datablock[1] += datablock[0] - ptr
+                        datablock[0] = ptr
+                    elif f.tell() > datablock[0] + datablock[1]:
+                        datablock[1] = f.tell() - datablock[0]
 
-    # sort pointers
-    midwayptrset = set(midwayptrs)
-    midwayptrset.discard(0)  # remove 0, the vanilla filler pointer, if present
-    midwayptrset.add(0xFFFFFFFF)
-    sortedptrs = sorted(midwayptrset)
+                except (ValueError, IndexError):
+                    pass
 
-    with GBA.Open(filepath, "rb") as f:
-        # use sorted pointers to import midway entrances, without duplicating
-        for i, ptr in enumerate(sortedptrs):
-            if ptr == 0xFFFFFFFF:
-                break
-            levelID = midwayptrs.index(ptr)
+            # account for Advynia-added end-of-data marker
+            f.seek(sum(datablock))
+            if f.read(4) == b"\xFF\xFF\xFF\xFF":
+                datablock[1] += 4
 
-            try:
-                f.seek(ptr)
-                midwaycount = min(
-                    (sortedptrs[i+1] - ptr)//midwaylen, maxmidpoints)
-                for j in range(midwaycount):
-                    entr = Entrance(f.read(midwaylen))
-                    if entr[0:4] == b"\xFF\xFF\xFF\xFF":
-                        break
-                    midwayentrances[levelID].append(entr)
+        midwayentrances.datablock = datablock
+        return midwayentrances
 
-                # expand datablock if needed
-                if not datablock:
-                    datablock = [ptr, 0]
-                if ptr < datablock[0]:
-                    datablock[1] += datablock[0] - ptr
-                    datablock[0] = ptr
-                elif f.tell() > datablock[0] + datablock[1]:
-                    datablock[1] = f.tell() - datablock[0]
+    @classmethod
+    def importfromSNES(cls, filepath, *, force4=True):
+        with SNES.Open(filepath, "rb") as f:
+            f.seek(PointersSNES.entrancemidwaybank)
+            bank = f.readint(1)
 
-            except (ValueError, IndexError):
-                pass
+            # determine table location and max offset
+            f.seek(PointersSNES.entrancemidwaytable)
+            entrtable = bank << 0x10 | f.readint(2)
+            maxoffset = ((bank+1) << 0x10) - entrtable
 
-        # account for Advynia-added end-of-data marker
-        f.seek(sum(datablock))
-        if f.read(4) == b"\xFF\xFF\xFF\xFF":
-            datablock[1] += 4
+            # read offsets to table
+            offsets = []
+            f.seek(PointersSNES.entrancemidwayoffsets)
+            f.seek(bank << 0x10 | f.readint(2))
+            for levelID in range(Constants.maxlevel+1):
+                num = f.readint(2)
+                if num % 4 or num >= maxoffset:
+                    offsets.append(None)
+                else:
+                    offsets.append(num)
 
-    midwayentrances.datablock = datablock
-    return midwayentrances
+            midwayentrances = cls()
+            for levelID in range(Constants.maxlevel++1):
+                midwayentrances.append([])
+
+            # read entrances
+            if force4:
+                # read 4 midway entrances for every level
+                for levelID, offset in enumerate(offsets):
+                    if offset is not None:
+                        f.seek(entrtable + offset)
+                        for i in range(4):
+                            midwayentrances[levelID].append(Entrance(f.read(4)))
+            else:
+                # use sorted offsets to avoid duplicating
+                sortedoffsets = sorted((set(offsets) | {maxoffset}) - {None})
+                for offset, nextoffset in itertools.pairwise(sortedoffsets):
+                    try:
+                        levelID = offsets.index(offset)
+                        f.seek(entrtable + offset)
+                        midwaycount = min((nextoffset - offset) // 4, 4)
+                        for i in range(midwaycount):
+                            midwayentrances[levelID].append(Entrance(f.read(4)))
+                    except ValueError:
+                        pass
+
+        swapExtraSecret(midwayentrances)
+
+        return midwayentrances
+
+    @classmethod
+    def importfrombytes(cls, bytedata, offsets, midwaylen=6):
+        """Create a new instance from byte data, given a sequence of offsets to
+        each level's midway entrances."""
+
+        midwayentrances = cls()
+        for _ in offsets:
+            midwayentrances.append([])
+
+        # iterate over pairs of consecutive offsets; the last offset uses
+        #  len(bytedata) as its end
+        sortedoffsets = sorted((set(offsets) | {len(bytedata)}) - {None})
+        for offset, nextoffset in itertools.pairwise(sortedoffsets):
+            levelID = offsets.index(offset)
+            for i in range(offset, nextoffset, midwaylen):
+                entr = Entrance(bytedata[i:i+midwaylen])
+                if entr[0:4] == b"\xFF\xFF\xFF\xFF":
+                    # don't import end-of-data marker, if it exists
+                    break
+                midwayentrances[levelID].append(entr)
+
+        # ensure all level IDs are included, if offset table was shorter
+        while len(midwayentrances) < Constants.maxlevel + 1:
+            midwayentrances.append([])
+
+        return midwayentrances
+
+    def tobytearray(self, *, midwaylen=None, endmarker=True):
+        """Convert to a byte sequence. Also return the offsets necessary to
+        generate level-indexed pointers.
+        Optionally can override self.midwaylen."""
+
+        if midwaylen is None:
+            midwaylen = self.midwaylen
+
+        bytedata = bytearray()
+        offsets = []
+        for level in self:
+            if level:
+                offsets.append(len(bytedata))
+                for entr in level:
+                    bytedata += entr[0:midwaylen]
+            else:
+                offsets.append(None)
+        if endmarker:
+            bytedata += b"\xFF\xFF\xFF\xFF"
+
+        return bytedata, offsets
 
 def importlevelentrances(filepath, maxlevelID=0x47, maxmidpoints=4,
         midwaylen=4):
     "Convenience function to import both main and midway entrances."
-    return (importmainentrances(filepath, maxlevelID),
-        importmidwayentrances(filepath, maxlevelID, maxmidpoints, midwaylen))
+    return (MainEntrances.importfromROM(filepath, maxlevelID),
+            MidwayEntrances.importfromROM(
+                filepath, maxlevelID, maxmidpoints, midwaylen))
+
+def swapExtraSecret(seq):
+    """Swap indexes corresponding to Extra/Secret levels.
+    For use in porting SNES/GBA level-indexed data."""
+    for secretID in range(8, 0x48, 0xC):
+        extraID = secretID + 1
+        seq[secretID], seq[extraID] = seq[extraID], seq[secretID]

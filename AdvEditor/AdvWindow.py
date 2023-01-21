@@ -6,6 +6,8 @@ sublevelscene = None
 selection = None
 sidebar = None
 statusbar = None
+entranceeditor = None
+texteditor = None
 
 from .Undo import SublevelUndoHistory
 undohistory = SublevelUndoHistory()

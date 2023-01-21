@@ -1,3 +1,6 @@
+# import from other files
+from AdvEditor import AdvSettings
+
 def pluralize(num, singular, plural=None, numformat=""):
     """Generate a string containing the given number and either a singular
     or plural word, depending on the number.

@@ -339,14 +339,15 @@ def nonbreakingstr(text):
     "Replace spaces/hyphens in a string with their nonbreaking equivalents."
     text = list(text)
     for i, char in enumerate(text):
-        if char == " ":
-            text[i] = "\u00A0"  # nonbreaking space
-        elif char == "-":
-            text[i] = "\u2011"  # nonbreaking hyphen
-        elif char in ".:/":
-            # nonbreaking character since for an unknown reason,
-            #  Qt line-breaks on these characters
-            text[i] += "\u2060"
+        match char:
+            case " ":
+                text[i] = "\u00A0"  # nonbreaking space
+            case "-":
+                text[i] = "\u2011"  # nonbreaking hyphen
+            case "." | ":" | "/":
+                # nonbreaking character since for an unknown reason,
+                #  Qt line-breaks on these characters
+                text[i] += "\u2060"
     return "".join(text)
 
 def rotaterectbox(width, height, degrees):
@@ -354,7 +355,6 @@ def rotaterectbox(width, height, degrees):
     angle = math.radians(degrees)
     return (abs(math.cos(angle)*width) + abs(math.sin(angle)*height),
             abs(math.sin(angle)*width) + abs(math.cos(angle)*height))
-                
 
 ObjectMetadata = _importobjmetadata(
     AdvMetadata.datapath("tsv", "SMA3ObjectMetadata.tsv"))

@@ -283,7 +283,7 @@ class MouseResizeObjects:
         self.vert = resizeflags & 2
         self.resized = False
 
-        self.objects = sorted(AdvWindow.selection.objects, 
+        self.objects = sorted(AdvWindow.selection.objects,
                               key=Adv3Attr.sublevel.objects.index)
         self.oldsizes = []
         minX, maxX, minY, maxY = 0, 0, 0, 0

@@ -15,11 +15,11 @@ class Open(AdvGame.Open):
         if not 0x08000000 <= ptr < 0x0A000000:
             raise ValueError("Address " + format(ptr, "08X") +
                              " is not a valid GBA ROM pointer.")
-        self.fileobj.seek(ptr & 0x01FFFFFF)
+        self.fileobj.seek(ptr - 0x08000000)
 
     def tell(self):
         "Return the curent position as a GBA pointer."
-        return self.fileobj.tell() | 0x08000000
+        return self.fileobj.tell() + 0x08000000
 
     def readptr(self, ptr, index=0):
         """Seek to the given pointer, offset with a pointer table index if
@@ -38,8 +38,9 @@ class Open(AdvGame.Open):
         return ptr
 
     def readseek(self, ptr=None):
-        "Read a pointer at the current or specified position, then seek to it."
-        if not ptr:
+        """Read a pointer at the current or specified position, then seek to it.
+        Can only be used in subclasses that define self.readptr."""
+        if ptr is None:
             ptr = f.tell()
         self.seek(self.readptr(ptr))
 
@@ -167,14 +168,14 @@ def addrtofile(addr):
     if not 0x08000000 <= addr < 0x0A000000:
         raise ValueError("Address " + format(addr, "08X") +
                          " is not a valid GBA ROM pointer.")
-    return addr & 0x01FFFFFF
+    return addr - 0x08000000
 
 def addrfromfile(addr):
     "Convert a file offset to a GBA ROM pointer, both expressed in integers."
     if addr >= 0x02000000:
         raise ValueError("Offset " + format(addr, "08X") +
                          " is larger than the maximum GBA ROM size, 32 MiB.")
-    return addr | 0x08000000
+    return addr + 0x08000000
 
 def readinternalname(filepath):
     "Extract the GBA internal name."
@@ -260,9 +261,11 @@ def compressLZ77(data):
                 if index+copylength > len(data):
                     # slice is interrupted by end of data
                     continue
-                # search earlier data for progressively shorter subsequences
-                pos = data.find(data[index:index+copylength],
-                                start, index+copylength-1)
+                # search earlier data for progressively shorter subsequences,
+                #  forcing at least 2 bytes overlap for self-intersecting copies
+                #  (in-game decompression fails with 1 byte overlap)
+                pos = data.find(data[index:index+copylength], start,
+                                index + copylength - 2)
                 if pos >= 0:  # matching subsequence found
                     # generate 16-bit parameter to copy previous data
                     offset = index - pos - 1
@@ -300,35 +303,30 @@ def importdata(filepath, addr, length):
         offset = addrtofile(addr)
         return AdvGame.importdata(filepath, offset, length)
 
-def savedatatofreespace(filepath, data, ptrstodata,
-        freespacestart=0x400000, freespaceend=0x2000000):
+def savedatatofreespace(filepath, data, ptrref,
+        freespacestart=0x08400000, freespaceend=0x0A000000):
     """Save variable-length data to a GBA ROM, in the provided freespace region,
-    and update the data's pointer(s).
-    Returns the new pointer, or None if insufficient space in the region."""
-
-    if ptrstodata:
-        try:
-            ptrstodata[0]
-        except TypeError:
-            # convert single pointer to sequence of pointers
-            ptrstodata = (ptrstodata,)
-    else:
-        ptrstodata = ()
+    and update the data's pointer(s) if any.
+    ptrref: PtrRef instance or other iterable of pointers, if pointers to update
+            None/any False value, if no pointers to update
+    Returns: pointer to newly saved data, or None if insufficient space in the
+    region."""
 
     freespace = AdvGame.findfreespace(
-        filepath, freespacestart, freespaceend, minlength=max(len(data), 0x10),
-        width=4)
+        filepath, freespacestart - 0x08000000, freespaceend - 0x08000000,
+        minlength=max(len(data), 0x10), width=4)
     if not freespace:
-        return
+        return None
 
     # save at smallest free location
     newptr = addrfromfile(min(freespace, key=itemgetter(1))[0])
     with Open(filepath, "r+b") as f:
         f.seek(newptr)
         f.write(data)
-        for ptr in ptrstodata:
-            f.seek(ptr)
-            f.writeint(newptr, 4)
+        if ptrref:
+            for ptr in ptrref:
+                f.seek(ptr)
+                f.writeint(newptr, 4)
     return newptr
 
 def overwritedata(filepath, data, ptr, expectedlen=None):
@@ -353,6 +351,13 @@ def splittilemap(tileprop):
     xflip = tileprop & 0x400
     yflip = tileprop & 0x800
     return tileID_8, paletterow, xflip, yflip
+
+# OAM sizes, indexed by [shapeID][sizeID]
+oamsizes = (
+    ((8, 8), (16, 16), (32, 32), (64, 64)),
+    ((16, 8), (32, 8), (32, 16), (64, 32)),
+    ((8, 16), (8, 32), (16, 32), (32, 64)),
+    )
 
 class PointerTable(list):
     "List subclass representing a GBA pointer table."

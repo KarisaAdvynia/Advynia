@@ -3,15 +3,15 @@ An editor for Yoshi's Island: Super Mario Advance 3.
 
 Aiming to be a streamlined editor experience, providing what's needed for creating custom Yoshi's Island levels, with no in-depth ROM hacking knowledge required. Work in progress.
 
-## Features, as of 0.3
-- Sublevel editing, with in-game graphics for about 80% of objects, most sprites, background gradient, layer 2/3
+## Features, as of 0.4
+- Sublevel editing, with in-game graphics for about 80% of objects, most sprites, background gradient, all 4 GBA layers
 - Level main/midway entrance editing
 - Message editing (including standard messages, level names, file select, story intro, ending, credits)
 - Viewers for palettes, 8x8 tiles, and layer 1 16x16 tiles
 - Customizing sprite tileset and music in each sublevel
 - Inserting 16x16 tiles as objects
-- Exporting/importing sublevels to Advynia-format .a3l files, including one-way SNES-GBA importing (using .a3l or .ylt files)
-- Exporting graphics and compressed data (note: only exporting is currently supported, not importing)
+- Exporting/importing sublevels, entrances, and messages (using Advynia-format .a3l files), including SNES-GBA porting
+- Exporting/importing graphics and tilemaps to .bin files
 - Internal name editing
 - Various conveniences:
     - detailed tooltip descriptions for many objects/sprites
@@ -35,7 +35,7 @@ Advynia should run natively on any platform that supports Python/PyQt.
 
 ## Settings
 Settings are stored in Advynia.cfg in the app folder, and can be modified manually while Advynia is closed.
-- Note: In the Mac build, Advynia.app/Contents/MacOS/ is treated as the app folder. This is unintentional; it's intended to be the folder containing Advynia.app.
+- Note: In the Mac build, Advynia.app/Contents/MacOS/ is treated as the app folder, as opposed to the folder containing Advynia.app. This is unintentional.
 
 To reset a setting to default, delete the line corresponding to that setting; it will be restored the next time Advynia is opened. To reset all settings, delete the entire file.
 

@@ -13,7 +13,7 @@ from . import QtAdvFunc, HeaderEditor
 
 # Viewer dialog base class
 
-class QTileViewer(QDialog):
+class QTileViewer(QDialogBase):
     "Base class for the 8x8 and 16x16 tile viewers."
     def __init__(self, parent):
         super().__init__(parent)
@@ -429,7 +429,7 @@ class Q16x16TileViewer(QTileViewer):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.setWindowTitle("Layer 1 16x16 Tile Viewer")
+        self.setWindowTitle("16x16 Tile Viewer")
 
         self.tile16x16items = {}
         self.tilenumitems = []
@@ -438,16 +438,18 @@ class Q16x16TileViewer(QTileViewer):
 
         # init widgets
         self.scene = QGraphicsScene(-0x18, 0, 0x118, 0x2000)
-        self.view = QTileGraphicsView(self.scene, startheight=0x182, zoom=1)        
+        self.view = QTileGraphicsView(self.scene, startheight=0x182, zoom=1)
+
+        self.layerlabel = QLabel()
 
         jumplabel = QLabel("Scroll to high byte")
         self.jumpinput = QLineEditByte("00", maxvalue=0xFF)
-        self.jumpinput.textChanged.connect(self.scrolltojumpinput)
+        self.jumpinput.editingFinished.connect(self.scrolltojumpinput)
 
         self.currenttile = QLabel()
         self.currenttile.setPixmap(QTransparentPixmap(16, 16))
         self.tileinfo = QLabel()
-        self.tileinfo.setMinimumWidth(QtAdvFunc.basewidth(self.tileinfo) * 40)
+        self.tileinfo.setMinimumWidth(QtAdvFunc.basewidth(self.tileinfo) * 46)
         self.settileinfo(None)
 
         insertlabel = QLabel("Insert tile as object")
@@ -462,26 +464,25 @@ class Q16x16TileViewer(QTileViewer):
         self.setLayout(layoutMain)
         layoutMain.addWidget(self.view)
 
-        layoutSidebar = QVBoxLayout()
+        layoutSidebar = QVHBoxLayout()
         layoutMain.addLayout(layoutSidebar)
-        
-        layoutJump = QHBoxLayout()
-        layoutSidebar.addLayout(layoutJump)
-        layoutJump.addWidget(jumplabel)
-        layoutJump.addWidget(self.jumpinput)
-        layoutJump.addStretch()
 
-        layoutTileInfo = QHBoxLayout()
-        layoutSidebar.addLayout(layoutTileInfo)
-        layoutTileInfo.addWidget(self.currenttile)
-        layoutTileInfo.addWidget(self.tileinfo)
-        layoutTileInfo.addStretch()
+        layoutSidebar.addWidget(self.layerlabel)
 
-        layoutInsert = QHBoxLayout()
-        layoutSidebar.addLayout(layoutInsert)
-        layoutInsert.addWidget(insertlabel)
-        layoutInsert.addWidget(self.insertbutton)
-        layoutInsert.addStretch()
+        layoutSidebar.addRow()
+        layoutSidebar[-1].addWidget(jumplabel)
+        layoutSidebar[-1].addWidget(self.jumpinput)
+        layoutSidebar[-1].addStretch()
+
+        layoutSidebar.addRow()
+        layoutSidebar[-1].addWidget(self.currenttile)
+        layoutSidebar[-1].addWidget(self.tileinfo)
+        layoutSidebar[-1].addStretch()
+
+        layoutSidebar.addRow()
+        layoutSidebar[-1].addWidget(insertlabel)
+        layoutSidebar[-1].addWidget(self.insertbutton)
+        layoutSidebar[-1].addStretch()
 
         layoutSidebar.addStretch()
 
@@ -504,6 +505,8 @@ class Q16x16TileViewer(QTileViewer):
             self.createtileitems()
         else:
             self.reloadtiles()
+        self.layerlabel.setText("Currently displaying: Layer " +
+                                ("0" if Adv3Visual.layer0only else "1"))
 
     def createtileitems(self):
         maxtile = max(Adv3Attr.tilemapL1_8x8)
@@ -583,15 +586,17 @@ class Q16x16TileViewer(QTileViewer):
         else:
             text = ["16x16 tile {tileID}:".format(
                 tileID=format(tileID, "04X"))]
-            for tileprop in Adv3Attr.tilemapL1_8x8[tileID]:
+            for tileprop, layer0 in zip(Adv3Attr.tilemapL1_8x8[tileID],
+                                         Adv3Attr.tilemapL0flags[tileID]):
                 tileID_8, paletterow, _, _ = GBA.splittilemap(tileprop)
                 text.append(
                     "{tileprop}: 8x8 tile {tileID_8}, palette {pal}"
-                    "{flip}".format(
+                    ", layer {layers}{flip}".format(
                         tileprop=format(tileprop, "04X"),
                         tileID_8=format(tileID_8, "03X"),
                         pal=format(paletterow, "X"),
-                        flip=self.fliptext[(tileprop&0xC00)>>10]
+                        flip=self.fliptext[(tileprop&0xC00)>>10],
+                        layers="0" if layer0 else "1",
                         ))
         self.tileinfo.setText("\n".join(text))
 

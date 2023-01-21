@@ -242,7 +242,7 @@ ID	extID	name	tooltipbase	tilemap	graphicstype	enabled	parity	x	y	itemmemory	rng
 0x0B2	1	normal		d082A8A64 p15 r16; t12C p10 r16 x-7 y-7; tEE p10 r16 x+7 y-7; tEE p10 r16 x-7 y+7 fxy; tEE p10 r16 x+7 y+7 fy													
 0x0B2	2	???															
 0x0B2	3	moving horizontally		d082A8A64 p15 r16 fx; t12C p10 r16 x-7 y-7; tEE p10 r16 x+7 y-7; tEE p10 r16 x-7 y+7 fxy; tEE p10 r16 x+7 y+7 fy													
-0x0B3	None	Unused sprite ID				0											
+0x0B3	None	Cloud from eating Fuzzy				1											
 0x0B4	None	Morph bubble, submarine	Transforms Yoshi into a submarine, which can travel underwater and shoot torpedoes with A/B.			3	3			0	0	0	0	0	1	0	0
 0x0B4	0	in ? cloud		t187 p10 x+12 y-1; t1A7 p10 x+F y+2; t187 p10 x-A y-1 fx; t1A7 p10 x-7 y+2 fx; t18C p10 r16; d082AA864 p15 r16 x+5 y+5 o50													
 0x0B4	1	normal		d082AA864 p15 r16; t12C p10 r16 x-7 y-7; tEE p10 r16 x+7 y-7; tEE p10 r16 x-7 y+7 fxy; tEE p10 r16 x+7 y+7 fy													
@@ -282,7 +282,7 @@ ID	extID	name	tooltipbase	tilemap	graphicstype	enabled	parity	x	y	itemmemory	rng
 0x0CA	None	Boss door, large	A larger boss door typically used for the final boss.	d082A9FA4 p11 r16,32 m2 x+1E y-10 fx; d082A9FA4 p11 r16,32 m2 x+2 y-10		3		3			0	0	0	0	0	0	1
 0x0CB	None	Winged cloud, 1 coin (sprite)	Produced by the winged cloud inventory item. When activated, spawns a coin sprite that falls to the ground.	t187 p10 x+12 y-1; t1A7 p10 x+F y+2; t187 p10 x-A y-1 fx; t1A7 p10 x-7 y+2 fx; t18C p10 r16; tAC p12 r16 x+5 y+5 o50		3				0	0	0	0	0	1	0	0
 0x0CC	None	Winged cloud, ! switch		t187 p10 x+12 y-1; t1A7 p10 x+F y+2; t187 p10 x-A y-1 fx; t1A7 p10 x-7 y+2 fx; t18C p10 r16; d082921A4 p11 r32 x-8 y-6 o50		3	1			0	0	0	0	0	1	0	0
-0x0CC	0	? cloud with ! switch															
+0x0CC	0	cloud with ! switch															
 0x0CC	1	! switch		d082921A4 p11 r32 x-8 y-10													
 0x0CD	None	Balloon, with giant egg (Bowser battle)	Balloon color is random green/red/yellow/pink.	t16C p10 x+4 y-12; t16C p10 x+4 y-E; t112 p11 r16 x+4 y-8; t110 p11 r16 x-4; t132 p11 x+C y+8; t114 p11 x-4 y-8; t148 p10 r16 y-20	Stripe {no ID} in slot 4	2						0	0		1		
 0x0CE	None	Bowser's fireball	Floats in midair with no interaction.			1						0	0	1			
@@ -296,7 +296,7 @@ ID	extID	name	tooltipbase	tilemap	graphicstype	enabled	parity	x	y	itemmemory	rng
 0x0D6	None	Ghost lift (5-4 movement)			L3=?	3						0	0			1	
 0x0D7	None	Sluggy the Unshaven	Boss activator.			3						0	0	2			
 0x0D8	None	Chomp sign	Decorative.	d0829A1A4 p11 r32 x-8 y-8		3						0	1	0	0	0	0
-0x0D9	None	Fishin' Lakitu	A Lakitu with a fishing rod that tries to catch Baby Mario and carry him out of reach.	t13D p10 x+9 y-3; t118 p12 r16 x+4 y+4 fx; t118 p12 r16 x-4 y+4; t11D p11 x+3 y-D; t114 p11 r16 x-3 y-6; t156 p12 r16 x-11 y+8; t154 p12 r16 x-A y-5	Stripe 49 in slot 4 + AA in slot 5	3	3					0	0	1			
+0x0D9	None	Fishin' Lakitu	A Lakitu with a fishing rod that tries to catch Baby Mario and carry him out of reach.	t13D p10 x+9 y-3; t118 p12 r16 x+4 y+4 fx; t118 p12 r16 x-4 y+4; t11D p11 x+3 y-D; t114 p11 r16 x-3 y-6; t156 p12 r16 x-11 y+8; t154 p12 r16 x-A y-5	Stripe 49 in slot 4 + AA in slot 5	3						0	0	1			
 0x0DA	None	Flower pot	When pushed off a ledge, breaks and reveals an item. After the item is collected, the flower pot still spawns but contains nothing.			3	3			2	0	0	0	0	1	1	0
 0x0DA	0	key		s44 t02 p11 r32,16 x-8 y-16; s44 t00 p11 r16 y-26; s44 t08 p11 r24,16 x-4; s44 t0D p11 r24,8 x-4 y-8; t1CE p11 r16 y-8 o50						2							
 0x0DA	1	6 stars		s44 t02 p11 r32,16 x-8 y-16; s44 t00 p11 r16 y-26; s44 t08 p11 r24,16 x-4; s44 t0D p11 r24,8 x-4 y-8; t14A p12 r16 y-A o50; t12E p10 o50; t12E p10 x+7 fx o50						2							
@@ -471,7 +471,7 @@ ID	extID	name	tooltipbase	tilemap	graphicstype	enabled	parity	x	y	itemmemory	rng
 0x141	None	Cheep Cheep, jumps back and forth	A fish that swims and jumps in an arc back and forth, with a horizontal range of 8 tiles. Does not require water. Starting direction depends on parity.			3	1					0	0	1			
 0x141	0	right		d082A6F24 p11 r32 x-8 y-10 a77 fx													
 0x141	1	left		d082A6F24 p11 r32 x-8 y-10 a-77													
-0x142	None	Cheep Cheep, jumps 3 times	A fish that jumps in an arc 3 times in the same direction, then despawns. Does not require water. Starting direction depends on parity.			3	1					0	0	1			
+0x142	None	Cheep Cheep, jumps 3 times	A fish that jumps in an arc 3 times in the same direction, then despawns. Does not require water. Direction depends on parity.			3	1					0	0	1			
 0x142	0	right		d082A6F24 p11 r32 x-8 y-10 a-77 fx													
 0x142	1	left		d082A6F24 p11 r32 x-8 y-10 a77													
 0x143	None	Spray Fish	A fish that sprays water in a diagonal line, which pushes Yoshi backward. Does not require water.	t10 p12 r32,16 x-8 y-10	Stripe 58 in slot 0	3						0	0	1			
