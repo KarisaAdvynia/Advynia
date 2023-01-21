@@ -1,29 +1,34 @@
 "Functions for loading and evaluating the current sublevel."
 
 # standard library imports
-import os, traceback
+import copy, traceback
 from collections import defaultdict
 
 # import from other files
 import AdvMetadata, AdvEditor.ROM
-from AdvEditor import (AdvFile, AdvSettings, AdvWindow,
+from AdvEditor import (AdvSettings, AdvWindow,
                        Adv3Attr, Adv3Save, Adv3Patch, Adv3Visual)
-from AdvGame import SMA3
-from AdvGUI.PyQtImport import QFileDialog
-from AdvGUI.Dialogs import QSimpleDialog, QDialogImportPatch, QDialogSaveWarning
+from AdvGame import GBA, SMA3
+from AdvGUI.Dialogs import (QSimpleDialog, QDialogLoadValidation,
+                            QDialogSaveWarning)
 from AdvGUI import QtAdvFunc
-
-oldglobals = frozenset(globals())
 
 def loadsublevel(sublevel):
     "Load a sublevel from an SMA3.Sublevel object."
 
     if AdvMetadata.printtime: timer = QtAdvFunc.timerstart()  # debug
 
+    # if SublevelFromSNES, copy to base class to ensure correct methods
+    if isinstance(sublevel, SMA3.SublevelFromSNES):
+        sublevel = copy.deepcopy(sublevel)
+        sublevel.__class__ = SMA3.Sublevel
+
     try:
         Adv3Attr.sublevel = sublevel
         if not sublevel.fromfile:
             Adv3Patch.loadsublevelpatchattr(sublevel)
+        if not sublevel.stripeIDs:
+            Adv3Visual.updatestripesfromsublevel()
         Adv3Visual.loadpalette(sublevel)
         Adv3Visual.loadgraphics(sublevel)
 
@@ -42,6 +47,8 @@ def loadsublevel(sublevel):
 
     # reset undo history, reinit with new sublevel as first state
     AdvWindow.undohistory.reset(sublevel)
+    if not sublevel.fromfile:
+        AdvWindow.undohistory.updatelastsave()
 
     # window title and status bar
     if sublevel.ID is not None:
@@ -86,7 +93,9 @@ def savesublevel_action():
     if AdvSettings.warn_save_screencount:
         screencount = AdvWindow.sublevelscene.layer1.tilemap.screencount()
         if screencount >= 0x40:
-            QSimpleDialog(AdvWindow.editor, title="Warning", text="".join(
+            QSimpleDialog(AdvWindow.editor, title="Warning",
+                          dontshow="warn_save_screencount",
+                          text="".join(
                 ("The current sublevel uses ", format(screencount, "02X"),
                  " screens. If a sublevel uses more than 3F screens, it "
                  "will freeze the game on the loading screen!\n"
@@ -100,7 +109,7 @@ def savesublevel_action():
         itemmemorycheck(dialog_on_pass=False)
 
     # save
-    success = Adv3Save.saveSublevelToROM(Adv3Attr.sublevel, Adv3Attr.sublevel.ID)
+    success = Adv3Save.savesubleveltoROM(Adv3Attr.sublevel, Adv3Attr.sublevel.ID)
     if success:
         AdvWindow.undohistory.updatelastsave()
     return success
@@ -126,135 +135,6 @@ def cmpheader(newheader):
             toupdate[i] = new
     return toupdate
 
-def importsublevel():
-    "Load a sublevel from a separate file."
-
-    filepath, _ = QFileDialog.getOpenFileName(
-        AdvWindow.editor, caption="Import Sublevel",
-        directory=os.path.dirname(Adv3Attr.filepath),
-        filter=";;".join((
-            "All supported files (*.a3l *.ylt)",
-            AdvMetadata.export3ext,
-            "SNES YI Level Tool file (*.ylt)")))
-    if filepath:
-        _, ext = os.path.splitext(filepath)
-
-        warnSNES = False
-
-        if ext.lower() == ".a3l":
-            data = AdvFile.A3LFileData.importfromfile(filepath)
-            if data.version > AdvMetadata.version:
-                QSimpleDialog(AdvWindow.editor, title="Warning", text="".join((
-                    "This sublevel was created in Advynia ", str(version),
-                    ". You are using version ", str(AdvMetadata.version),
-                    "."
-                    ))).exec()
-
-            sublevel = data.tosublevel()
-            if 0x95 in data:
-                warnSNES = True
-
-            # check for patches that aren't applied to current ROM
-            newpatches = []
-            if not Adv3Attr.world6flag and 0x06 in data:
-                newpatches.append("world6flag")
-            if not Adv3Attr.musicoverride and sublevel.music:
-                newpatches.append("musicoverride")
-            if not Adv3Attr.sublevelstripes and sublevel.stripeIDs:
-                if sublevel.stripeIDs != SMA3.loadstripeIDs(
-                        Adv3Attr.filepath, sublevel.header[7]):
-                    newpatches.append("sublevelstripes")
-            if not Adv3Attr.object65 and 0x65 in data:
-                newpatches.append("object65")
-            if newpatches:
-                if AdvSettings.warn_patch_all:
-                    # load warning dialog
-                    if not QDialogImportPatch(newpatches, sublevel).exec():
-                        return
-                else:
-                    Adv3Patch.applymultiplepatches(newpatches)
-
-            loadsublevel(sublevel)
-
-            AdvWindow.statusbar.setActionText("".join((
-                "Imported sublevel ", format(Adv3Attr.sublevel.ID, "02X"),
-                " from ", filepath)))
-
-        elif ext.lower() == ".ylt":
-            warnSNES = True
-            sublevel = SMA3.SublevelFromSNES()
-            sublevel.fromfile = True
-            with open(filepath, "rb") as f:
-                sublevel.ID = f.read(1)[0]
-                sublevel.importmaindata(f)
-                sublevel.importspritedata(f)
-            loadsublevel(sublevel)
-
-            AdvWindow.statusbar.setActionText("".join((
-                "Imported sublevel ", format(Adv3Attr.sublevel.ID, "02X"),
-                " from ", filepath)))
-
-        if warnSNES and AdvSettings.warn_import_SNES:
-            QSimpleDialog(AdvWindow.editor, title="Warning", text="".join((
-                "This sublevel was created on the SNES version. The "
-                "entrance camera bytes will need to be set manually, and "
-                "level design may need to be tweaked for the GBA screen "
-                "size."
-                ))).exec()
-
-def exportsublevel_action():
-    """Called from the main window's export sublevel action. Prompts the user
-    for an export filepath, then exports the current sublevel if valid."""
-
-    # generate default filepath
-    defaultpath = os.path.join(
-        os.path.dirname(Adv3Attr.filepath),
-        AdvFile.sublevelfilename(Adv3Attr.filename, Adv3Attr.sublevel.ID))
-
-    # get filepath from user
-    filepath, _ = QFileDialog.getSaveFileName(
-        AdvWindow.editor, caption="Export Sublevel",
-        filter=AdvMetadata.export3ext, directory=defaultpath)
-
-    # export to filepath
-    if filepath:
-        exportsublevel(filepath)
-
-def exportsublevel(filepath):
-    "Export the current sublevel to the given filepath."
-    data = AdvFile.A3LFileData.fromsublevel(Adv3Attr.sublevel)
-    if not Adv3Attr.sublevelstripes:
-        # include stripe data even if the patch isn't applied
-        data[5] = Adv3Visual.spritegraphics.stripeIDs
-    data.exporttofile(filepath)
-    AdvWindow.statusbar.setActionText("Exported sublevel to " + filepath)
-
-def exportallsublevels():
-    outputdir = QFileDialog.getExistingDirectory(
-        AdvWindow.editor, caption="Export All Sublevels",
-        directory=os.path.dirname(Adv3Attr.filepath))
-
-    if outputdir:
-        AdvFile.exportallYIsublevels(Adv3Attr.filepath, outputdir)
-        AdvWindow.statusbar.setActionText(
-            "Exported all sublevels to " + outputdir)
-
-def exportSNESsublevels():
-    filepath, _ = QFileDialog.getOpenFileName(
-        AdvWindow.editor, caption="Open SNES ROM",
-        directory=os.path.dirname(Adv3Attr.filepath),
-        filter="SNES ROM Image (*.sfc, *.smc)")
-    if not filepath:
-        return
-
-    outputdir = QFileDialog.getExistingDirectory(
-        AdvWindow.editor, caption="Extract SNES Sublevels",
-        directory=os.path.dirname(filepath))
-    if outputdir:
-        AdvFile.exportallYIsublevels(filepath, outputdir, console="SNES")
-        AdvWindow.statusbar.setActionText(
-            "Extracted all sublevels from " + os.path.basename(filepath))
-
 def countitems():
     redcoins = 0
     flowers = 0
@@ -264,31 +144,35 @@ def countitems():
                 # red coin tile or in poundable post
                 redcoins += 1
     for spr in Adv3Attr.sublevel.sprites:
-        if spr.ID in (0x065, 0x022, 0x068, 0x05B):
-            # stationary sprite, flashing egg, flashing egg block,
-            #  Bandit with red coin
-            redcoins += 1
-        elif spr.ID in (0x0FA, 0x110, 0x0B8):
-            # flower, tileset-specific flower, ? cloud with flower
-            flowers += 1
-        elif spr.ID == 0x12C and not spr.x&1:
-            # Fly Guy with red coin, back and forth
-            redcoins += 1
-        elif spr.ID == 0x08D and spr.parity() == 1:
-            # Fly Guy with red coin, timed
-            redcoins += 1
-        elif spr.ID == 0x067 and spr.parity() == 2:
-            # Chomp Rock ? cloud with flower
-            flowers += 1
-        elif spr.ID == 0x161:
-            # reward for killing all enemies
-            if spr.parity() == 0:
+        match spr.ID:
+            case 0x065 | 0x022 | 0x068 | 0x05B:
+                # stationary sprite, flashing egg, flashing egg block,
+                #  Bandit with red coin
                 redcoins += 1
-            elif spr.parity() == 2:
+            case 0x0FA | 0x110 | 0x0B8:
+                # flower, tileset-specific flower, ? cloud with flower
                 flowers += 1
+            case 0x12C:
+                if not spr.x&1:
+                    # Fly Guy with red coin, back and forth
+                    redcoins += 1
+            case 0x08D:
+                if spr.parity() == 1:
+                    # Fly Guy with red coin, timed
+                    redcoins += 1
+            case 0x067:
+                if spr.parity() == 2:
+                    # Chomp Rock ? cloud with flower
+                    flowers += 1
+            case 0x161:
+                # reward for killing all enemies
+                if spr.parity() == 0:
+                    redcoins += 1
+                elif spr.parity() == 2:
+                    flowers += 1
 
     text = "Red coins: {redcoins}<br>Flowers: {flowers}"
-    QSimpleDialog(AdvWindow.editor, title="Count Items",
+    QSimpleDialog(AdvWindow.editor, title="Count Items", wordwrap=False,
         text=text.format(redcoins=redcoins, flowers=flowers)).exec()
 
 def itemmemorycheck(*, dialog_on_pass=True):
@@ -326,7 +210,7 @@ def itemmemorycheck(*, dialog_on_pass=True):
                 return
 
     if dialog_on_pass:
-        QSimpleDialog(AdvWindow.editor, title="Item Memory Check",
+        QSimpleDialog(AdvWindow.editor, title="Item Memory Check", wordwrap=False,
             text="No item memory errors detected.").exec()
 
 def _itemmemorycolcheck(tilemap, x, startY, colstatus=0):
@@ -337,8 +221,9 @@ def _itemmemorycolcheck(tilemap, x, startY, colstatus=0):
             if colstatus:
                 return False
             colstatus = 2
-        elif tileID in (0x6000, 0x7400):
-            # normal coins only conflict with high priority
+        elif tileID in (0x6000, 0x7400, 0xA400):
+            # normal coins only conflict with high-priority items
+            # green red coins aren't objects, so they're also low priority
             if colstatus >= 2:
                 return False
             colstatus = 1
@@ -347,9 +232,6 @@ def _itemmemorycolcheck(tilemap, x, startY, colstatus=0):
 def _itemmemoryerror(screen, x):
     text = """Items in the same column detected on screen {screen} at x={x}.
 If one item is collected, any others may vanish!"""
-    QSimpleDialog(AdvWindow.editor, title="Item Memory Check", text=text.format(
+    QSimpleDialog(AdvWindow.editor, title="Item Memory Check", wordwrap=False,
+                  text=text.format(
         screen=format(screen, "02X"), x=format(x, "02X"))).exec()
-
-# import only newly defined functions using import *
-__all__ = [name for name in (frozenset(globals()) - oldglobals)
-           if name[0] != "_"]

@@ -27,7 +27,7 @@ class QMainEditorStatusBar(QStatusBar):
         self.hovertext.setSizePolicy(QSPIgnoreWidth)
         self.addWidget(self.hovertext, 4)
 
-        self.actiontext = QLabel()
+        self.actiontext = QLabelToolTip()
         self.actiontext.setSizePolicy(QSPIgnoreWidth)
         self.addWidget(self.actiontext, 9)
 

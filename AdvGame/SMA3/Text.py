@@ -5,8 +5,8 @@ Classes for SMA3 text strings and commands."""
 import io, string
 
 # import from other files
-from AdvGame import AdvGame, GBA
-from AdvGame.SMA3 import Pointers, Constants
+from AdvGame import AdvGame, GBA, SNES
+from AdvGame.SMA3 import Constants, Pointers, PointersSNES
 
 class TextCommand:
     "A single command from SMA3 text data."
@@ -122,6 +122,10 @@ class Text(list):
 
     # properties
 
+    @classmethod
+    def ptrref(cls):
+        return Pointers.text[cls.texttype]
+
     def charcount(self):
         "Return the number of non-command characters in the message."
         output = 0
@@ -150,14 +154,14 @@ class Text(list):
     # import methods
 
     @classmethod
-    def importtext(cls, f, addr):
+    def importtext(cls, f, addr=0):
         """Import text data from a file object.
         Can only be called from subclasses that define self.charsfrombytes,
         a generator that yields text characters/commands."""
         output = cls()
         try:
             f.seek(addr)
-        except ValueError:  # invalid pointer
+        except (ValueError, TypeError):  # invalid pointer
             return output
 
         output.extend(output.charsfrombytes(f))
@@ -170,13 +174,38 @@ class Text(list):
     def importall(cls, filepath):
         """Import all text of this class's type from a ROM file.
         Returns a SharedPointerList.
-        Can only be called from subclasses that define cls.ptrtotable and
-        self.charsfrombytes."""
+        Can only be called from subclasses that define cls.charsfrombytes."""
+        ptrref = cls.ptrref()
         ptrtable = GBA.PointerTable.importtable(
-            filepath, cls.ptrtotable, cls.vstart, cls.vlen, maxlen=0x1000)
+            filepath, ptrref, ptrref.vdest, cls.vlen, maxlen=0x1000)
         with GBA.Open(filepath, "rb") as fileobj:
             return AdvGame.SharedPointerList(
                 ptrtable, lambda ptr : cls.importtext(fileobj, ptr))
+
+    @classmethod
+    def importallfromSNES(cls, filepath):
+        """Import all text of this class's type from an SNES YI ROM file.
+        In addition to the cls.importall restrictions, this only works with text
+        types where SNES/GBA use the same format."""
+        with SNES.Open(filepath, "rb") as f:
+            ptr = PointersSNES.text[cls.texttype]
+            bankhigh = ptr & 0xFF0000
+            f.seek(ptr)
+            ptrtable = []
+            for levelID in range(cls.vlen):
+                rawptr = f.readint(2)
+                if rawptr:
+                    ptrtable.append(bankhigh | rawptr)
+                else:
+                    ptrtable.append(None)
+            return AdvGame.SharedPointerList(
+                ptrtable, lambda ptr : cls.importtext(f, ptr))
+
+    @classmethod
+    def importallfrombytes(cls, bytedata, offsets):
+        buffer = io.BytesIO(bytedata)
+        return AdvGame.SharedPointerList(
+            offsets, lambda offset : cls.importtext(buffer, offset))
 
     def updatefromstr(self, textstr, includenewlines=False):
         """Update the current text data using the contents of a string,
@@ -286,8 +315,6 @@ class LevelName(Text):
     "Subclass to handle level name text."
 
     texttype = "Level name"
-    ptrtotable = Pointers.textlevelnames
-    vstart = 0x082F9888
     vlen = 0x48
     maxchar = 0xFC
     endofdata = b"\xFD"
@@ -295,14 +322,15 @@ class LevelName(Text):
     def charsfrombytes(self, f):
         while True:
             charID = f.read(1)[0]
-            if charID == 0xFE:   # next 2 bytes are part of command
-                yield TextCommand(charID, f.read(2))
-            elif charID == 0xFF:
-                yield TextCommand(charID, f.read(1))
-            elif charID == 0xFD:   # end of data
-                return
-            else:
-                yield charID
+            match charID:
+                case 0xFE:   # next 2 bytes are part of command
+                    yield TextCommand(charID, f.read(2))
+                case 0xFF:
+                    yield TextCommand(charID, f.read(1))
+                case 0xFD:   # end of data
+                    return
+                case _:
+                    yield charID
 
     def isnewline(self, command):
         return command.charID == 0xFE
@@ -310,20 +338,28 @@ class LevelName(Text):
     def validatecommand(self, command):
         # validating and charID both depend on length
         # so charID is updated here, to avoid hardcoding in Text.updatefromstr
-        if len(command.params) == 2:
-            command.charID = 0xFE
-            return True
-        elif len(command.params) == 1:
-            command.charID == 0xFF
-            return True
-        return False
+        match len(command.params):
+            case 2:
+                command.charID = 0xFE
+                return True
+            case 1:
+                command.charID == 0xFF
+                return True
+            case _:
+                return False
+
+    @classmethod
+    def importallfromSNES(cls, filepath):
+        # swap Extra/Secret level names
+        levelnames = super().importallfromSNES(filepath)
+        from AdvGame.SMA3 import Level
+        Level.swapExtraSecret(levelnames)
+        return levelnames
 
 class StandardMessage(Text):
     "Subclass to handle standard message text."
 
     texttype = "Standard message"
-    ptrtotable = Pointers.textstandardmsg
-    vstart = 0x082F5E18
     vlen = 0x12C
 
     @property
@@ -363,14 +399,13 @@ class StandardMessage(Text):
         return command.params[0] in (0x0A, 0x0F, 0x11, 0x12, 0x13, 0x14)
 
     def validatecommand(self, command):
-        commandID = command.params[0]
-        if commandID == 0xFF:
-            # end of data command
-            return False
-        elif commandID == 0x60:
-            # large image
-            return len(command.params) == 8
-        return len(command.params) == 1
+        match command.params[0]:
+            case 0xFF:  # end of data command
+                return False
+            case 0x60:  # large image
+                return len(command.params) == 8
+            case _:
+                return len(command.params) == 1
 
     # Simplified string methods
 
@@ -481,8 +516,6 @@ class FileSelectText(Text):
     "Subclass to handle file select text."
 
     texttype = "File select"
-    ptrtotable = Pointers.textfileselect
-    vstart = 0x081995E0
     vlen = 0xC
     width = 0x98
     height = 0x10
@@ -533,8 +566,6 @@ class StoryIntroText(StoryText):
     "Subclass to handle story intro text."
 
     texttype = "Story intro"
-    ptrtotable = Pointers.textstoryintro
-    vstart = 0x0816B748
     vlen = 0x2A
     height = 0x40
 
@@ -548,8 +579,6 @@ class CreditsText(StoryText):
     "Subclass to handle credits text."
 
     texttype = "Credits"
-    ptrtotable = Pointers.textcredits
-    vstart = 0x0816DB0C
     vlen = 0x24
     height = 0x20
 
@@ -559,12 +588,13 @@ class CreditsText(StoryText):
     @classmethod
     def importall(cls, filepath):
         "Subclassed to include hardcoded pointers for last 3 credits messages."
+        ptrref = cls.ptrref()
         ptrtable = GBA.PointerTable.importtable(
-            filepath, cls.ptrtotable, cls.vstart, cls.vlen, maxlen=0x1000)
+            filepath, ptrref, ptrref.vdest, cls.vlen, maxlen=0x1000)
         with GBA.Open(filepath, "rb") as fileobj:
             output = AdvGame.SharedPointerList(
                 ptrtable, lambda ptr : cls.importtext(fileobj, ptr))
-            for ptr in Pointers.textcreditsfinal:
+            for ptr in Pointers.text["Credits final"]:
                 # hardcoded pointers
                 newtext = cls.importtext(fileobj, fileobj.readptr(ptr))
                 output.append(newtext)
@@ -580,7 +610,7 @@ class EndingText(Text):
     def height(self):
         h = 0x10
         for char in self:
-            if isinstance(char, TextCommand) and char.params[0] == 0xA:
+            if isinstance(char, TextCommand) and char.params[0] in (0x09, 0x0A):
                 h += 0x10
         return min(h, 0x100)
 
@@ -589,7 +619,7 @@ class EndingText(Text):
             charID = f.read(1)[0]
             if charID == 0xFF:
                 params = f.read(1)
-                if params[0] == 0xFF:   # end of data
+                if params[0] == 0xFF:  # end of data
                     return
                 yield TextCommand(charID, params)
             else:
@@ -603,8 +633,39 @@ class EndingText(Text):
         """Return the message as a 1-element list, for consistent processing
         with other text types."""
         with GBA.Open(filepath, "rb") as fileobj:
-            ptr = fileobj.readptr(Pointers.text68ending)
+            ptr = fileobj.readptr(Pointers.text[cls.texttype])
             return [cls.importtext(fileobj, ptr)]
+
+    @classmethod
+    def importallfromSNES(cls, filepath):
+        with SNES.Open(filepath, "rb") as f:
+            ptrref = PointersSNES.text[cls.texttype]
+            f.seek(ptrref)
+            ptr = ptrref & 0xFF0000 | f.readint(2)
+            return [cls.importtext(f, ptr)]
 
     def validatecommand(self, command):
         return len(command.params) == 1 and command.params[0] != 0xFF
+
+textclasses = {
+    "Level name": LevelName,
+    "Standard message": StandardMessage,
+    "File select": FileSelectText,
+    "Story intro": StoryIntroText,
+    "Credits": CreditsText,
+    "Ending": EndingText,
+    }
+
+def importalltext(filepath):
+    """Wrapper function to import all messages for all text types into a
+    single dict."""
+    messages = {}
+    for key, cls in textclasses.items():
+        messages[key] = cls.importall(filepath)
+    return messages
+
+if __name__ == "__main__":
+##    msgs = StandardMessage.importallfromSNES("../../../../2/YI hacks/yi.sfc")
+    msgs = LevelName.importallfromSNES("../../../../2/YI hacks/NEW!SMW2YI 2012-12-31.smc")
+    for ID, msg in enumerate(msgs):
+        print(format(ID, "02X"), repr(msg))

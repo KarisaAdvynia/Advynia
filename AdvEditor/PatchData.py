@@ -4,6 +4,11 @@ Constants for Adv3Patch."""
 from AdvGame.SMA3 import PointersAdv
 
 patches = {  # key:(name, text)
+    "huffmantolz77":("Huffman to LZ77 Compression",
+        """Changes the compression format used by 7 Mario Bros. graphics files
+to match the rest of the game's compression. This slightly reduces their byte
+size, but has no other noticeable effect.<br><br>
+Advynia cannot modify these files without converting them to LZ77."""),
     "midway6byte":("6-byte Midway Entrances",
         """Allows manually specifying the camera bytes in each midway entrance.
 The bytes can still be left as 00 to save/load them with the checkpoint, as
@@ -12,19 +17,27 @@ in vanilla."""),
         """Allows customizing the music ID and enabling/disabling pause menu
 items in every sublevel."""),
     "object65":("Object 65: Arbitrary Single Tile",
-        """Adds a rectangular custom object that can be any single 16x16 
+        """Adds a rectangular custom object that can be any single 16x16
 tile ID."""),
     "sublevelstripes":("Sublevel Sprite Tilesets",
         """Allows customizing the 6 stripes for every sublevel.<br>
 Each sublevel's stripes will default to its current sprite tileset header
 setting. The header setting will no longer be used afterward."""),
     "world6flag":("World 6 Tileset Flag",
-        """Allows access to the world 6 tileset (tileset 11) in any world, and to
-tileset 1 in world 6. Tilesets 10,12-1F also become selectable, but are clones of
-tilesets 0,2-F."""),
+        """Allows access to the world 6 tileset (tileset 11) in any world, and
+to tileset 1 in world 6. Tilesets 10,12-1F also become selectable, but are
+clones of tilesets 0,2-F."""),
     }
 
 patchhexdata = {
+    "huffmantolz77":(
+        (0x08110C2A, bytes.fromhex("1E F0 4F FD")),  # bl swi_LZ77_VRAM
+        (0x081116CA, bytes.fromhex("1D F0 FF FF")),  # bl swi_LZ77_VRAM
+        (0x081116DE, bytes.fromhex("1D F0 F5 FF")),  # bl swi_LZ77_VRAM
+        (0x08112934, bytes.fromhex("1C F0 CA FE")),  # bl swi_LZ77_VRAM
+        (0x08112948, bytes.fromhex("1C F0 C0 FE")),  # bl swi_LZ77_VRAM
+        (0x081186B4, bytes.fromhex("17 F0 0A F8")),  # bl swi_LZ77_VRAM
+        ),
     "midway6byte":(
         (0x08002ED4, bytes.fromhex("""
             44 00 80 00 00 19 09 68 09 18 45 48

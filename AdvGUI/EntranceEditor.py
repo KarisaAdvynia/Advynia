@@ -6,12 +6,13 @@ class."""
 import copy
 
 # import from other files
-import AdvEditor.ROM
-from AdvEditor import AdvRecovery, AdvWindow, Adv3Attr, Adv3Save, Adv3Patch
+import AdvEditor, AdvFile
+from AdvEditor import AdvSettings, AdvWindow, Adv3Attr, Adv3Save, Adv3Patch
 from AdvGame import GBA, SMA3
+from .Dialogs import QDialogFileError
 from .GeneralQt import *
 
-class QDialogSMA3Entrances(QDialog):
+class QDialogSMA3Entrances(QDialogBase):
     "Base class for level entrance and screen exit dialogs."
     def __init__(self, parent, screenexits=False):
         super().__init__(parent)
@@ -43,6 +44,8 @@ class QDialogSMA3Entrances(QDialog):
                      "Create duplicate of current screen exit.\n"
                      "Uses specified screen number if different from\n"
                      "current screen."),
+                ("Export", "&Export", None, "Export entrances to file"),
+                ("Import", "&Import", None, "Import entrances from file"),
                 ):
             button = QPushButton(text)
             button.setToolTip(tooltip)
@@ -168,15 +171,19 @@ class QDialogSMA3Entrances(QDialog):
 
         layoutR.addStretch()
 
+        layoutR.addWidget(QHorizLine())
+        layoutR.addRow()
         if screenexits:
-            layoutR.addWidget(QHorizLine())
-            layoutR.addRow()
             layoutR[-1].addWidget(self.labels["newscreen"])
             layoutR[-1].addWidget(self.lineeditbytes["newscreen"])
             layoutR.addRow()
             layoutR[-1].addWidget(self.buttons["Add"])
             layoutR[-1].addWidget(self.buttons["Move"])
             layoutR[-1].addWidget(self.buttons["Duplicate"])
+        else:
+            layoutR[-1].addWidget(QLabel("Manage entrances:"))
+            layoutR[-1].addWidget(self.buttons["Export"])
+            layoutR[-1].addWidget(self.buttons["Import"])
 
         layoutR.addWidget(QHorizLine())
         layoutR.addRow()
@@ -235,10 +242,6 @@ class QDialogSMA3Entrances(QDialog):
         text = [prefix, ":"]
         text += (format(i, "02X") for i in entr[0:3])
         self.entrlistwidget.addItem(" ".join(text))
-
-    def reloadsidebar(self):
-        "Overridden by subclasses."
-        raise NotImplementedError
 
     def setEntranceLayout(self, key):
         """Enable/disable widgets to account for the minor differences in
@@ -307,7 +310,6 @@ class QDialogSMA3Entrances(QDialog):
             text = str(entr)
         else:
             text = str(self.entr)
-        
         QApplication.clipboard().setText(text)
 
     def pasteentr(self):
@@ -335,34 +337,33 @@ class QDialogSMA3Entrances(QDialog):
 
 class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
     "Dialog for editing the game's level main/midway entrances."
-    def __init__(self, *args, maxmidpoints=4):
+    def __init__(self, *args):
         super().__init__(*args)
-        
+
         self.setWindowTitle("Edit Level Entrances")
 
         self.lineeditbytes["entrlist"].setValue(0)
         self.lineeditbytes["entrlist"].editingFinished.connect(
             self.levelnumcallback)
         self.buttons["Confirm"].setText("Save")
+        self.buttons["Confirm"].setToolTip("Save modified entrances to ROM")
         for key, slot in (("+", self.addmidway),
-                          ("-", self.delmidway)):
+                          ("-", self.delmidway),
+                          ("Export", self.exportentrances),
+                          ("Import", self.importentrances_dialog),
+                          ):
             self.buttons[key].clicked.connect(slot)
+
+        self.exportdialog = QDialogSMA3ExportEntrances(self)
 
         self.mainentrances = []
         self.midwayentrances = []
         self.levelID = 0
-        self.maxmidpoints = maxmidpoints
 
     def open(self):
         if not AdvEditor.ROM.exists(): return
 
-        if Adv3Attr.midway6byte:
-            midwaylen = 6
-        else:
-            midwaylen = 4
-        self.mainentrances, self.midwayentrances = SMA3.importlevelentrances(
-            Adv3Attr.filepath, maxmidpoints=self.maxmidpoints,
-            midwaylen=midwaylen)
+        self.mainentrances, self.midwayentrances = self.loadentrances()
 
 ##        import itertools
 ##        print([hex(i) for i in itertools.chain(
@@ -371,102 +372,15 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
         super().open()
 
     def accept(self):
-        startptrs = Adv3Save.savewrapper(self.saveentrances)
-        if startptrs is None:
-            # saving failed
-            return
+        if Adv3Save.savewrapper(Adv3Save.saveentrances,
+                self.mainentrances, self.midwayentrances):
+            super().accept()
 
-        statustext = ("Saved main entrances to {mainptr}, "
-                      "midway entrances to {midwayptr}.")
-        AdvWindow.statusbar.setActionText(statustext.format(
-            mainptr=format(startptrs[0], "08X"),
-            midwayptr=format(startptrs[1], "08X")))
-
-        super().accept()
-
-    def saveentrances(self):
-        "Save level entrances to ROM."
-        # determine 4 or 6-byte midways
-        if Adv3Attr.midway6byte:
-            midwaylen = 6
-        else:
-            midwaylen = 4
-            for level in self.midwayentrances:
-                for entr in level:
-                    if entr[4] or entr[5]:
-                        applied = Adv3Patch.applypatch("midway6byte")
-                        if not applied:
-                            return
-                        midwaylen = 6
-                        break
-                if midwaylen == 6: break
-
-        # generate bytearrays
-        bytesmain = bytearray()
-        offsetsmain = []
-        for entr in self.mainentrances:
-            if entr:
-                offsetsmain.append(len(bytesmain))
-                bytesmain += entr
-            else:
-                offsetsmain.append(None)
-        bytesmain += b"\xFF\xFF\xFF\xFF"
-
-        bytesmidway = bytearray()
-        offsetsmidway = []
-        for level in self.midwayentrances:
-            if level:
-                offsetsmidway.append(len(bytesmidway))
-                for entr in level:
-                    bytesmidway += entr[0:midwaylen]
-            else:
-                offsetsmidway.append(None)
-        bytesmidway += b"\xFF\xFF\xFF\xFF"
-
-        startptrs = []
-        for entrances, data, offsets, ptrtoptrtable in (
-                (self.mainentrances, bytesmain, offsetsmain,
-                 SMA3.Pointers.entrancemainptrs),
-                (self.midwayentrances, bytesmidway, offsetsmidway,
-                 (SMA3.Pointers.entrancemidwayptrs,) )
-                ):
-
-            # calculate number of pointers to save
-            oldlen = len(entrances.ptrs)
-            newlen = len(offsets)
-            if len(offsets) > oldlen:
-                for ptr in reversed(offsets[oldlen:]):
-                    if ptr != None:
-                        break
-                    newlen -= 1
-            offsets = offsets[0:newlen]
-
-            # write entrances to ROM
-            GBA.erasedata(Adv3Attr.filepath, *entrances.datablock)
-            startptr = Adv3Save.saveDataToROM(data, ())
-            startptrs.append(startptr)
-
-            # calculate pointers
-            ptrs = GBA.PointerTable()
-            for offset in offsets:
-                if offset is None:
-                    ptrs.append(1)
-                else:
-                    ptrs.append(startptr + offset)
-
-            # save entrance pointer table
-            if newlen != oldlen:
-                ptrs.endmarker = True
-                GBA.erasedata(Adv3Attr.filepath, *entrances.ptrs.datablock)
-                newtableptr = Adv3Save.saveDataToROM(
-                    ptrs.tobytearray(nullptr=1), SMA3.Pointers.entrancemainptrs)
-            else:
-                ptrs.endmarker = False
-                GBA.overwritedata(
-                    Adv3Attr.filepath, bytes(ptrs),
-                    GBA.readptr(Adv3Attr.filepath, ptrtoptrtable[0]))
-
-        return startptrs
+    @staticmethod
+    def loadentrances():
+        return SMA3.importlevelentrances(
+            Adv3Attr.filepath, maxmidpoints=Adv3Attr.maxmidpoints,
+            midwaylen = 6 if Adv3Attr.midway6byte else 4)
 
     def reloadsidebar(self):
         row = self.entrlistwidget.currentRow()
@@ -481,6 +395,7 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
     def loadlevel(self, levelID):
         self.entrlistwidget.clear()
         self.levelID = levelID
+        self.lineeditbytes["entrlist"].setValue(levelID)
 
         levelnumstr = SMA3.levelnumber(levelID, short=True)
 
@@ -490,7 +405,7 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
             self.addentrancerow(str(i), entr)
 
         self.buttons["+"].setEnabled(
-            len(self.midwayentrances[levelID]) < self.maxmidpoints)
+            len(self.midwayentrances[levelID]) < Adv3Attr.maxmidpoints)
         self.buttons["-"].setEnabled(len(self.midwayentrances[levelID]))
 
         # set level name text
@@ -512,7 +427,7 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
             self.setEntranceLayout("normal")
             self.loadentrance(self.midwayentrances[self.levelID][row-1])
             self.labels["entrname"].setText("".join((
-                "Midway Entrance ", str(row-1), ":"
+                "Midway Entrance ", format(row-1, "X"), ":"
                 )))
 
     # button functions
@@ -521,10 +436,10 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
         self.midwayentrances[self.levelID].append(SMA3.Entrance())
         self.reloadsidebar()
         self.buttons["-"].setEnabled(True)
-        if len(self.midwayentrances[self.levelID]) >= self.maxmidpoints:
+        if len(self.midwayentrances[self.levelID]) >= Adv3Attr.maxmidpoints:
             self.buttons["+"].setDisabled(True)
             self.buttons["-"].setFocus()
-        
+
     def delmidway(self):
         self.midwayentrances[self.levelID].pop()
         self.reloadsidebar()
@@ -533,11 +448,221 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
             self.buttons["-"].setDisabled(True)
             self.buttons["+"].setFocus()
 
+    def exportentrances(self):
+        # prompt for current level or all levels
+        returnvalue = self.exportdialog.exec()
+        if returnvalue == 1:
+            caption = "Export Level Entrance"
+            statustext = ["Exported level ", format(self.levelID, "02X")]
+            dataargs = (self.mainentrances[self.levelID],
+                        self.midwayentrances[self.levelID],
+                        self.levelID)
+        elif returnvalue == 2:
+            caption = "Export Level Entrances"
+            statustext = ["Exported all"]
+            dataargs = (self.mainentrances, self.midwayentrances)
+        else:
+            return
+
+        # prepare A3L data
+        a3l = AdvFile.A3LFileData.fromentrances(*dataargs)
+        defaultpath = os.path.join(
+            os.path.dirname(Adv3Attr.filepath),
+            a3l.defaultfilename(Adv3Attr.filename))
+
+        # get filepath from user
+        filepath, _ = QFileDialog.getSaveFileName(
+            AdvWindow.editor, caption=caption, directory=defaultpath,
+            filter=AdvFile.A3LFileData.longext)
+
+        # export data
+        if filepath:
+            a3l.exporttofile(filepath)
+
+            statustext += [" entrances to ", filepath]
+            AdvWindow.statusbar.setActionText("".join(statustext))
+
+    def importentrances_dialog(self):
+        filepath, _ = QFileDialog.getOpenFileName(
+            AdvWindow.editor, caption="Import Level Entrances",
+            directory=os.path.dirname(Adv3Attr.filepath),
+            filter=";;".join((
+                "All supported files (*.a3l *.yet)",
+                AdvFile.A3LFileData.longext,
+                "SNES YI Level Tool entrances (*.yet)")))
+        if not filepath: return
+        self.importentrances(filepath)
+
+    def importentrances(self, filepath):
+        ext = os.path.splitext(filepath)[1].lower()
+
+        if ext == ".a3l":
+            a3l = AdvEditor.Export.importwrapper(
+                AdvFile.A3LFileData.importfromfile, filepath)
+            if not a3l: return
+            datatype = a3l.datatype()
+            warnSNES = False
+
+            if datatype == "Entrances: Single Level":
+                levelID, main, midways = a3l.toentrances()
+
+                # prompt for level ID to replace
+                newlevelID = QDialogSMA3Import1LevelEntr(
+                    self, levelID, main, midways).exec()
+
+                # replace entrances
+                if newlevelID >= 0:
+                    self.levelID = newlevelID
+                    self.mainentrances[newlevelID] = main
+                    self.midwayentrances[newlevelID] = midways
+                    self.reloadsidebar()
+                    AdvWindow.statusbar.setActionText("".join((
+                        "Imported level ", format(newlevelID, "02X"),
+                        " entrances from ", filepath
+                        )))
+                return
+
+            elif datatype == "Entrances: All Levels":
+                mainentrances, midwayentrances = a3l.toentrances()
+                if 0x95 in a3l:
+                    warnSNES = True
+                # continue to processing entrances
+
+            else:
+                QDialogFileError(AdvWindow.editor, filepath, text=(
+                    "File does not contain entrance data. "
+                    "Other .a3l file variants can be imported in the "
+                    "main editor.")).exec()
+                return
+
+        elif ext == ".yet":
+            result = AdvEditor.Export.loadwrapper(
+                AdvFile.YILevelTool.import_yet, filepath)
+            if not result: return
+            mainentrances, midwayentrances = result
+            warnSNES = True
+
+        else:
+            QDialogFileError(AdvWindow.editor, filepath, text="".join((
+                "Importing from file extension ", ext, " is not supported."
+                ))).exec()
+            return
+
+        if warnSNES and not AdvSettings.warn_import_SNES:
+            # change alert only if SNES warning is enabled
+            warnSNES = False
+        if ((warnSNES or AdvSettings.warn_import_allentrances) and
+                not QDialogSMA3ImportAllLevelEntr(self, warnSNES).exec()):
+            return
+
+        self.mainentrances[:] = mainentrances
+        self.midwayentrances[:] = midwayentrances
+        self.reloadsidebar()
+        AdvWindow.statusbar.setActionText(
+            "Imported all entrances from " + filepath)
+
+class QDialogSMA3ExportEntrances(QDialogBase):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.setWindowTitle("Export Level Entrances")
+
+        # init widgets
+
+        self.buttons = [QRadioButton("Current level"),
+                        QRadioButton("All levels")]
+        self.buttons[1].setChecked(True)
+
+        # init layout
+
+        layoutMain = QVHBoxLayout()
+        self.setLayout(layoutMain)
+        for widget in self.buttons:
+            layoutMain.addWidget(widget)
+        layoutMain.addAcceptRow(self, accepttext="Export")
+
+    def accept(self):
+        for i, widget in enumerate(self.buttons):
+            if widget.isChecked():
+                super().done(i+1)
+
+class QDialogSMA3Import1LevelEntr(QDialogBase):
+    def __init__(self, parent, levelID, main, midway):
+        super().__init__(parent)
+
+        self.setWindowTitle("Import Level Entrances")
+
+        # init widgets
+
+        levellabel = QLabel("Replace level:")
+        self.levelinput = QLineEditByte(maxvalue=SMA3.Constants.maxlevel)
+        self.levelinput.setValue(levelID)
+
+        entrdesc = [
+            "Main Entrance:\n", str(main), "\n\n"
+            "Midway Entrances:  ", format(len(midway), "X")]
+        for entr in midway:
+            entrdesc += ["\n", str(entr)]
+        entrlabel = QLabel("".join(entrdesc))
+
+        # init layout
+
+        layoutMain = QVHBoxLayout()
+        self.setLayout(layoutMain)
+
+        layoutMain.addRow()
+        layoutMain[-1].addWidget(levellabel)
+        layoutMain[-1].addWidget(self.levelinput)
+        layoutMain[-1].addStretch()
+        layoutMain.addWidget(entrlabel)
+        layoutMain.addAcceptRow(self, "Load")
+
+    def accept(self):
+        self.done(self.levelinput.value)
+
+    def reject(self):
+        self.done(-1)
+
+class QDialogSMA3ImportAllLevelEntr(QDialogBase):
+    def __init__(self, parent, warnSNES=False):
+        super().__init__(parent)
+
+        self.setWindowTitle("Import Level Entrances")
+
+        # init widget
+
+        if warnSNES:
+            label = QLabel(
+                """These entrances were created on the SNES version.<br><br>
+                Extra/Secret entrances have been automatically swapped, but 
+                the camera bytes will need to be set manually.""")
+            label.setWordWrap(True)
+            self.flag = "warn_import_SNES"
+        else:
+            label = QLabel("Replace all level entrances?\n"
+                           "Entrances can be viewed before saving.")
+            self.flag = "warn_import_allentrances"
+        self.checkbox = QCheckBox("Don't show this message again")
+
+        # init layout
+
+        layoutMain = QVHBoxLayout()
+        self.setLayout(layoutMain)
+
+        layoutMain.addWidget(label)
+        layoutMain.addWidget(self.checkbox)
+        layoutMain.addAcceptRow(self, "Load")
+
+    def accept(self):
+        if self.checkbox.isChecked():
+            setattr(AdvSettings, self.flag, False)
+        super().accept()
+
 class QDialogSMA3ScreenExits(QDialogSMA3Entrances):
     "Dialog for editing the current sublevel's screen exits."
     def __init__(self, *args):
         super().__init__(*args, screenexits=True)
-        
+
         self.setWindowTitle("Edit Screen Exits")
 
         self.lineeditbytes["newscreen"].setValue(0)
@@ -568,9 +693,9 @@ class QDialogSMA3ScreenExits(QDialogSMA3Entrances):
             Adv3Attr.sublevel.exits = copy.deepcopy(self.exits)
 
             AdvWindow.statusbar.setActionText("Screen exits updated.")
-            AdvWindow.statusbar.updateByteText()
             AdvWindow.undohistory.addaction("Edit Screen Exits",
-                updateset={"Screen Exits"}, reload=True)
+                updateset={"Screen Exits", "Byte Text"}, reload=True)
+
         super().accept()
 
     def reloadsidebar(self):

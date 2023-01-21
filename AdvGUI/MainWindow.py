@@ -5,7 +5,7 @@ from functools import partial
 import itertools
 
 # import from other files
-import AdvMetadata, AdvEditor.ROM
+import AdvMetadata, AdvEditor.Export, AdvEditor.ROM
 from AdvEditor import AdvSettings, AdvWindow, Adv3Attr, Adv3Sublevel, Adv3Visual
 from . import QtAdvFunc
 from .GeneralQt import *
@@ -18,6 +18,7 @@ from .Dialogs import *
 from .EntranceEditor import QDialogSMA3LevelEntrances, QDialogSMA3ScreenExits
 from .HeaderEditor import QSMA3HeaderEditor
 from .TextEditor import QSMA3TextEditor
+from .YITitle import QYITitleDialog
 
 class QSMA3Editor(QMainWindow):
     """Main GUI window. Handles editor init, main window layout, and
@@ -69,6 +70,8 @@ class QSMA3Editor(QMainWindow):
         self.viewer8x8 = Q8x8TileViewer(self)
         self.viewer16x16 = Q16x16TileViewer(self)
         self.headereditor = QSMA3HeaderEditor(self)
+        AdvWindow.entranceeditor = QDialogSMA3LevelEntrances(self)
+        AdvWindow.texteditor = QSMA3TextEditor(self)
 
         # initialize toolbar/menu and actions
         # (actions frequently reference other objects, so this should be last)
@@ -83,143 +86,160 @@ class QSMA3Editor(QMainWindow):
 
         actiondata = {
             #key: text, tooltip, shortcut, triggered, icon, checked
-            "Exit":("E&xit", None, "Ctrl+Q", QApplication.quit, None, None),
-            "Open ROM":("&Open ROM...", None, "Ctrl+O",
+            "Exit": ("E&xit", None, "Ctrl+Q", QApplication.quit, None, None),
+            "Open ROM": ("&Open ROM...", None, "Ctrl+O",
                         AdvEditor.ROM.opendialog, None, None),
-            "Load Sublevel":("&Load Sublevel...", None, "Ctrl+D",
+            "Load Sublevel": ("&Load Sublevel...", None, "Ctrl+D",
                              QDialogLoadSublevel(self).open, None, None),
-            "Save Sublevel":("&Save Sublevel to ROM", "Save Sublevel", "Ctrl+S",
-                             Adv3Sublevel.savesublevel_action, None, None),
-            "Save Sublevel As":(
+            "Save Sublevel": (
+                "&Save Sublevel to ROM", "Save Sublevel", "Ctrl+S",
+                Adv3Sublevel.savesublevel_action, None, None),
+            "Save Sublevel As": (
                 "Save Sublevel to ROM &As...", None, "Ctrl+Shift+S",
                 QDialogSaveSublevelAs(self).open, None, None),
-            "Import Sublevel":(
-                "&Import Sublevel from File...", None, "Ctrl+Shift+I",
-                Adv3Sublevel.importsublevel, None, None),
-            "Export Sublevel":(
-                "&Export Sublevel to File...", None, "Ctrl+Shift+E",
-                Adv3Sublevel.exportsublevel_action, None, None),
-            "Export All Sublevels":(
-                "Export All Sublevels...", None, None,
-                Adv3Sublevel.exportallsublevels, None, None),
-            "Export SNES Sublevels":(
-                "Extract Sublevels from SNES...", None, None,
-                Adv3Sublevel.exportSNESsublevels, None, None),
-            "Info":("Current ROM Info", None, "Ctrl+I",
+            "Import Sublevel": (
+                "&Import A3L File...", None, "Ctrl+Shift+I",
+                AdvEditor.Export.importA3L_action, None, None),
+            "Import Multiple": (
+                "Import Multiple A3Ls...", None, None,
+                AdvEditor.Export.importmultiple, None, None),
+            "Export Sublevel": (
+                "&Export Sublevel to A3L...", None, "Ctrl+Shift+E",
+                AdvEditor.Export.exportsublevel_action, None, None),
+            "Export YLT": (
+                "&Export Sublevel to YLT (SNES)...", None, None,
+                AdvEditor.Export.export_ylt, None, None),
+            "Export YET": (
+                "&Export Entrances to YET (SNES)...", None, None,
+                AdvEditor.Export.export_yet, None, None),
+            "Export All": (
+                "Export All Data to A3Ls...", None, None,
+                AdvEditor.Export.exportall_action, None, None),
+            "Export SNES": (
+                "Extract SNES YI Data...", None, None,
+                AdvEditor.Export.exportSNESdata_action, None, None),
+            "Info": ("Current ROM Info", None, "Ctrl+I",
                     QDialogROMInfo(self).open, None, None),
-            "Undo":("&Undo", None, "Ctrl+Z",
+            "Undo": ("&Undo", None, "Ctrl+Z",
                     AdvWindow.undohistory.undo, None, None),
-            "Redo":("&Redo", None, ("Ctrl+Y", "Ctrl+Shift+Z"),
+            "Redo": ("&Redo", None, ("Ctrl+Y", "Ctrl+Shift+Z"),
                     AdvWindow.undohistory.redo, None, None),
-            "Cut":("Cu&t", None, "Ctrl+X",
+            "Cut": ("Cu&t", None, "Ctrl+X",
                    AdvWindow.sublevelscene.cut, None, None),
-            "Copy":("&Copy", None, "Ctrl+C",
+            "Copy": ("&Copy", None, "Ctrl+C",
                     AdvWindow.sublevelscene.copy, None, None),
-            "Paste":("&Paste", None, "Ctrl+V",
+            "Paste": ("&Paste", None, "Ctrl+V",
                      AdvWindow.sublevelscene.paste, None, None),
-            "Select All":("Select &All", None, "Ctrl+A",
+            "Select All": ("Select &All", None, "Ctrl+A",
                           AdvWindow.selection.selectall,
                           None, None),
-            "Insert":(
+            "Insert": (
                 "&Insert Object/Sprite", None, ("", "Insert"),
                 AdvWindow.sublevelscene.quickinsertfromsidebar, None, None),
-            "Delete":(
+            "Delete": (
                 "&Delete Objects/Sprites", None, ("Delete", "Backspace"),
                 AdvWindow.selection.deleteitems, None, None),
-            "Move Left":("Move &Left", None, "Ctrl+Left",
+            "Move Left": ("Move &Left", None, "Ctrl+Left",
                 lambda : AdvWindow.selection.moveitems(-1, 0), None, None),
-            "Move Right":("Move &Right", None, "Ctrl+Right",
+            "Move Right": ("Move &Right", None, "Ctrl+Right",
                 lambda : AdvWindow.selection.moveitems(1, 0), None, None),
-            "Move Up":("Move &Up", None, "Ctrl+Up",
+            "Move Up": ("Move &Up", None, "Ctrl+Up",
                 lambda : AdvWindow.selection.moveitems(0, -1), None, None),
-            "Move Down":("Move &Down", None, "Ctrl+Down",
+            "Move Down": ("Move &Down", None, "Ctrl+Down",
                 lambda : AdvWindow.selection.moveitems(0, 1), None, None),
-            "Decrease Width":("Decrease Width", None, "Shift+Left",
+            "Decrease Width": ("Decrease Width", None, "Shift+Left",
                 lambda : AdvWindow.selection.resizeobjects(-1, 0), None, None),
-            "Increase Width":("Increase Width", None, "Shift+Right",
+            "Increase Width": ("Increase Width", None, "Shift+Right",
                 lambda : AdvWindow.selection.resizeobjects(1, 0), None, None),
-            "Decrease Height":("Decrease Height", None, "Shift+Up",
+            "Decrease Height": ("Decrease Height", None, "Shift+Up",
                 lambda : AdvWindow.selection.resizeobjects(0, -1), None, None),
-            "Increase Height":("Increase Height", None, "Shift+Down",
+            "Increase Height": ("Increase Height", None, "Shift+Down",
                 lambda : AdvWindow.selection.resizeobjects(0, 1), None, None),
-            "Move Forward":("Move Forward", None, "]",
+            "Move Forward": ("Move Forward", None, "]",
                 lambda : AdvWindow.selection.moveobjectorder(1), None, None),
-            "Move Backward":("Move Backward", None, "[",
+            "Move Backward": ("Move Backward", None, "[",
                 lambda : AdvWindow.selection.moveobjectorder(-1), None, None),
-            "Move to Front":("Move to Front", None, "Ctrl+]",
+            "Move to Front": ("Move to Front", None, "Ctrl+]",
                 lambda : AdvWindow.selection.moveobjectorder(2), None, None),
-            "Move to Back":("Move to Back", None, "Ctrl+[",
+            "Move to Back": ("Move to Back", None, "Ctrl+[",
                 lambda : AdvWindow.selection.moveobjectorder(-2), None, None),
-            "Clear Sublevel":("&Clear Sublevel...", None,
+            "Clear Sublevel": ("&Clear Sublevel...", None,
                               ("Ctrl+Delete", "Ctrl+Backspace"),
                               QDialogClearSublevel(self).open, None, None),
-            "Filter":("&Filter Sidebar...", None, "Ctrl+F",
+            "Filter": ("&Filter Sidebar...", None, "Ctrl+F",
                       None, None, None),
-            "Quick Filter":("&Quick Filter", None, "Ctrl+Shift+F",
+            "Quick Filter": ("&Quick Filter", None, "Ctrl+Shift+F",
                       None, None, None),
-            "Edit Header":(
+            "Edit Header": (
                 "Edit Sublevel &Header...", None, "Ctrl+H",
                 self.headereditor.open, "yoshi.png", None),
-            "Edit Screen Exits":(
+            "Edit Screen Exits": (
                 "Edit &Screen Exits...", None, "Ctrl+E",
                 QDialogSMA3ScreenExits(self).open, "door16.png", None),
-            "Edit Level Entrances":(
+            "Edit Level Entrances": (
                 "Edit &Level Entrances...", None, "Ctrl+L",
-                QDialogSMA3LevelEntrances(self).open, "egg.png", None),
-            "Edit Messages":("Edit &Messages...", None, "Ctrl+M",
-                             QSMA3TextEditor(self).open, "messageblock.png",
-                             None),
-            "Edit Internal Name":("Edit Internal ROM &Name...", None, None,
+                AdvWindow.entranceeditor.open, "egg.png", None),
+            "Edit Messages": (
+                "Edit &Messages...", None, "Ctrl+M",
+                AdvWindow.texteditor.open, "messageblock.png", None),
+            "Edit Internal Name": ("Edit Internal ROM &Name...", None, None,
                                   QDialogInternalName(self).open, None, None),
-            "Toggle Palette":("&Palette Viewer", None, "Ctrl+P",
+            "YI Title": ("View YI Title Screen Sprites...", None, None,
+                         QYITitleDialog(self).open, None, None),
+            "Toggle Palette": ("&Palette Viewer", None, "Ctrl+P",
                 QtAdvFunc.createdialogtogglefunc(self.viewerpalette),
                               "palette.png", False),
-            "Toggle 8x8":("&8x8 Tile Viewer", None, "Ctrl+8",
+            "Toggle 8x8": ("&8x8 Tile Viewer", None, "Ctrl+8",
                 QtAdvFunc.createdialogtogglefunc(self.viewer8x8),
                           "8x8.png", False),
-            "Toggle 16x16":("Layer 1 1&6x16 Tile Viewer", None, "Ctrl+6",
+            "Toggle 16x16": ("1&6x16 Tile Viewer", None, "Ctrl+6",
                 QtAdvFunc.createdialogtogglefunc(self.viewer16x16),
                           "16x16.png", False),
-            "Refresh":("&Refresh", "Refresh\n"
+            "Refresh": ("&Refresh", "Refresh\n"
                        "Refresh the current layer 1 tilemap, to reroll\n"
                        "RNG-dependent objects.", "Ctrl+R",
                        AdvWindow.sublevelscene.refresh, "refresh.png", None),
-            "Zoom In":("Zoom &In", None, ("Ctrl++", "Ctrl+="),
+            "Zoom In": ("Zoom &In", None, ("Ctrl++", "Ctrl+="),
                        self._zoomin, None, None),
-            "Zoom Out":("Zoom &Out", None, "Ctrl+-", self._zoomout, None, None),
-            "Zoom Button":("Zoom", None, None, None, None, None),
-            "Show Layer 1":("Layer &1", None, "1",
-                QtAdvFunc.createtogglefunc(AdvWindow.sublevelscene.layer1),
-                            None, True),
-            "Show Layer 2":("Layer &2", None, "2",
+            "Zoom Out": ("Zoom &Out", None, "Ctrl+-", self._zoomout, None, None),
+            "Zoom Button": ("Zoom", None, None, None, None, None),
+            "Show Layer 0": ("Layer &0 (Layer 1 FG)", None, "0",
+                             partial(self._layer1action, True), None, False),
+            "Show Layer 1": ("Layer &1", None, "1",
+                             partial(self._layer1action, False), None, True),
+            "Show Layer 2": ("Layer &2", None, "2",
                 QtAdvFunc.createtogglefunc(AdvWindow.sublevelscene.layer2),
                             None, True),
-            "Show Layer 3":("Layer &3", None, "3",
+            "Show Layer 3": ("Layer &3", None, "3",
                 QtAdvFunc.createtogglefunc(AdvWindow.sublevelscene.layer3),
                             None, True),
-            "Show Sprites":("&Sprites", None, "4",
+            "Show Sprites": ("&Sprites", None, "4",
                 QtAdvFunc.createtogglefunc(AdvWindow.sublevelscene.spritelayer),
                             None, True),
-            "Show Grid":("&Grid", "Show/Hide Screen Grid", "G",
+            "Show Grid": ("&Grid", "Show/Hide Screen Grid", "G",
                 QtAdvFunc.createtogglefunc(AdvWindow.sublevelscene.grid),
                          "grid.png", True),
-            "Cycle Enabled Screens":("&Quick Swap", None, "U",
+            "Cycle Enabled Screens": ("&Quick Swap", None, "U",
                 AdvWindow.sublevelscene.layer1.cycleDimScreens, None, None),
-            "Show Red Coins":("&Red Coin Palette", None, None,
+            "Show Red Coins": ("&Red Coin Palette", None, None,
                 self._magnifyingglass, None, AdvSettings.visual_redcoins),
-            "Screenshot":("&Screenshot", None, "F12",
+            "Screenshot": ("Save Sublevel &Screenshot", None, "F12",
                           AdvWindow.sublevelscene.screenshot, None, None),
-            "Count Items":("&Count Red Coins/Flowers", None, "F10",
+            "Window Screenshot": ("Save &Window Screenshot", None, "Shift+F12",
+                          QDialogBase.screenshotwindow, None, None),
+            "Count Items": ("&Count Red Coins/Flowers", None, "F10",
                            Adv3Sublevel.countitems, "redcoin.png", None),
-            "Item Memory":("Check &Item Memory", None, "F11",
+            "Item Memory": ("Check &Item Memory", None, "F11",
                            Adv3Sublevel.itemmemorycheck, "cloud.png", None),
-            "Export Graphics":("&Export Graphics/Tilemaps",
+            "Export Graphics": ("&Export Graphics/Tilemaps",
                 "Export Graphics/Tilemaps\n"
                 "Export all graphics and compressed tilemaps.", None,
-                Adv3Visual.exportgraphics, "graphicsexport.png", None),
-            "Import Graphics":("&Import Graphics/Tilemaps", None, None,
-                               None, "graphicsimport.png", None),
-            "About":("&About Advynia", None, "F1",
+                AdvEditor.Export.exportgraphics_action,
+                                "graphicsexport.png", None),
+            "Import Graphics": ("&Import Graphics/Tilemaps", None, None,
+                AdvEditor.Export.importgraphics_action,
+                                "graphicsimport.png", None),
+            "About": ("&About Advynia", None, "F1",
                      QDialogAbout(self).open, None, None),
             }
 
@@ -264,6 +284,10 @@ class QSMA3Editor(QMainWindow):
             self.actions[actionkey].setShortcutContext(
                 Qt.ShortcutContext.ApplicationShortcut)
 
+        if not (AdvSettings.import_includegraphics or
+                AdvSettings.import_includetilemaps):
+            self.actions["Import Graphics"].setDisabled(True)
+
         # init Enabled Screens submenu actions
         for i, text in enumerate(("&No Shading", "&Default", "&High Contrast")):
             action = QAction(text, actiongroups["Screens"])
@@ -278,16 +302,18 @@ class QSMA3Editor(QMainWindow):
         self.menus = {}
         menubaractions = (
             # main menus
-            ("&File", (
+            ("&File", [
                 "Open ROM", "Menu:&Recent ROMs",
                 "Load Sublevel", "Save Sublevel", "Save Sublevel As", 0,
-                "Import Sublevel", "Export Sublevel", "Export All Sublevels",
-                "Export SNES Sublevels", 0,
+                "Import Sublevel", "Import Multiple", "Export Sublevel"] +
+                (["Export YLT", "Export YET"]
+                 if AdvSettings.export_yileveltool_enable else []) +
+                ["Export All", "Export SNES", 0,
                 "Info", 0,
-                "Exit")),
+                "Exit"]),
             ("&Edit", (
                 "Undo", "Redo", 0,
-                "Cut", "Copy", "Paste", "Insert", "Delete", 
+                "Cut", "Copy", "Paste", "Insert", "Delete",
                 "Menu:&Resize Selected Objects",
                 "Menu:Change Object &Order", "Select All", "Clear Sublevel", 0,
                 "Filter", "Quick Filter", 0,
@@ -297,14 +323,15 @@ class QSMA3Editor(QMainWindow):
             ("&View", (
                 "Toggle Palette", "Toggle 8x8", "Toggle 16x16", 0,
                 "Refresh", "Menu:&Zoom", 0,
-                "Show Layer 1", "Show Layer 2", "Show Layer 3",
+                "Show Layer 1", "Show Layer 0", "Show Layer 2", "Show Layer 3",
                 "Show Sprites", "Show Grid", "Menu:&Enabled Screens",
                 "Show Red Coins",
                 )),
             ("&Misc", (
-                "Screenshot", 0,
+                "Screenshot", "Window Screenshot", 0,
                 "Count Items", "Item Memory", 0,
-                "Export Graphics", "Import Graphics",
+                "Export Graphics", "Import Graphics", 0,
+                "YI Title",
                 )),
             ("&Help", (
                 "About",
@@ -314,7 +341,7 @@ class QSMA3Editor(QMainWindow):
 ##                "Move Left", "Move Right", "Move Up", "Move Down",
 ##                )),
             ("Resize Selected Objects", (
-                "Decrease Width", "Increase Width", 
+                "Decrease Width", "Increase Width",
                 "Decrease Height", "Increase Height",
                 )),
             ("Change Object Order", (
@@ -453,20 +480,36 @@ class QSMA3Editor(QMainWindow):
     def _zoomin(self):
         for value in self.zoomlevels:
             if AdvSettings.visual_zoom < value:
-                self._setZoom(value)
+                self.actions["Zoom " + str(value) + "%"].activate(
+                    QAction.ActionEvent.Trigger)
                 return
 
     def _zoomout(self):
         for value in reversed(self.zoomlevels):
             if AdvSettings.visual_zoom > value:
-                self._setZoom(value)
+                self.actions["Zoom " + str(value) + "%"].activate(
+                    QAction.ActionEvent.Trigger)
                 return
+
+    def _layer1action(self, layer0newvalue):
+        layer1 = AdvWindow.sublevelscene.layer1
+        if Adv3Visual.layer0only is not layer0newvalue:
+            # swap layer 0/1 tilemaps
+            self.actions["Show Layer 0"].setChecked(layer0newvalue)
+            self.actions["Show Layer 1"].setChecked(not layer0newvalue)
+            Adv3Visual.layer0only = layer0newvalue
+            self.reload("Layer 1")
+            if not layer1.isVisible():
+                layer1.setVisible(True)
+        else:
+            # toggle currently active layer
+            layer1.setVisible(not layer1.isVisible())
 
     def _magnifyingglass(self):
         "Toggle whether disguised red coins are displayed red or yellow."
         AdvSettings.visual_redcoins = not AdvSettings.visual_redcoins
-        Adv3Visual.palette.setRedCoinPalette(AdvSettings.showredcoins)
-        if AdvSettings.showredcoins:
+        Adv3Visual.palette.setRedCoinPalette(AdvSettings.visual_redcoins)
+        if AdvSettings.visual_redcoins:
             AdvWindow.statusbar.setActionText("Enabled red coin palette.")
         else:
             AdvWindow.statusbar.setActionText("Disabled red coin palette.")
@@ -521,6 +564,8 @@ class QSMA3Editor(QMainWindow):
                 Adv3Visual.layergraphics.loadL3graphics(
                     Adv3Attr.filepath, newvalues[key])
                 Adv3Visual.resetcache8_layers(region="Layer 3")
+                Adv3Visual.palette.loadL3imagepal(
+                    Adv3Attr.filepath, newvalues[key])
                 updateset |= {"Layer 3", "8x8", "Palette"}
             elif key == 0xA:  # graphics animation
                 Adv3Visual.layergraphics.loadanimgraphics(
@@ -555,7 +600,12 @@ class QSMA3Editor(QMainWindow):
                 Adv3Visual.palette.loadspritepalette(
                     Adv3Attr.filepath, newvalues[key])
                 updateset |= {"Palette", "8x8", "Sprite Graphics"}
-
+            elif key == 0xB:  # palette animation
+                Adv3Visual.palette.loadanimpalette(
+                    Adv3Attr.filepath, newvalues[key])
+                updateset |= {"Palette", "8x8",
+                              "Layer 1", "Layer 2", "Layer 3", "cache8_layers",
+                              "Sprite Graphics"}
             elif key == 0xE:  # item memory index
                 updateset |= {"Middle Rings"}
 
@@ -574,6 +624,9 @@ class QSMA3Editor(QMainWindow):
                 }
             AdvWindow.selection.clear()
             AdvWindow.statusbar.setHoverText()
+        if "All Graphics" in updateset:
+            Adv3Visual.loadgraphics(Adv3Attr.sublevel)
+            updateset |= {"Layer 1", "Layer 2", "Layer 3", "Sprites", "8x8"}
 
         # update relevant widgets with graphics/palette changes
         if "cache8_layers" in updateset:
@@ -611,16 +664,8 @@ class QSMA3Editor(QMainWindow):
             AdvWindow.sublevelscene.grid.dispScreenExits(
                 Adv3Attr.sublevel.exits)
         if "Palette" in updateset:
-            self.viewerpalette.updateDropdowns()
-            self.viewerpalette.reloadPalette()
+            self.viewerpalette.runqueuedupdate()
         if "8x8" in updateset:
             self.viewer8x8.queueupdate()
-##        if "Byte Text" in updateset:
-##            AdvWindow.statusbar.updateByteText()
-
-##_nonqtglobals = []
-##for name in tuple(globals()):
-##    if name.startswith("_") or QtAdvFunc.isQtglobal(name):
-##        continue
-##    _nonqtglobals.append(name)
-##print(_nonqtglobals)
+        if "Byte Text" in updateset:
+            AdvWindow.statusbar.updateByteText()

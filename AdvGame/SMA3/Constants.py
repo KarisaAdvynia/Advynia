@@ -10,8 +10,8 @@ maxscreen = 0x7F
 maxtileX = 0xFF
 maxtileY = 0x7F
 
-levelnumrighthalf = ("1", "2", "3", "4", "5", "6", "7", "8",
-                    "Secret", "Extra", "Bonus", "Controls")
+levelnumrighthalf = ["1", "2", "3", "4", "5", "6", "7", "8",
+                    "Secret", "Extra", "Bonus", "Controls"]
 
 headersettings = [
     "Background Color",
@@ -21,9 +21,9 @@ headersettings = [
     "Layer 2 Palette",
     "Layer 3 Image",
     "Layer 3 Palette",
-    "Sprite Tileset", 
-    "Sprite Palette", 
-    "Layer Effects?", 
+    "Sprite Tileset",
+    "Sprite Palette",
+    "Layer Effects?",
     "Graphics Animation",
     "Palette Animation",
     "Layer 2/3 Scroll?",
@@ -44,7 +44,7 @@ headerpalettes = (2, 4, 6, 0, 8, 0xB)
 headergraphics = (1, 3, 5, 7, 0xA)
 
 headernames = {
-    1: (
+    0x01: [
         "Cave + background walls",
         "Grass + background walls",
         "Submarine",
@@ -64,8 +64,8 @@ headernames = {
         "",
         "W6 Wasteland",
         "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-        ),
-    3: (
+        ],
+    0x03: [
         "Cave waterfalls/lavafalls",
         "Tree trunks and bushes",
         "Submarine BG",
@@ -98,8 +98,8 @@ headernames = {
         "Rounded mountains (A=02/0B)",
         "Evergreen forest",
         "Baby Bowser's room",
-        ),
-    5: (
+        ],
+    0x05: [
         "None",
         "Submarine water (A=01)",
         "(Layer 3 sprites TBD)",
@@ -120,14 +120,14 @@ headernames = {
         "Pre-Hookbill mist",
         "Starry sky",
         "Interactive wavy water (A=05)",
-        "",
+        "Foreground vines",
         "Foreground crystals",
         "Shark Chomp (sprite 154)",
         "",
         "Castle ramparts (A=06)",
         "Snowing foreground (A=09)",
         "Clouds/Goonies (A=0A)",
-        "Bushes/flowers (butterfly A=0B)",
+        "FG flowers (butterfly A=0B)",
         "Dark room + Yoshi light circle",
         "(same as 13)",
         "Large moon (variant)",
@@ -148,160 +148,160 @@ headernames = {
         "(same as 2C)",
         "Large clouds (variant)",
         "",
-        ),
-    7: (
-        "Stripes 20 21 2A 2B 5E 29", 
-        "Stripes 20 21 5E 1C 31 29", 
-        "Stripes 1F 2C 36 40 51 29", 
-        "Stripes 2E 5E 37 1A 1A 1F", 
-        "Stripes 55 5E 5F 1F 1A 29", 
-        "Stripes 53 40 51 1A 1A 29", 
-        "Stripes 36 2A 2B 3C 2D 71", 
-        "Stripes 4A 36 1C 71 31 59", 
-        "Stripes 6A 1A 1A 1A 1A 1A", 
-        "Stripes 50 71 2F 31 49 29", 
-        "Stripes 55 57 5D 71 1C 2F", 
-        "Stripes 55 71 3C 57 4A 1C", 
-        "Stripes 3C 3F 1F 71 1A 1A", 
-        "Stripes 25 71 1C 1A 1A 1A", 
-        "Stripes 2E 1A 1A 1A 1A 1F", 
-        "Stripes 36 57 38 1C 5C 29", 
-        "Stripes 3A 3B 31 55 71 29", 
-        "Stripes 60 61 1C 22 23 25", 
-        "Stripes 1C 25 42 43 4F 29", 
-        "Stripes 5A 5B 5C 25 6A 29", 
-        "Stripes 1F 37 39 42 43 1A", 
-        "Stripes 27 35 4E 3D 1A 30", 
-        "Stripes 4E 1C 51 46 71 29", 
-        "Stripes 22 23 45 60 1A 30", 
-        "Stripes 42 43 38 39 1C 59", 
-        "Stripes 60 1D 71 4E 1C 30", 
-        "Stripes 60 1D 40 46 4E 30", 
-        "Stripes 55 1D 60 4E 51 1A", 
-        "Stripes 36 63 1F 5C 1A 29", 
-        "Stripes 39 1D 35 1B 63 30", 
-        "Stripes 71 1A 51 5F 60 30", 
-        "Stripes 2A 63 1A 1A 1A 1A", 
-        "Stripes 27 3E 1A 3D 1A 1A", 
-        "Stripes 25 2B 47 64 36 1F", 
-        "Stripes 51 61 48 65 1C 60", 
-        "Stripes 48 1C 65 28 60 71", 
-        "Stripes 1C 45 1F 71 6A 29", 
-        "Stripes 4D 6A 48 1F 1A 29", 
-        "Stripes 28 60 38 4E 36 51", 
-        "Stripes 1A 1A 2D 1A 1A 1A", 
-        "Stripes 45 35 54 64 1F 1C", 
-        "Stripes 54 58 35 3D 71 64", 
-        "Stripes 35 41 1F 64 5C 1C", 
-        "Stripes 32 33 34 41 4C 54", 
-        "Stripes 64 1E 41 1F 1C 29", 
-        "Stripes 55 1E 28 60 71 5C", 
-        "Stripes 64 4C 41 40 68 29", 
-        "Stripes 2F 5C 5D 1C 1A 1A", 
-        "Stripes 27 65 49 AA 1C 1F", 
-        "Stripes 61 48 71 1C 55 6A", 
-        "Stripes 71 3C 60 3F 49 AA", 
-        "Stripes 53 1A 1C 55 31 59", 
-        "Stripes 42 43 55 1F 41 1A", 
-        "Stripes 2A 2B 29 71 1C 5D", 
-        "Stripes 55 1F 27 2A 1A 29", 
-        "Stripes 4F 2B 47 52 60 51", 
-        "Stripes 2B 47 38 71 60 51", 
-        "Stripes 40 29 31 4E 1C 59", 
-        "Stripes 1C 1A 1A 4E 1A 1A", 
-        "Stripes 2B 47 26 52 56 29", 
-        "Stripes 2B 47 26 52 31 29", 
-        "Stripes 2B 47 1F 29 31 51", 
-        "Stripes 2B 47 2F 1E 71 29", 
-        "Stripes 29 1A 1A 53 1B 1F", 
-        "Stripes 31 40 1F 1A 1A 1A", 
-        "Stripes 41 35 39 71 1F 29", 
-        "Stripes 2B 47 24 49 1A 1F", 
-        "Stripes 1F 5C 49 4E 5D 47", 
-        "Stripes 3A 3B 1C 1A 1A 29", 
-        "Stripes 1F 1A 38 1A 1A 1A", 
-        "Stripes 2B 47 37 54 71 29", 
-        "Stripes 3F 3C 66 1C 47 60", 
-        "Stripes 31 35 71 54 55 1F", 
-        "Stripes 2E 1F 49 24 5E 29", 
-        "Stripes 58 54 5E 1F 48 29", 
-        "Stripes 60 65 30 71 1A 1A", 
-        "Stripes 5E 29 71 26 49 4B", 
-        "Stripes 55 2F 58 64 2C 59", 
-        "Stripes 5E 24 1C 29 49 4B", 
-        "Stripes 27 25 38 49 2A 29", 
-        "Stripes 1F 36 4E 1A 1A 1A", 
-        "Stripes 4D 1F 55 28 60 71", 
-        "Stripes 2E 71 1C 1A 1A 1A", 
-        "Stripes 35 39 41 25 64 29", 
-        "Stripes 64 25 36 41 1A 29", 
-        "Stripes 4E 44 1A 3D 48 29", 
-        "Stripes 5D 1E 36 3D 25 48", 
-        "Stripes 42 43 44 6A 1A 1A", 
-        "Stripes 64 45 1A 1A 1F 29", 
-        "Stripes 2A 2B 38 6A 6C 5E", 
-        "Stripes 55 31 1A 1A 1A 1F", 
-        "Stripes 35 3E 1C 3D 2B 47", 
-        "Stripes 2A 2B 5E 63 1A 1A", 
-        "Stripes 24 1A 1A 1A 1A 1A", 
-        "Stripes 1A 36 31 29 66 59", 
-        "Stripes 40 3A 3B 37 36 1A", 
-        "Stripes 2F 70 61 6A 1A 1F", 
-        "Stripes 6B 6C 1A 6A 47 1F", 
-        "Stripes 57 5C 5D 24 1C 29", 
-        "Stripes 1B 71 29 1C 1F 5D", 
-        "Stripes 55 5C 5F 45 71 37", 
-        "Stripes 6F 6D 6E 29 6A 1A", 
-        "Stripes 55 6A A9 1A 1A 1F", 
-        "Stripes 62 3C 4E 53 71 44", 
-        "Stripes 68 6A 1A 1A 1A 1A", 
-        "Stripes 1A 1E 52 1F 71 29", 
-        "Stripes 5D 44 4C 56 1A 1A", 
-        "Stripes 1C 29 44 2A 71 4E", 
-        "Stripes 45 71 1C 58 1A 1A", 
-        "Stripes 55 25 71 1F 29 1C", 
-        "Stripes 5D 37 71 29 1C 1A", 
-        "Stripes 45 6A 1F 1A 1A 1A", 
-        "Stripes 1F 64 41 53 3E 1C", 
-        "Stripes 53 71 5D 1C 1A 1A", 
-        "Stripes 36 1C 38 28 60 29", 
-        "Stripes 2B 47 20 21 1C 71", 
-        "Stripes 20 21 2F 1C 5D 47", 
-        "Stripes 27 35 41 54 64 68", 
-        "Stripes 1C 71 2C 2D 1A 1A", 
-        "Stripes 6A 6C 63 1A 1A 1A", 
-        "Stripes 22 23 45 60 1A 30", 
-        "Stripes 67 3C 55 1A 1A 29", 
-        "Stripes 54 71 41 4C 64 37", 
-        "Stripes AD AE AF B0 67 6A", 
-        "Stripes 55 47 57 49 1C 29", 
-        "Stripes 27 2B 47 1C 25 29", 
-        "Stripes 27 71 1C 31 1A 1A", 
-        "Stripes 1C 45 1F 71 46 29", 
-        "Stripes 20 21 1C 71 36 1C", 
-        "Stripes 20 21 4C 51 71 29", 
-        "Stripes 55 47 51 4E 1C 1C", 
-        "Stripes 51 31 38 2A 46 1C", 
-        "Stripes 47 1D 29 59 1C 1D", 
-        "Stripes 35 68 1F 29 1C 1C", 
-        "Stripes 35 3E 1A 3D 1A 1A", 
-        "Stripes 2E 1C 1C 71 1C 1C", 
-        "Stripes 1A 1E 1A 1A 1A 29", 
-        "Stripes 2B 47 1C 1A 31 1A", 
-        "Stripes 2B 47 37 71 1C 1C", 
-        "Stripes 2B 47 1A 52 31 1C", 
-        "Stripes 2B 47 1C 1A 31 1A", 
-        "Stripes 27 5D 1C 4E 71 29", 
-        "Stripes 27 51 45 4E 71 29", 
-        "Stripes 27 5E 37 2E 1C 29", 
-        "Stripes 59 31 26 56 35 29", 
-        "Stripes 66 45 30 51 31 1C", 
-        "Stripes 27 57 38 4E 1C 1C", 
-        "Stripes 3A 3B 1C 71 1C 1C", 
-        "Stripes 1F 64 38 5C 1C 1C", 
+        ],
+    0x07: [
+        "Stripes 20 21 2A 2B 5E 29",
+        "Stripes 20 21 5E 1C 31 29",
+        "Stripes 1F 2C 36 40 51 29",
+        "Stripes 2E 5E 37 1A 1A 1F",
+        "Stripes 55 5E 5F 1F 1A 29",
+        "Stripes 53 40 51 1A 1A 29",
+        "Stripes 36 2A 2B 3C 2D 71",
+        "Stripes 4A 36 1C 71 31 59",
+        "Stripes 6A 1A 1A 1A 1A 1A",
+        "Stripes 50 71 2F 31 49 29",
+        "Stripes 55 57 5D 71 1C 2F",
+        "Stripes 55 71 3C 57 4A 1C",
+        "Stripes 3C 3F 1F 71 1A 1A",
+        "Stripes 25 71 1C 1A 1A 1A",
+        "Stripes 2E 1A 1A 1A 1A 1F",
+        "Stripes 36 57 38 1C 5C 29",
+        "Stripes 3A 3B 31 55 71 29",
+        "Stripes 60 61 1C 22 23 25",
+        "Stripes 1C 25 42 43 4F 29",
+        "Stripes 5A 5B 5C 25 6A 29",
+        "Stripes 1F 37 39 42 43 1A",
+        "Stripes 27 35 4E 3D 1A 30",
+        "Stripes 4E 1C 51 46 71 29",
+        "Stripes 22 23 45 60 1A 30",
+        "Stripes 42 43 38 39 1C 59",
+        "Stripes 60 1D 71 4E 1C 30",
+        "Stripes 60 1D 40 46 4E 30",
+        "Stripes 55 1D 60 4E 51 1A",
+        "Stripes 36 63 1F 5C 1A 29",
+        "Stripes 39 1D 35 1B 63 30",
+        "Stripes 71 1A 51 5F 60 30",
+        "Stripes 2A 63 1A 1A 1A 1A",
+        "Stripes 27 3E 1A 3D 1A 1A",
+        "Stripes 25 2B 47 64 36 1F",
+        "Stripes 51 61 48 65 1C 60",
+        "Stripes 48 1C 65 28 60 71",
+        "Stripes 1C 45 1F 71 6A 29",
+        "Stripes 4D 6A 48 1F 1A 29",
+        "Stripes 28 60 38 4E 36 51",
+        "Stripes 1A 1A 2D 1A 1A 1A",
+        "Stripes 45 35 54 64 1F 1C",
+        "Stripes 54 58 35 3D 71 64",
+        "Stripes 35 41 1F 64 5C 1C",
+        "Stripes 32 33 34 41 4C 54",
+        "Stripes 64 1E 41 1F 1C 29",
+        "Stripes 55 1E 28 60 71 5C",
+        "Stripes 64 4C 41 40 68 29",
+        "Stripes 2F 5C 5D 1C 1A 1A",
+        "Stripes 27 65 49 AA 1C 1F",
+        "Stripes 61 48 71 1C 55 6A",
+        "Stripes 71 3C 60 3F 49 AA",
+        "Stripes 53 1A 1C 55 31 59",
+        "Stripes 42 43 55 1F 41 1A",
+        "Stripes 2A 2B 29 71 1C 5D",
+        "Stripes 55 1F 27 2A 1A 29",
+        "Stripes 4F 2B 47 52 60 51",
+        "Stripes 2B 47 38 71 60 51",
+        "Stripes 40 29 31 4E 1C 59",
+        "Stripes 1C 1A 1A 4E 1A 1A",
+        "Stripes 2B 47 26 52 56 29",
+        "Stripes 2B 47 26 52 31 29",
+        "Stripes 2B 47 1F 29 31 51",
+        "Stripes 2B 47 2F 1E 71 29",
+        "Stripes 29 1A 1A 53 1B 1F",
+        "Stripes 31 40 1F 1A 1A 1A",
+        "Stripes 41 35 39 71 1F 29",
+        "Stripes 2B 47 24 49 1A 1F",
+        "Stripes 1F 5C 49 4E 5D 47",
+        "Stripes 3A 3B 1C 1A 1A 29",
+        "Stripes 1F 1A 38 1A 1A 1A",
+        "Stripes 2B 47 37 54 71 29",
+        "Stripes 3F 3C 66 1C 47 60",
+        "Stripes 31 35 71 54 55 1F",
+        "Stripes 2E 1F 49 24 5E 29",
+        "Stripes 58 54 5E 1F 48 29",
+        "Stripes 60 65 30 71 1A 1A",
+        "Stripes 5E 29 71 26 49 4B",
+        "Stripes 55 2F 58 64 2C 59",
+        "Stripes 5E 24 1C 29 49 4B",
+        "Stripes 27 25 38 49 2A 29",
+        "Stripes 1F 36 4E 1A 1A 1A",
+        "Stripes 4D 1F 55 28 60 71",
+        "Stripes 2E 71 1C 1A 1A 1A",
+        "Stripes 35 39 41 25 64 29",
+        "Stripes 64 25 36 41 1A 29",
+        "Stripes 4E 44 1A 3D 48 29",
+        "Stripes 5D 1E 36 3D 25 48",
+        "Stripes 42 43 44 6A 1A 1A",
+        "Stripes 64 45 1A 1A 1F 29",
+        "Stripes 2A 2B 38 6A 6C 5E",
+        "Stripes 55 31 1A 1A 1A 1F",
+        "Stripes 35 3E 1C 3D 2B 47",
+        "Stripes 2A 2B 5E 63 1A 1A",
+        "Stripes 24 1A 1A 1A 1A 1A",
+        "Stripes 1A 36 31 29 66 59",
+        "Stripes 40 3A 3B 37 36 1A",
+        "Stripes 2F 70 61 6A 1A 1F",
+        "Stripes 6B 6C 1A 6A 47 1F",
+        "Stripes 57 5C 5D 24 1C 29",
+        "Stripes 1B 71 29 1C 1F 5D",
+        "Stripes 55 5C 5F 45 71 37",
+        "Stripes 6F 6D 6E 29 6A 1A",
+        "Stripes 55 6A A9 1A 1A 1F",
+        "Stripes 62 3C 4E 53 71 44",
+        "Stripes 68 6A 1A 1A 1A 1A",
+        "Stripes 1A 1E 52 1F 71 29",
+        "Stripes 5D 44 4C 56 1A 1A",
+        "Stripes 1C 29 44 2A 71 4E",
+        "Stripes 45 71 1C 58 1A 1A",
+        "Stripes 55 25 71 1F 29 1C",
+        "Stripes 5D 37 71 29 1C 1A",
+        "Stripes 45 6A 1F 1A 1A 1A",
+        "Stripes 1F 64 41 53 3E 1C",
+        "Stripes 53 71 5D 1C 1A 1A",
+        "Stripes 36 1C 38 28 60 29",
+        "Stripes 2B 47 20 21 1C 71",
+        "Stripes 20 21 2F 1C 5D 47",
+        "Stripes 27 35 41 54 64 68",
+        "Stripes 1C 71 2C 2D 1A 1A",
+        "Stripes 6A 6C 63 1A 1A 1A",
+        "Stripes 22 23 45 60 1A 30",
+        "Stripes 67 3C 55 1A 1A 29",
+        "Stripes 54 71 41 4C 64 37",
+        "Stripes AD AE AF B0 67 6A",
+        "Stripes 55 47 57 49 1C 29",
+        "Stripes 27 2B 47 1C 25 29",
+        "Stripes 27 71 1C 31 1A 1A",
+        "Stripes 1C 45 1F 71 46 29",
+        "Stripes 20 21 1C 71 36 1C",
+        "Stripes 20 21 4C 51 71 29",
+        "Stripes 55 47 51 4E 1C 1C",
+        "Stripes 51 31 38 2A 46 1C",
+        "Stripes 47 1D 29 59 1C 1D",
+        "Stripes 35 68 1F 29 1C 1C",
+        "Stripes 35 3E 1A 3D 1A 1A",
+        "Stripes 2E 1C 1C 71 1C 1C",
+        "Stripes 1A 1E 1A 1A 1A 29",
+        "Stripes 2B 47 1C 1A 31 1A",
+        "Stripes 2B 47 37 71 1C 1C",
+        "Stripes 2B 47 1A 52 31 1C",
+        "Stripes 2B 47 1C 1A 31 1A",
+        "Stripes 27 5D 1C 4E 71 29",
+        "Stripes 27 51 45 4E 71 29",
+        "Stripes 27 5E 37 2E 1C 29",
+        "Stripes 59 31 26 56 35 29",
+        "Stripes 66 45 30 51 31 1C",
+        "Stripes 27 57 38 4E 1C 1C",
+        "Stripes 3A 3B 1C 71 1C 1C",
+        "Stripes 1F 64 38 5C 1C 1C",
         "Stripes 20 21 5E 1C 6A 6C",
-        ),
-    9: (
+        ],
+    0x09: [
         "None",
         "None?",
         "None?",
@@ -318,8 +318,8 @@ headernames = {
         "Froggy interior",
         "None?",
         "None?",
-        ),
-    0xA: (
+        ],
+    0x0A: [
         "None (clear animated region)",
         "Water for L3=01",
         "Clouds for L2=0B/0F/1D",
@@ -339,52 +339,52 @@ headernames = {
         "(glitch)",
         "Animations 03+0C",
         "2.5D lava for object FE",
-        ),
-    0xB: (
+        ],
+    0x0B: [
         "None",
+        "??? for Raphael battle",
         "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        ),
+        "Torches for L2=06?",
+        "Waterfalls for L2=0A?",
+        "Cave crystal sparkles?",
+        "Cave crystal sparkles?",
+        "(unused)",
+        "Sewer water flow?",
+        "Torches for L2=09?",
+        "(unused)",
+        "Snow for L3=19?",
+        "Snow for L3=19?",
+        "Sunset for L3=23?",
+        "Water/lavafalls for L2=00?",
+        "Lantern aura for L3=25",
+        "Mist for L3=2C?",
+        "Water/lavafalls + mist?",
+        "??? + mist?",
+        "Water/lavafalls + light for L3=0C?",
+        "(same as 13)",
+        ],
     }
 
 # flags for whether each layer 2/3 ID is a background/foreground image (display)
 #  or another purpose (don't display)
 layer23enable = {
-    2: (
+    2: [
         1, 1, 1, 1, 1, 1, 1, 1,  # 00-07
         1, 1, 1, 1, 1, 1, 1, 1,  # 08-0F
         1, 1, 1, 1, 1, 1, 0, 1,  # 10-17
         1, 1, 1, 1, 1, 1, 1, 1,  # 18-1F
-        ),
-    3: (
+        ],
+    3: [
         1, 1, 0, -1, 1, 0, 0, 0,  # 00-07
         0, -1, 0, 0, 1, 1, 1, 1,  # 08-0F
         1, -1, 1, 1, 1, 1, 0, -1,  # 10-17
         1, -1, -1, 1, 0, -1, -1, 0,  # 18-1F
         1, 1, 1, 1, 1, 1, 0, 1,  # 20-27
         1, 1, -1, 1, 1, 1, 1, 1,  # 28-2F
-        ),
+        ],
     }
 
-entranceanim = (
+entranceanim = [
     "None / X door closing",
     "On skis",
     "Pipe, rightward",
@@ -396,9 +396,9 @@ entranceanim = (
     "Screen edge, downward",
     "Launch upward",
     "Raphael's moon",
-    )
+    ]
 
-banditminigames = (
+banditminigames = [
     "Throwing Balloons (4)",
     "Throwing Balloons (5)",
     "Throwing Balloons (6)",
@@ -409,9 +409,9 @@ banditminigames = (
     "",
     "",
     "Seed Spitting Contest",
-    )
+    ]
 
-stripes = (
+stripes = [
     (0x1A, "Hookbill BG/null stripe"),
     (0x1B, "Chomps, BG Shy Guy, Raphael (1/2)"),
     (0x1C, "Red arrows, Raphael (2/2)"),
@@ -508,16 +508,16 @@ stripes = (
     (0xAE, "Baby Bowser (2/4)"),
     (0xAF, "Baby Bowser (3/4)"),
     (0xB0, "Baby Bowser (4/4)"),
-    )
+    ]
 
-headermusicIDs = (
+headermusicIDs = [
     (0x0F, 0), (0x10, 0), (0x13, 0), (0x17, 1),
     (0x12, 0), (0x14, 1), (0x0F, 0), (0x14, 1),
     (0x14, 1), (0x17, 1), (0x11, 0), (0x1F, 0),
     (0x17, 1), (0x17, 0), (-1, 0), (-1, 1),
-    )
+    ]
 
-music = (
+music = [
     "Story intro",
     "SMA3 title",
     "Choose a game",
@@ -558,7 +558,7 @@ music = (
     "Game over",
     "100% cutscene, part 1",
     "100% cutscene, part 2",
-    )
+    ]
 
 msgtypes = (
     ("Level name",
@@ -567,10 +567,10 @@ msgtypes = (
      """Text typically displayed on a chalkboard-style green background.
 Used by message blocks, Kamek, minigames, and various other sources."""),
     ("File select",
-     """Text displayed below the three save file icons.<br><i>Text above the 
+     """Text displayed below the three save file icons.<br><i>Text above the
 file icons is graphical and can be found in LZ77_YITitle_L0.bin.</i>"""),
     ("Ending",
-     """The single message that appears after Yoshi defeats Bowser and saves 
+     """The single message that appears after Yoshi defeats Bowser and saves
 Baby Luigi and the stork, which has a unique format."""),
     ("Story intro",
      "Text displayed during the story sequences before the title screen."),
@@ -578,7 +578,7 @@ Baby Luigi and the stork, which has a unique format."""),
      "Text displayed during and after the credits."),
     )
 
-sma3char = (
+sma3char = [
     "à", "â", "ç", "è", "é", "ê", "î", "ô", #00-07
     "ù", "û", "/", "œ", None, None, None, None, #08-0F
     "ä", "ö", "ü", "ß", "Ä", "Ö", "Ü", None, #10-17
@@ -618,7 +618,7 @@ sma3char = (
     "\{?cloud0}", "\{?cloud1}", "\{star0}", "\{star1}", #F0-F7
     "\{!switch0}", "\{!switch1}", "\{downoutline}", "\{heartL0}",
     "\{heartL1}", "\{heartR0}", "\{heartR1}", None, #F8-FF
-    )
+    ]
 
 sma3char_lookup = {}  # dict to convert character strings to IDs
 sma3char_maxlen = 1   # max character string length
@@ -629,11 +629,11 @@ for i, charstr in enumerate(sma3char):
             sma3char_maxlen = len(charstr)
 
 msgcommands = {
-    "Level name":(
+    "Level name": [
         (0xFE, "Set Y/X"),
         (0xFF, "Set X only"),
-        ),
-    "Standard message": (
+        ],
+    "Standard message": [
         (0x01, "Erase line at y=0"),
         (0x02, "Erase line at y=10"),
         (0x03, "Erase line at y=20"),
@@ -668,27 +668,27 @@ msgcommands = {
         (0x51, "Activate menu (Flip Cards)"),
         (0x52, "Activate menu (egg config)"),
         (0x60, "Large image"),
-        ),
-    "File select": (
+        ],
+    "File select": [
         (None, "Set X/Y"),
-        ),
-    "Ending": (
+        ],
+    "Ending": [
         (0x00, "Restart current line"),
         (0x0A, "Start new line"),
-        ),
-    "Story intro": (
-        (0x00, "Single 1x character"),
+        ],
+    "Story intro": [
+        (0x00, "Single 1x scale character"),
         (0x01, "(skip byte)"),
         (0x02, "Set Y (value*2)"),
         (0x03, "Set X"),
         (0x04, "Scale 2x, remove line gap"),
-        (0x05, "Single 2x character"),
+        (0x05, "Single 2x scale character"),
         (0x31, "Scale 2x, remove line gap"),
-        ),
-    "Credits": (
+        ],
+    "Credits": [
         (0x00, "Single character"),
         (0x01, "(skip byte)"),
         (0x02, "Set Y (value*2)"),
         (0x03, "Set X"),
-        ),
+        ],
     }

@@ -3,13 +3,14 @@ Qt subclasses that are general-purpose enough to not be in a more
 specialized file."""
 
 # standard library imports
-import os
+import os, time
 
 # Qt imports
 from .PyQtImport import *
 
 # import from other files
 import AdvMetadata, AdvEditor.Number
+from AdvEditor import AdvSettings, Adv3Attr
 from . import QtAdvFunc
 
 # Misc Qt classes
@@ -26,6 +27,93 @@ class QVertLine(QFrame):
         self.setFrameShape(QFrame.Shape.VLine)
         self.setFrameShadow(QFrame.Shadow.Plain)
 
+class QDialogBase(QDialog):
+    "Base class for Advynia's QDialogs. Includes a dialog screenshot action."
+    @staticmethod
+    def screenshotwindow():
+        window = QApplication.activeWindow()
+        window.grab().save(os.path.join(
+            os.path.dirname(Adv3Attr.filepath),
+            window.windowTitle().replace(" ", "") + "-" +
+            time.strftime("%y%m%d%H%M%S") + ".png"))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        try:
+            self.addAction(QDialogBase.screenshotwindowaction)
+        except AttributeError:
+            # create class screenshot action only once
+            #  (action needs to be created after the app initializes)
+            action = QAction()
+            action.triggered.connect(self.screenshotwindow)
+            action.setShortcut("Shift+F12")
+            self.addAction(action)
+            QDialogBase.screenshotwindowaction = action
+
+class QSimpleDialog(QDialogBase):
+    """Basic dialog with an OK button and possibly a don't-show-again checkbox.
+    Often used for displaying error/warning prompts.
+
+    dontshow: if included, displays the checkbox. This should be an AdvSettings
+              attribute that, if True, displays the dialog.
+    """
+    def __init__(self, *args, text="", title="Error", wordwrap=True,
+                 dontshow=None):
+        super().__init__(*args)
+        self.setWindowTitle(title)
+
+        self.dontshow = dontshow
+
+        # init widgets
+
+        label = QLabel(text)
+        label.setWordWrap(wordwrap)
+        if dontshow is not None:
+            self.checkbox = QCheckBox("Don't show this message again")
+
+        # init layout
+
+        layoutMain = QVHBoxLayout()
+        self.setLayout(layoutMain)
+
+        layoutMain.addWidget(label)
+        if dontshow is not None:
+            layoutMain.addWidget(QHorizLine())
+        layoutMain.addAcceptRow(self, rejectbutton=False)
+        if dontshow is not None:
+            layoutMain[-1].insertWidget(0, self.checkbox)
+
+        self.setFixedSize(self.sizeHint())
+        self.setMinimumWidth(QPushButton("OK").sizeHint().width() * 2)
+
+    def accept(self):
+        if self.dontshow is not None and self.checkbox.isChecked():
+            setattr(AdvSettings, self.dontshow, False)  # disable warning
+        super().accept()
+
+class QSimpleDialog2(QDialogBase):
+    "Basic dialog with accept/cancel buttons."
+    def __init__(self, *args, text="", title="Error", wordwrap=True,
+                 accepttext="OK", rejecttext="Cancel"):
+        super().__init__(*args)
+        self.setWindowTitle(title)
+
+        # init widgets
+
+        label = QLabel(text)
+        label.setWordWrap(wordwrap)
+
+        # init layout
+
+        layoutMain = QVHBoxLayout()
+        self.setLayout(layoutMain)
+
+        layoutMain.addWidget(label)
+        layoutMain.addAcceptRow(self, accepttext, rejecttext)
+
+        self.setFixedSize(self.sizeHint())
+
 class QGraphicsViewTransparent(QGraphicsView):
     "QGraphicsView with a transparent background and added border."
     def __init__(self, *args):
@@ -35,15 +123,20 @@ class QGraphicsViewTransparent(QGraphicsView):
         self.setFrameShadow(QFrame.Shadow.Plain)
 
 class QLabelToolTip(QLabel):
-    "QLabel that updates its tooltip to match its text."
-    def __init__(self, *args):
+    """QLabel that updates its tooltip to match its text. Optionally adds a
+    prefix to non-empty tooltips."""
+    def __init__(self, *args, prefix=""):
         super().__init__(*args)
+        self.prefix = prefix
         if args and isinstance(args[0], str):
-            self.setToolTip(args[0])
+            self.setToolTip(prefix + args[0])
 
     def setText(self, text):
         super().setText(text)
-        self.setToolTip(text)
+        if text:
+            self.setToolTip(self.prefix + text)
+        else:
+            self.setToolTip("")
 
 class QLineEditByte(QLineEdit):
     "QLineEdit displaying a single user-editable hex number."
@@ -103,13 +196,14 @@ class QPainterSource(QPainter):
         super().__init__(*args)
         self.setCompositionMode(self.CompositionMode.CompositionMode_Source)
 
-class QSimpleDialog(QMessageBox):
-    """Basic dialog with only an OK button, often used for displaying
-    error/warning prompts."""
-    def __init__(self, *args, text="", title="Error"):
-        super().__init__(*args)
-        self.setWindowTitle(title)
-        self.setText(text)
+class QPlainTextEdit(QPlainTextEdit):
+    """Replacement of QPlainTextEdit to ensure copying includes newlines,
+    not the default U+2029 character."""
+    def createMimeDataFromSelection(self):
+        data = super().createMimeDataFromSelection()
+        text = data.text().replace("\u2029", "\n")
+        data.setText(text)
+        return data
 
 class QTransparentPixmap(QPixmap):
     "QPixmap that's initialized to transparent."
@@ -132,16 +226,21 @@ class QVHBoxLayout(QVBoxLayout):
         return len(self._list)
 
     def addRow(self, stretch=0):
+        "Add a new QHBoxLayout to the end of the layout."
         self._list.append(QHBoxLayout())
         self.addLayout(self[-1], stretch)
 
     def insertRow(self, i):
+        """Insert a new QHBoxLayout at the specified position. This should only
+        be used if the layout consists exclusively of rows, not widgets;
+        otherwise self._list becomes desynced."""
         newlayout = QHBoxLayout()
         self._list.insert(i, newlayout)
         self.insertLayout(i, newlayout)
 
     def addAcceptRow(self, window, accepttext="OK", rejecttext="Cancel", *,
-                     labeltext=None, acceptbutton=True, rejectbutton=True):
+                     labeltext=None, acceptbutton=True, rejectbutton=True,
+                     addattr=False):
         """Add a row containing right-aligned accept/reject buttons for the
         provided window, and set the accept button as default.
         Optionally include a left-aligned label."""
@@ -157,11 +256,15 @@ class QVHBoxLayout(QVBoxLayout):
             acceptbutton.clicked.connect(window.accept)
             acceptbutton.setDefault(True)
             self[-1].addWidget(acceptbutton)
+            if addattr:
+                window.acceptbutton = acceptbutton
 
         if rejectbutton:
             rejectbutton = QPushButton(rejecttext)
             rejectbutton.clicked.connect(window.reject)
             self[-1].addWidget(rejectbutton)
+            if addattr:
+                window.rejectbutton = rejectbutton
 
 QSPIgnoreWidth = QSizePolicy(
     QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
@@ -174,34 +277,28 @@ class QAdvyniaIcon(QIcon):
         super().__init__(os.path.join(AdvMetadata.datadir, "icon", filename))
 
 class Q8x8Tile(QImage):
-    def __init__(self, *args):
-        super().__init__(*args)
-
+    "Base class for representing 8x8 tiles with 15-bit indexed color."
+    def __init__(self):
+        super().__init__(8, 8, QImage.Format.Format_Indexed8)
         self.fill(0)
 
     def setPalette(self, palette):
-        for i, color in enumerate(palette):
-            self.setColor(i, QtAdvFunc.color15toQRGB(color))
+        self.setColorTable(QtAdvFunc.color15toQRGB(color) for color in palette)
         self.setColor(0, 0)   # color 0 is always transparent
 
 class QGBA8x8Tile(Q8x8Tile):
     """A visual representation of single 8x8 tile, given its GBA 4bpp graphics
     and 0x10-byte palette."""
-    def __init__(self, tile, paletterow=None):
-        super().__init__(8, 8, QImage.Format.Format_Indexed8)
-        if not paletterow:
-            paletterow = [0]*0x10
+    def __init__(self, tile, paletterow=(0,)*0x10):
+        super().__init__()
         self.setPalette(paletterow)
-
         if not tile:
             return
 
         pixelarray = self.bits().asarray(64)
-        index = 0
-        for byte in tile:
-            pixelarray[index] = byte&0xF
-            pixelarray[index+1] = byte>>4
-            index += 2
+        for i, byte in zip(range(0, 64, 2), tile, strict=True):
+            pixelarray[i] = byte & 0xF
+            pixelarray[i+1] = byte >> 4
 
 class QNumberedTile16(QImage):
     """Image of a 16x16 square, circle, or other shape, containing a 4x7 hex
@@ -226,9 +323,9 @@ class QNumberedTile16(QImage):
         self.dispnumstr(numstr, 1, startY, textcolorindex)
 
     def setImage(self, filepath):
-        with open(filepath, "rb") as bitmap:
-            newpixels = bitmap.read()
-        pixelarray = self.bits().asarray(16*16)
+        # read color indexes from an external file
+        newpixels = open(filepath, "rb").read()
+        pixelarray = self.bits().asarray(0x100)
         for i in range(0x100):
             pixelarray[i] = newpixels[i]
 
@@ -240,7 +337,7 @@ class QNumberedTile16(QImage):
             return
         else:
             startX += (None, 5, 2, 0)[len(numstr)]
-        
+
         pixelarray = self.bits().asarray(0x100)
         with open(AdvMetadata.datapath("font", "5x8font.bin"), "rb") as bitmap:
             for char in bytes(numstr, encoding="ASCII"):

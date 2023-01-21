@@ -214,7 +214,6 @@ class L1Constructor:
             tileiter = itertools.repeat(tiles)
         else:
             tileiter = itertools.cycle(tiles)
-        
         for i in range(size):
             self.setTile(next(tileiter), major)
             if i % width == width-1:
@@ -383,7 +382,7 @@ class L1Constructor:
                        0x96CD,0x96CD,0x96CD,0x96CD,
                        0x96CD,0x96CD,0x96CD,0x96CD)},
         0x47:{"w":4, "h":4, "y":-3,
-              "tiles":(  -1,  0x3D18,0x3D19,  -1,  
+              "tiles":(  -1,  0x3D18,0x3D19,  -1,
                        0x3D1A,0x3D1B,0x3D1C,0x3D1D,
                        0x3D1E,0x3D26,0x3D27,0x3D21,
                        0x3D22,0x6300,0x3D28,0x3D25)},
@@ -407,10 +406,10 @@ class L1Constructor:
         0x5D:{"w":3, "h":2,
               "tiles":(  -1  ,0x3D97,0x3D98,0x3D71,0x3D99,0x3D9A)},
         0x5F:{"w":4, "h":2,
-              "tiles":((0x02,1),(0x0F,1),(0x10,1),  -1,  
+              "tiles":((0x02,1),(0x0F,1),(0x10,1),  -1,
                        (0x03,2),0x01A8,0x01B0,(0x0A,2))},
         0x60:{"w":5, "h":3,
-              "tiles":(  -1,  (0x08,1),(0x0F,1),(0x10,1),  -1,  
+              "tiles":(  -1,  (0x08,1),(0x0F,1),(0x10,1),  -1,
                        (0x02,1),0x01B1,0x01B2,0x01B3,(0x05,1),
                        (0x03,2),0x01B4,0x01B5,0x01B6,(0x06,2))},
         0x61:{"w":3, "h":2,
@@ -418,17 +417,17 @@ class L1Constructor:
         0x62:{"w":3, "h":2,
               "tiles":((0x02,1),0x01A7,(0x05,1),(0x03,2),0x01A8,(0x06,1))},
         0x63:{"w":5, "h":4,
-              "tiles":(  -1,  (0x02,1),(0x0F,1),(0x10,1),  -1,  
-                         -1,  (0x03,1),0x01AA,0x01AB,  -1,  
+              "tiles":(  -1,  (0x02,1),(0x0F,1),(0x10,1),  -1,
+                         -1,  (0x03,1),0x01AA,0x01AB,  -1,
                        (0x02,1),0x01B1,0x01B2,0x01AC,(0x05,1),
                        (0x03,2),0x01B4,0x01B5,0x01AD,(0x06,2))},
         0x64:{"w":5, "h":4,
-              "tiles":(  -1,  (0x02,1),0x01A7,(0x0A,1),  -1,  
-                         -1,  (0x03,1),0x01AA,0x01AB,  -1,  
+              "tiles":(  -1,  (0x02,1),0x01A7,(0x0A,1),  -1,
+                         -1,  (0x03,1),0x01AA,0x01AB,  -1,
                        (0x02,1),0x01B1,0x01B2,0x01AC,(0x05,1),
                        (0x03,2),0x01B4,0x01B5,0x01AD,(0x06,2))},
         0x65:{"w":4, "h":3,
-              "tiles":(  -1,  (0x08,1),(0x0A,1),  -1,  
+              "tiles":(  -1,  (0x08,1),(0x0A,1),  -1,
                        (0x02,1),0x01B1,0x01B3,(0x05,1),
                        (0x03,2),0x01AE,0x01B6,(0x06,2))},
         0x66:{"w":2, "h":2,
@@ -457,8 +456,8 @@ class L1Constructor:
               "tiles":(0x792E,0x5D09,0x77B9,0x77CA,0x0A2E,0x791E)},
         0x75:{"w":2, "h":4,
               "tiles":(0x7917,0x7918,
-                       0x77B1,  -1,  
-                       0x77B4,  -1,  
+                       0x77B1,  -1,
+                       0x77B4,  -1,
                        0x7927,0x7928)},
         0x76:{"w":2, "h":4,
               "tiles":(0x7919,0x791A,
@@ -467,10 +466,10 @@ class L1Constructor:
                        0x7929,0x792A)},
         0x77:{"w":2, "h":6,
               "tiles":(0x7917,0x7918,
-                       0x77B1,  -1,  
-                       0x77B2,  -1,  
-                       0x77B3,  -1,  
-                       0x77B4,  -1,  
+                       0x77B1,  -1,
+                       0x77B2,  -1,
+                       0x77B3,  -1,
+                       0x77B4,  -1,
                        0x7927,0x7928)},
         0x78:{"w":2, "h":6,
               "tiles":(0x7919,0x791A,
@@ -517,13 +516,13 @@ class L1Constructor:
                        -1,-1,-1,0x84A8,0x84A6,
                            0x84AC,0x84AD,0x84A8,0x84AD,-1)},
         0x86:{"w":8, "h":7, "y":-3, "tiles":(
-              -1,    -1,    -1,    -1,    -1,  0x84AF,  -1,    -1,  
-              -1,    -1,  0x8415,0x8416,0x8426,0x8414,0x842D,  -1,  
+              -1,    -1,    -1,    -1,    -1,  0x84AF,  -1,    -1,
+              -1,    -1,  0x8415,0x8416,0x8426,0x8414,0x842D,  -1,
               -1,  0x8426,0x8419,0x84B4,0x8427,0x8434,0x8465,0x8466,
             0x845B,(0x0C,2),(0x0D,0),(0x38,0),(0x38,0),(0x0F,0),(0x10,4),0x8475,
               -1,  0x8451,0x8497,0x8434,0x8482,0x8490,0x84A3,0x842F,
               -1,    -1,  0x8451,0x84A5,0x8423,0x849E,0x849F,0x8493,
-              -1,    -1,    -1,  0x84A8,0x84A9,0x84AC,0x84AD,  -1,  
+              -1,    -1,    -1,  0x84A8,0x84A9,0x84AC,0x84AD,  -1,
             )},
         0x87:{"w":0x0D, "h":8, "y":-3, "tiles":(ObjectExtraData.ext87tiles)},
         0x92:{"w":2, "h":2, "tiles":(0x8714,0x8715,0x8718,  -1  )},
@@ -532,57 +531,57 @@ class L1Constructor:
         0x95:{"w":2, "h":2, "tiles":(  -1,  0x871F,0x871C,0x871D)},
         0x96:{"w":8, "h":8, "tiles":(
               -1,    -1,    -1,    -1,  0x8720,0x8721,0x8722,0x8723,
-              -1,    -1,  0x8724,0x8725,0x8726,  -1,    -1,    -1,  
-              -1,  0x8727,0x8728,  -1,    -1,    -1,    -1,    -1,  
-              -1,  0x8729,  -1,    -1,    -1,    -1,    -1,    -1,  
-            0x872A,0x872B,  -1,    -1,    -1,    -1,    -1,    -1,  
-            0x872C,  -1,    -1,    -1,    -1,    -1,    -1,    -1,  
-            0x872D,  -1,    -1,    -1,    -1,    -1,    -1,    -1,  
+              -1,    -1,  0x8724,0x8725,0x8726,  -1,    -1,    -1,
+              -1,  0x8727,0x8728,  -1,    -1,    -1,    -1,    -1,
+              -1,  0x8729,  -1,    -1,    -1,    -1,    -1,    -1,
+            0x872A,0x872B,  -1,    -1,    -1,    -1,    -1,    -1,
+            0x872C,  -1,    -1,    -1,    -1,    -1,    -1,    -1,
+            0x872D,  -1,    -1,    -1,    -1,    -1,    -1,    -1,
             0x872E,  -1,    -1,    -1,    -1,    -1,    -1,    -1  )},
         0x97:{"w":8, "h":8, "tiles":(
-            0x874B,0x874C,0x874D,0x874E,  -1,    -1,    -1,    -1,  
-              -1,    -1,    -1,  0x8748,0x8749,0x874A,  -1,    -1,  
-              -1,    -1,    -1,    -1,    -1,  0x8746,0x8747,  -1,  
-              -1,    -1,    -1,    -1,    -1,    -1,  0x8745,  -1,  
+            0x874B,0x874C,0x874D,0x874E,  -1,    -1,    -1,    -1,
+              -1,    -1,    -1,  0x8748,0x8749,0x874A,  -1,    -1,
+              -1,    -1,    -1,    -1,    -1,  0x8746,0x8747,  -1,
+              -1,    -1,    -1,    -1,    -1,    -1,  0x8745,  -1,
               -1,    -1,    -1,    -1,    -1,    -1,  0x8743,0x8744,
               -1,    -1,    -1,    -1,    -1,    -1,    -1,  0x8742,
               -1,    -1,    -1,    -1,    -1,    -1,    -1,  0x8741,
               -1,    -1,    -1,    -1,    -1,    -1,    -1,  0x8740)},
         0x98:{"w":8, "h":8, "tiles":(
-            0x873E,  -1,    -1,    -1,    -1,    -1,    -1,    -1,  
-            0x873D,  -1,    -1,    -1,    -1,    -1,    -1,    -1,  
-            0x873C,  -1,    -1,    -1,    -1,    -1,    -1,    -1,  
-            0x873A,0x873B,  -1,    -1,    -1,    -1,    -1,    -1,  
-              -1,  0x8739,  -1,    -1,    -1,    -1,    -1,    -1,  
-              -1,  0x8737,0x8738,  -1,    -1,    -1,    -1,    -1,  
-              -1,    -1,  0x8734,0x8735,0x8736,  -1,    -1,    -1,  
+            0x873E,  -1,    -1,    -1,    -1,    -1,    -1,    -1,
+            0x873D,  -1,    -1,    -1,    -1,    -1,    -1,    -1,
+            0x873C,  -1,    -1,    -1,    -1,    -1,    -1,    -1,
+            0x873A,0x873B,  -1,    -1,    -1,    -1,    -1,    -1,
+              -1,  0x8739,  -1,    -1,    -1,    -1,    -1,    -1,
+              -1,  0x8737,0x8738,  -1,    -1,    -1,    -1,    -1,
+              -1,    -1,  0x8734,0x8735,0x8736,  -1,    -1,    -1,
               -1,    -1,    -1,    -1,  0x8730,0x8731,0x8732,0x8733)},
         0x99:{"w":8, "h":8, "tiles":(
               -1,    -1,    -1,    -1,    -1,    -1,    -1,  0x8750,
               -1,    -1,    -1,    -1,    -1,    -1,    -1,  0x8751,
               -1,    -1,    -1,    -1,    -1,    -1,    -1,  0x8752,
               -1,    -1,    -1,    -1,    -1,    -1,  0x8753,0x8754,
-              -1,    -1,    -1,    -1,    -1,    -1,  0x8755,  -1,  
-              -1,    -1,    -1,    -1,    -1,  0x8756,0x8757,  -1,  
-              -1,    -1,    -1,  0x8758,0x8759,0x875A,  -1,    -1,  
+              -1,    -1,    -1,    -1,    -1,    -1,  0x8755,  -1,
+              -1,    -1,    -1,    -1,    -1,  0x8756,0x8757,  -1,
+              -1,    -1,    -1,  0x8758,0x8759,0x875A,  -1,    -1,
             0x875B,0x875C,0x875D,0x875E,  -1,    -1,    -1,    -1  )},
         0x9A:{"w":1, "h":2, "y":-1, "tiles":(0x0006,0x872F)},
         0x9B:{"w":1, "h":2, "y":-1, "tiles":(0x0007,0x873F)},
         0x9C:{"w":2, "h":1, "x":-1, "tiles":(0x0008,0x874F)},
         0x9D:{"w":2, "h":1, "x":-1, "tiles":(0x0009,0x875F)},
         0xA4:{"w":2, "h":2, "tiles":(0x000A,0x000B,0x8800,0x8801)},
-        0xA5:{"w":5, "h":9, "x":-2, "y":-8, 
-              "tiles":(  -1,    -1,  0x3DDE,  -1,    -1,  
-                         -1,  0x3DDF,0x8B04,0x3DE0,  -1,  
-                         -1,  0x8B0A,0x8B01,0x8B0C,  -1,  
-                       0x3DE1,0x8B07,0x8B08,0x8B09,  -1,  
+        0xA5:{"w":5, "h":9, "x":-2, "y":-8,
+              "tiles":(  -1,    -1,  0x3DDE,  -1,    -1,
+                         -1,  0x3DDF,0x8B04,0x3DE0,  -1,
+                         -1,  0x8B0A,0x8B01,0x8B0C,  -1,
+                       0x3DE1,0x8B07,0x8B08,0x8B09,  -1,
                        0x3DE2,0x8B0E,0x8B0F,0x8B10,0x3DE3,
                        0x8B02,0x8B0B,0x8B15,0x8B16,0x8B0C,
                        0x8B12,0x8B19,0x8B1A,0x8B1B,0x8B14,
-                         -1,    -1,  0x3DE4,  -1,    -1,  
+                         -1,    -1,  0x3DE4,  -1,    -1,
                          -1,    -1,  0x6A25,  -1,    -1,  )},
         0xA6:{"w":3, "h":5, "x":-1, "y":-4,
-              "tiles":(  -1,  0x3DDE,  -1,  
+              "tiles":(  -1,  0x3DDE,  -1,
                        0x3DDF,0x8B04,0x3DE0,
                        0x8B0A,0x8B0B,0x8B0C,
                        0x8B12,0x8B13,0x8B14,
@@ -621,7 +620,7 @@ class L1Constructor:
         0xC8:{"w":2, "h":2, "tiles":(0x00CA,-1,0x00CB,0x00CC)},
         0xC9:{"w":2, "h":2, "tiles":(-1,0x00C5,0x00C6,0x00C7)},
         0xD4:{"w":5, "h":5,
-              "tiles":(  -1,    -1,  0x0817,0x0A18,  -1,  
+              "tiles":(  -1,    -1,  0x0817,0x0A18,  -1,
                          -1,  0x0817,0x9000,0x9001,0x0A1A,
                        0x79DE,0x9002,0x9003,0x9004,0x9005,
                        0x79B6,0x9006,0x9007,0x9008,0x5D0C,
@@ -637,7 +636,7 @@ class L1Constructor:
                        0x79DE,0x9017,0x9018,0x9019,0x901A,
                        0x79BD,0x901B,0x901C,0x901D,0x901E,
                        0x79C6,0x901F,0x901D,0x9015,0x5D0C,
-                       0x79C3,0x9020,0x9008,0x5D0C,  -1,  
+                       0x79C3,0x9020,0x9008,0x5D0C,  -1,
                        0x79AF,0x9009,0x5D0C,  -1,    -1,  )},
         0xD7:{"w":3, "h":4,
               "tiles":(  -1,  0x0817,0x0A18,
@@ -649,26 +648,26 @@ class L1Constructor:
                        0x79BE,0x9024,0x5D0D,
                        0x79DE,0x5D0E,  -1,  )},
         0xD9:{"w":5, "h":5,
-              "tiles":(  -1,  0x0817,0x0A19,  -1,    -1,  
-                       0x0817,0x9000,0x9025,0x0A19,  -1,  
+              "tiles":(  -1,  0x0817,0x0A19,  -1,    -1,
+                       0x0817,0x9000,0x9025,0x0A19,  -1,
                        0x9026,0x9027,0x9028,0x9029,0x79DA,
                        0x5B10,0x902A,0x902B,0x902C,0x79BD,
                          -1,  0x5B10,0x900A,0x902D,0x79AE)},
         0xDA:{"w":5, "h":5,
-              "tiles":(0x0C0D,0x0D0F,0x0F13,0x1011,  -1,  
+              "tiles":(0x0C0D,0x0D0F,0x0F13,0x1011,  -1,
                        0x902E,0x902F,0x9030,0x9029,0x79DA,
                        0x9031,0x9032,0x9033,0x9034,0x79B6,
-                       0x5B10,0x9035,0x9036,0x9037,  -1,  
+                       0x5B10,0x9035,0x9036,0x9037,  -1,
                          -1,  0x5B10,0x902D,0x79AF,  -1,  )},
         0xDB:{"w":5, "h":6,
-              "tiles":(0x0C0D,0x0D0F,0x0F12,0x1010,  -1,  
+              "tiles":(0x0C0D,0x0D0F,0x0F12,0x1010,  -1,
                        0x902E,0x9038,0x9039,0x903A,0x79DA,
                        0x9026,0x9027,0x903B,0x903C,0x79AF,
                        0x5B10,0x902A,0x903D,0x903E,0x79CC,
                          -1,  0x5B10,0x902A,0x903F,0x79C3,
                          -1,    -1,  0x5B10,0x902D,0x79AD)},
         0xDC:{"w":3, "h":4,
-              "tiles":(0x0817,0x0A18,  -1,  
+              "tiles":(0x0817,0x0A18,  -1,
                        0x9040,0x9041,0x79CC,
                        0x9042,0x902C,0x79BD,
                        0x9043,0x902D,0x79CD)},
@@ -677,18 +676,18 @@ class L1Constructor:
                        0x5B11,0x904F,0x79AE,
                          -1,  0x5B12,0x79B6)},
         0xDE:{"w":7, "h":6,
-              "tiles":(  -1,    -1,    -1,  0x0817,0x0A18,  -1,    -1,  
+              "tiles":(  -1,    -1,    -1,  0x0817,0x0A18,  -1,    -1,
                          -1,    -1,  0x0817,0x9000,0x9001,0x0F14,0x1010,
                          -1,  0x0817,0x9045,0x9038,0x9039,0x9033,0x9010,
                          -1,  0x9046,0x9047,0x9048,0x9004,0x9049,0x9010,
                          -1,  0x79DC,0x79C1,0x79CA,0x9009,0x902B,0x9022,
                          -1,  0x79D0,0x79CE,0x79C0,0x79DC,0x9009,0x9023)},
         0xDF:{"w":7, "h":6,
-              "tiles":(  -1,  0x0817,0x900C,0x0A18,  -1,    -1,    -1,  
-                       0x0817,0x9045,0x9038,0x9001,0x0A1A,  -1,    -1,  
-                       0x902E,0x9011,0x904A,0x9039,0x904B,0x0A1A,  -1,  
-                       0x9026,0x9027,0x9022,0x904C,0x901F,0x903E,  -1,  
-                       0x904D,0x904E,0x902D,0x79DC,0x79B6,0x79C5,  -1,  
+              "tiles":(  -1,  0x0817,0x900C,0x0A18,  -1,    -1,    -1,
+                       0x0817,0x9045,0x9038,0x9001,0x0A1A,  -1,    -1,
+                       0x902E,0x9011,0x904A,0x9039,0x904B,0x0A1A,  -1,
+                       0x9026,0x9027,0x9022,0x904C,0x901F,0x903E,  -1,
+                       0x904D,0x904E,0x902D,0x79DC,0x79B6,0x79C5,  -1,
                        0x9043,0x902D,0x79AF,0x79D0,0x79B3,0x79B4,  -1,  )},
         0xE0:{"w":2, "h":2, "tiles":(0x7D24,0x7D25,0x0118,0x0119)},
         }
@@ -736,9 +735,9 @@ class L1Constructor:
             0x84C2 + ((0,2,1,3)[self.relY&3] ^ (self.relX&1))), 0x10, 0x20)
 
     ext1415tiles = {
-        0x14:( 1, (0x96D6,  -1,  0x96D6,0x96D7,  -1,  
+        0x14:( 1, (0x96D6,  -1,  0x96D6,0x96D7,  -1,
                    0x96D7,  -1,  0x96D4,  -1,  0x96D4)),
-        0x15:(-1, (  -1,  0x96D5,  -1,  0x96D5,  -1,  
+        0x15:(-1, (  -1,  0x96D5,  -1,  0x96D5,  -1,
                    0x96D8,0x96D9,0x96D8,0x96D9,  -1, ))}
     def ext1415(self):
         slope, tiles = self.ext1415tiles[self.obj.extID]
@@ -779,6 +778,16 @@ class L1Constructor:
                 shift=self.shifthoriz, length=4)
             self.relY += 1
 
+    def ext31(self):
+        for i in range(7):
+            self.setLine(tile=lambda:self.setTile(0x00BD-self.parityX()),
+                         first=0x00BB, length=6, shift=self.shifthoriz)
+            self.relX = 0
+            self.relY += 1
+
+    def ext46(self):
+        self.setTile(random.choice((0x5F00,0x5F01,0x5F03,0x5F03)))
+
     def ext48(self):
         # is this simpler than just using extR, full of duplicate rows?
         #  rows 1 to 0x10 and 0x12 are just -1,-1,0x00E1,0x00E2
@@ -797,47 +806,9 @@ class L1Constructor:
         self.relY, self.relX = -0x13, 2
         self.setLine(first=0x00DF, tile=0x00E1, last=0x00E3,
                      length=0x14, shift=self.shiftvert)
-        self.relY, self.relX = -0x13, 3 
+        self.relY, self.relX = -0x13, 3
         self.setLine(first=0x00E0, tile=0x00E2, last=0x00E4,
                      length=0x14, shift=self.shiftvert)
-
-    def ext52(self):
-        centertiles = iter(range(0x3D63, 0x3D69))
-        for i in range(2):
-            self.relX = -1
-            self.setLine(
-                first=lambda:self.simpleoverlap(0x015C, 0x015A, -1),
-                tile=lambda:self.setTile(next(centertiles)),
-                last=lambda:self.simpleoverlap(0x015C, 0x015B, -1),
-                shift=self.shifthoriz, length=5)
-            self.relY += 1
-
-    def ext53(self):
-        centertiles = iter((0x3D63,0x3D6C,0x3D65,0x3D69,0x3D6A,0x3D6B,
-                            lambda:self.simpleoverlap(-1, 0x015A, 0x015C),
-                            0x010E,0x010F))
-        for i in range(2):
-            self.relX = -1
-            self.setLine(
-                first=lambda:self.simpleoverlap(0x015C, 0x015A, -1),
-                tile=lambda:self.setTile(next(centertiles)),
-                last=lambda:self.simpleoverlap(0x015C, 0x015B, -1),
-                shift=self.shifthoriz, length=5)
-            self.relY += 1
-        self.relX = 0
-        self.setLine(lambda:self.setTile(next(centertiles)),
-                     shift=self.shifthoriz, length=3)
-        
-
-    def ext31(self):
-        for i in range(7):
-            self.setLine(tile=lambda:self.setTile(0x00BD-self.parityX()),
-                         first=0x00BB, length=6, shift=self.shifthoriz)
-            self.relX = 0
-            self.relY += 1
-
-    def ext46(self):
-        self.setTile(random.choice((0x5F00,0x5F01,0x5F03,0x5F03)))
 
     def ext4A(self):
         self.setTile(0x3D4C)
@@ -882,6 +853,33 @@ class L1Constructor:
             self.setTile(self.ext50A8tiles[self.obj.extID][self.parityYX()])
     def ext50A8(self):
         self.setRect(self._ext50A8if, 2, 2)
+
+    def ext52(self):
+        centertiles = iter(range(0x3D63, 0x3D69))
+        for i in range(2):
+            self.relX = -1
+            self.setLine(
+                first=lambda:self.simpleoverlap(0x015C, 0x015A, -1),
+                tile=lambda:self.setTile(next(centertiles)),
+                last=lambda:self.simpleoverlap(0x015C, 0x015B, -1),
+                shift=self.shifthoriz, length=5)
+            self.relY += 1
+
+    def ext53(self):
+        centertiles = iter((0x3D63,0x3D6C,0x3D65,0x3D69,0x3D6A,0x3D6B,
+                            lambda:self.simpleoverlap(-1, 0x015A, 0x015C),
+                            0x010E,0x010F))
+        for i in range(2):
+            self.relX = -1
+            self.setLine(
+                first=lambda:self.simpleoverlap(0x015C, 0x015A, -1),
+                tile=lambda:self.setTile(next(centertiles)),
+                last=lambda:self.simpleoverlap(0x015C, 0x015B, -1),
+                shift=self.shifthoriz, length=5)
+            self.relY += 1
+        self.relX = 0
+        self.setLine(lambda:self.setTile(next(centertiles)),
+                     shift=self.shifthoriz, length=3)
 
     def ext545C(self):
         ext545Cprop = {
@@ -1120,7 +1118,7 @@ class L1Constructor:
 
     _landinteriorrandoffset = (0x0E, 0x0E, 0x0F, 0x0F, 0x10, 0x11, 0x2B, 0x2C)
     def _landinterior(self):
-        # should be called by overlap check for 67, and 
+        # should be called by overlap check for 67, and
         #  by function for 08029548 (01/04-09/99 interior overlap checks)
         self.setTile((0x39, random.choice(self._landinteriorrandoffset)))
 
@@ -1365,7 +1363,11 @@ class L1Constructor:
                     break
             else:
                 index = 0
-        self.setTile(tiles[index])
+        try:
+            tile = tiles[index]
+        except IndexError:
+            tile = 0x11014
+        self.setTile(tile)
 
     def obj14(self, width, height):
         tilebase = self.dynamicshift(0x19)
@@ -1760,7 +1762,7 @@ class L1Constructor:
             if self.relY < 2:
                 tile = (0x9061, 0x909B)[self.relY]
             else:
-                tile = random.choice((0x9098,0x9098,0x9099,0x909A))                
+                tile = random.choice((0x9098,0x9098,0x9099,0x909A))
         elif highbyte in (0x94, 0x95):
             tile = (highbyte + 3) << 8
             if self.relY:
@@ -2391,21 +2393,21 @@ class L1Constructor:
         0x790F,0x791F,0x7910,0x7920,0x7799,0x779A,0x779F,0x77A0,
         # pipe ceiling, pipe floor, BGwall ceiling, BGwall floor
         0x7915,0x7916,0x7925,0x7926,0x77A9,0x77AA,0x77AF,0x77B0)
-    objDAAADoverlaptiles = (
+    objAAADoverlaptiles = (
         # 3-dimensional table represented as a single tuple, indexed by:
         # default tile index // 2, then overlap tile index // 2, then coordindex
         0x7931,0x792C,0x792C, 0x791C,0x7931,0x791C,  # original: pipe left
-        0x792E,  -1,    -1,     -1,  0x791E,  -1,  
+        0x792E,  -1,    -1,     -1,  0x791E,  -1,
         0x7931,0x792B,0x792B, 0x791B,0x7931,0x791B,  # original: pipe right
-        0x792D,  -1,    -1,     -1,  0x791D,  -1,  
+        0x792D,  -1,    -1,     -1,  0x791D,  -1,
         0x792E, None,  None,   None, 0x791E, None,   # original: BGwall left
         0x5D09,0x77B9,0x77B9, 0x77BB,0x0A2F,0x77BB,
         0x792D, None,  None,   None, 0x791D, None,   # original: BGwall right
         0x5B0D,0x77CC,0x77CC, 0x77BA,0x082D,0x77BA,
         0x7931,0x792C,0x792C, 0x792B,0x7931,0x792B,  # original: pipe ceiling
-        0x792E,  -1,    -1,     -1,  0x792D,  -1,  
+        0x792E,  -1,    -1,     -1,  0x792D,  -1,
         0x7931,0x791C,0x791C, 0x791B,0x7931,0x791B,  # original: pipe floor
-        0x791E,  -1,    -1,     -1,  0x791D,  -1,  
+        0x791E,  -1,    -1,     -1,  0x791D,  -1,
         0x792E, None,  None,   None, 0x792D, None,   # original: BGwall ceiling
         0x5D09,0x77B9,0x77B9, 0x77CC,0x5B0D,0x77CC,
         0x791E, None,  None,   None, 0x791D, None,   # original: BGwall floor
@@ -2429,7 +2431,7 @@ class L1Constructor:
             coordindex = 2
         index = defaulttype*12 + (overlaptype&3)*3 + coordindex
 
-        return self.objDAAADoverlaptiles[index]
+        return self.objAAADoverlaptiles[index]
 
     def _objAAADmain(self, tiles, coord, length):
         defaulttile = tiles[self.parityYX()]
@@ -2730,8 +2732,8 @@ class L1Constructor:
                          last=self._objE1ground, length1=self._objE1ground,
                          shift=self.shiftvert, length=height-1)
 
-    objE2tiles = (  -1,  0x8D9A,0x8D9B,  -1,     -1,  0x8DA9,0x8DAA,  -1,  
-                    -1,  0x8DB8,0x8DB9,  -1,     -1,  0x8DC6,0x8DC7,  -1,  
+    objE2tiles = (  -1,  0x8D9A,0x8D9B,  -1,     -1,  0x8DA9,0x8DAA,  -1,
+                    -1,  0x8DB8,0x8DB9,  -1,     -1,  0x8DC6,0x8DC7,  -1,
                   0x8D9C,0x8D9D,0x8D9E,0x8D9F, 0x8DAB,0x8DAC,0x8DAD,0x8DAE,
                   0x8DBA,0x8DBB,0x8DBC,0x8DBD, 0x8DC8,0x8DC9,0x8DCA,0x8DCB,
                   0x8D9A,0x8DA0,0x8DA0,0x8D9B, 0x8DA9,0x8DAF,0x8DAF,0x8DAA,
@@ -2878,7 +2880,7 @@ class L1Constructor:
 
         awayside = self.objEBECprop[self.obj.ID]["awayside"]
 
-        # EB-EC check the tiles on either side of the column 
+        # EB-EC check the tiles on either side of the column
         if self.getTile(offsetX=-awayside) >> 8 == 0x79:
             self.relX -= awayside
             self.setTile(random.choice(self.objEBECcolumnside))

@@ -124,7 +124,7 @@ class QSMA3Layer1(QAbstractLayer):
             self.setDimScreens()
             AdvWindow.statusbar.setSizeText(
                 newscreencount=self.tilemap.screencount())
-            
+
             if AdvMetadata.printtime: print("Layer 1 pixmap processing:",
                   QtAdvFunc.timerend(timer), "ms")  # debug
 
@@ -304,7 +304,7 @@ class QSublevelScreenGrid(QGraphicsPixmapItem):
                 self.drawnumbox(screen=num, data=((num, 1),),
                     pixelarray=pixelarray, arraywidth=width,
                     bgcolor=1, numcolor=2)
-                
+
         pixmap = QPixmap.fromImage(self.gridimage)
         self.setPixmap(pixmap)
 

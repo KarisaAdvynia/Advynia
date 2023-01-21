@@ -5,13 +5,14 @@ import copy, itertools
 
 # import from other files
 from AdvEditor import AdvSettings, AdvWindow, Adv3Attr, Adv3Save, Adv3Visual
-import AdvEditor
+import AdvEditor, AdvFile
 from AdvEditor.Format import pluralize
 from AdvGame import GBA, SMA3
+from .Dialogs import QDialogFileError
 from .GeneralQt import *
 from . import QtAdvFunc
 
-class QSMA3TextEditor(QDialog):
+class QSMA3TextEditor(QDialogBase):
     "Dialog for editing SMA3 text."
     def __init__(self, *args):
         super().__init__(*args)
@@ -43,6 +44,20 @@ class QSMA3TextEditor(QDialog):
             msgtypebuttons.append(button)
             self.messages[key] = []
         msgtypebuttons[0].setChecked(True)
+
+        pushbuttons = {}
+        for key, text, tooltip, action in (
+                ("Command", "Add &Command", None,
+                 lambda : QDialogAddTextCommand(self, self.texttype).open()),
+                ("Export", "&Export", "Export messages to file",
+                 self.exportmessages),
+                ("Import", "&Import", "Import messages from file",
+                 self.importmessages_dialog),
+                ):
+            button = QPushButton(text)
+            if tooltip: button.setToolTip(tooltip)
+            button.clicked.connect(action)
+            pushbuttons[key] = button
 
         self.textlistwidget = QListWidgetResized(
             width=QtAdvFunc.basewidth(QListWidget()) * 50,
@@ -78,24 +93,19 @@ class QSMA3TextEditor(QDialog):
         self.messagescene.addItem(self.messagepixmapitem)
 
         self.charinfo = QLabel()
-        commandbutton = QPushButton("Add Command")
-        commandbutton.clicked.connect(
-            lambda : QDialogAddTextCommand(self, self.texttype).open())
 
         self.messagelabel = QLabelToolTip()
         self.messagelabel.setSizePolicy(QSPIgnoreWidth)
         self.linkinfo = QLabelToolTip()
         self.linkinfo.setSizePolicy(QSPIgnoreWidth)
-        self.linkbutton = QPushButton("Link")
+        self.linkbutton = QPushButton("&Link")
         self.linkbutton.setFixedWidth(QtAdvFunc.basewidth(self.linkbutton) * 12)
         self.linkbutton.clicked.connect(self.linkaction)
 
         self.textedit = QMessageTextEdit()
-        self.textedit.setAcceptRichText(False)
-        self.textedit.setTabChangesFocus(True)
         self.textedit.textChanged.connect(self.texteditcallback)
 
-        self.simplifiedbox = QCheckBox("Simplified")
+        self.simplifiedbox = QCheckBox("&Simplified")
         self.simplifiedbox.setToolTip("""
 Simplified Mode<br>
 <i>When enabled</i>: Line breaks are interpreted as common commands. 
@@ -120,7 +130,7 @@ ignored.
         layoutFontView.addWidget(self.charinfo)
         layoutFontView.addRow()
         layoutFontView[-1].addStretch()
-        layoutFontView[-1].addWidget(commandbutton)
+        layoutFontView[-1].addWidget(pushbuttons["Command"])
         layoutFontView.addStretch()
 
         layoutMain[-1].addWidget(QVertLine())
@@ -158,6 +168,10 @@ ignored.
         layoutMain.addWidget(QHorizLine())
 
         layoutMain.addAcceptRow(self, "Save")
+        layoutMain[-1].insertWidget(0, QLabel("Manage Messages:"))
+        layoutMain[-1].insertWidget(1, pushbuttons["Export"])
+        layoutMain[-1].insertWidget(2, pushbuttons["Import"])
+        layoutMain[-1].insertWidget(3, QVertLine())
 
     # init/load methods
 
@@ -167,87 +181,85 @@ ignored.
         self.simplifiedbox.setChecked(AdvSettings.text_simplified)
         self.texttypeschanged.clear()
         self.loadfont()
-        if not self.charID: self.charID = 0
+        if self.charID is None: self.charID = 0
 
         # load message data for each type
-        for cls in (SMA3.LevelName, SMA3.StandardMessage, SMA3.FileSelectText,
-                    SMA3.StoryIntroText, SMA3.CreditsText, SMA3.EndingText):
-            self.messages[cls.texttype] = cls.importall(Adv3Attr.filepath)
+        self.messages = SMA3.importalltext(Adv3Attr.filepath)
 
-        # reload list widget for current type
-        self.texttype = self.texttype  
-
+        self.reload()
         self.textedit.setFocus()
         super().open()
 
+    def reload(self):
+        # reload list widget for current type
+        self.texttype = self.texttype
+
     def accept(self):
-        newptrs = Adv3Save.savewrapper(self.savemessages)
-        if newptrs is None or newptrs is False:
-            # saving failed
+        if not self.texttypeschanged:
+            # nothing to save
+            super().accept()
             return
-        if newptrs:
-            statustext = ["Saved messages: "]
-            for texttype, ptr in newptrs:
-                if texttype in ("Level name", "Standard message"):
-                    texttype += "s"
-                statustext += [
-                    texttype.lower(), " at ", format(ptr, "08X"), ", "]
-            statustext[-1] = "."
-            AdvWindow.statusbar.setActionText("".join(statustext))
-        super().accept()
+        if Adv3Save.savewrapper(Adv3Save.savemessages,
+                self.messages, self.texttypeschanged):
+            super().accept()
 
-    def savemessages(self):
-        "Save modified messages to ROM."
-        outputptrs = []
-        for texttype in self.texttypeschanged:
-            if texttype != "Ending":
-                newblockptr = self._savetablemessages(texttype)
-            else:
-                message = self.messages["Ending"][0]
+    def exportmessages(self):
+        # get list of text types from user
+        texttypes = []
+        if not QDialogExportMessages(self, texttypes).exec() or not texttypes:
+            return
 
-                # erase old ending message
-                GBA.erasedata(Adv3Attr.filepath, *type(message).importall(
-                    Adv3Attr.filepath)[0].datablock)
+        # prepare A3L data
+        exportmessages = {}
+        for texttype in texttypes:
+            exportmessages[texttype] = self.messages[texttype]
+        a3l = AdvFile.A3LFileData.fromtextdata(exportmessages)
 
-                # save ending message and update pointer
-                newblockptr = Adv3Save.saveDataToROM(
-                    bytes(message), SMA3.Pointers.text68ending)
-            outputptrs.append((texttype, newblockptr))
-        return outputptrs
+        # get filepath from user
+        defaultpath = os.path.join(
+            os.path.dirname(Adv3Attr.filepath),
+            a3l.defaultfilename(Adv3Attr.filename))
+        filepath, _ = QFileDialog.getSaveFileName(
+            AdvWindow.editor, caption="Export Messages", directory=defaultpath,
+            filter=AdvFile.A3LFileData.longext)
 
-    def _savetablemessages(self, texttype):
-        messages = self.messages[texttype]
-        array, relptrs = messages.tobytearray(nullptr=(texttype=="Story intro"))
+        # export data
+        if filepath:
+            a3l.exporttofile(filepath)
 
-        with GBA.Open(Adv3Attr.filepath, "r+b") as f:
-            # erase old messages
-            for message in type(messages[0]).importall(
-                    Adv3Attr.filepath).uniqueitems():
-                if message.datablock:
-                    f.erasedata(*message.datablock)
+            AdvWindow.statusbar.setActionText(
+                "Exported messages to " + filepath)
 
-            # save new message block, without auto-updating pointers
-            newblockptr = Adv3Save.saveDataToROM(array, None)
+    def importmessages_dialog(self):
+        filepath, _ = QFileDialog.getOpenFileName(
+            AdvWindow.editor, caption="Import Messages",
+            directory=os.path.dirname(Adv3Attr.filepath),
+            filter=AdvFile.A3LFileData.longext)
+        if not filepath: return
+        self.importmessages(filepath)
 
-            # overwrite pointer table
-            ptrs = GBA.PointerTable(
-                ((ptr + newblockptr if ptr is not None else 0)
-                 for ptr in relptrs),
-                endmarker=False)
-            if texttype == "Credits":
-                # update hardcoded pointers for last 3 messages,
-                #  and remove them from table
-                creditsendptrs = ptrs[-3:]
-                del ptrs[-3:]
-                for ptrtotext, newptr in zip(
-                        SMA3.Pointers.textcreditsfinal, creditsendptrs,
-                        strict=True):
-                    f.seek(ptrtotext)
-                    f.writeint(newptr, 4)
-            f.readseek(messages[0].ptrtotable)
-            f.write(bytes(ptrs))
-        return newblockptr
+    def importmessages(self, filepath):
+        a3l = AdvEditor.Export.importwrapper(
+            AdvFile.A3LFileData.importfromfile, filepath)
+        if not a3l: return
+        if a3l.datatype() != "Text":
+            QDialogFileError(AdvWindow.editor, filepath, text=(
+                "File does not contain message data. "
+                "Other .a3l file variants can be imported in the main editor."
+                )).exec()
+            return
+        newmessages = AdvEditor.Export.importprocesswrapper(
+            lambda filepath : a3l.totextdata(), filepath)
+        if not newmessages: return
 
+        if (AdvSettings.warn_import_messages and
+                not QDialogImportMessages(self, newmessages.keys()).exec()):
+            return
+
+        for texttype in newmessages:
+            self.messages[texttype] = newmessages[texttype]
+
+        self.reload()
 
     @property
     def texttype(self):
@@ -270,8 +282,8 @@ ignored.
         else:
             self._textlistformatstr = AdvEditor.Number.hexlenformatstr(len(messages) - 1)
             for msgID, text in enumerate(messages):
-                self.textlistwidget.addItem(" ".join((
-                    format(msgID, self._textlistformatstr), ":", text.shortstr()
+                self.textlistwidget.addItem("".join((
+                    format(msgID, self._textlistformatstr), ": ", text.shortstr()
                     )))
         self.textlistwidget.setCurrentRow(row)
 
@@ -345,25 +357,26 @@ ignored.
         """Return a string description of the message ID, using the current
         texttype."""
         msgIDstr = format(msgID, self._textlistformatstr)
-        if self.texttype == "Level name":
-            return "Level {msgID}: {levelnum}".format(
-                msgID=msgIDstr,
-                levelnum=SMA3.levelnumber(msgID),
-                )
-        elif self.texttype == "Standard message":
-            return "Message {msgID}: {levelnum}-{parity}".format(
+        match self.texttype:
+            case "Level name":
+                return "Level {msgID}: {levelnum}".format(
                     msgID=msgIDstr,
-                    levelnum=SMA3.levelnumber(msgID // 4),
-                    parity=msgID & 3,
+                    levelnum=SMA3.levelnumber(msgID),
                     )
-        elif self.texttype == "Ending":
-            return "Ending message"
-        else:
-            return self.texttype + " " + msgIDstr
+            case "Standard message":
+                return "Message {msgID}: {levelnum}-{parity}".format(
+                        msgID=msgIDstr,
+                        levelnum=SMA3.levelnumber(msgID // 4),
+                        parity=msgID & 3,
+                        )
+            case "Ending":
+                return "Ending message"
+            case _:
+                return self.texttype + " " + msgIDstr
 
     def updatelinkinfo(self):
         if self.texttype == "Ending":
-            self.linkbutton.setText("Link")
+            self.linkbutton.setText("&Link")
             self.linkbutton.setDisabled(True)
             self.linkinfo.clear()
         else:
@@ -373,9 +386,9 @@ ignored.
                 self.messages[self.texttype].linksetstr(self.msgID, "02X"))
 
             if self.messages[self.texttype].islinked(self.msgID):
-                self.linkbutton.setText("Unlink")
+                self.linkbutton.setText("Un&link")
             else:
-                self.linkbutton.setText("Link")
+                self.linkbutton.setText("&Link")
 
     def textselectcallback(self):
         row = self.textlistwidget.currentRow()
@@ -404,8 +417,8 @@ ignored.
             else:
                 # update linked rows if any exist
                 for msgID in linksets[self.msgID]:
-                    listtext = " ".join((
-                        format(msgID, self._textlistformatstr), ":", shortstr))
+                    listtext = "".join((
+                        format(msgID, self._textlistformatstr), ": ", shortstr))
                     self.textlistwidget.item(msgID).setText(listtext)
         if self.texttype not in self.texttypeschanged:
             self.texttypeschanged.append(self.texttype)
@@ -414,16 +427,26 @@ ignored.
     def linkaction(self):
         if self.messages[self.texttype].islinked(self.msgID):
             # unlink
+            linked = False
             self.messages[self.texttype].unlinkitem(self.msgID)
         else:
+            linked = True
             # open link dialog
             accepted = QDialogLinkMessage(
                 self, self.messages[self.texttype], self.msgID).exec()
             if not accepted: return
+
         if self.texttype not in self.texttypeschanged:
             self.texttypeschanged.append(self.texttype)
         self.loadmessage(self.msgID)
         self.updatelinkinfo()
+
+        if linked:
+            # also update row in list widget
+            listtext = "".join((
+                format(self.msgID, self._textlistformatstr), ": ",
+                self.textdata.shortstr()))
+            self.textlistwidget.item(self.msgID).setText(listtext)
 
     # text inserting
 
@@ -463,18 +486,20 @@ ignored.
         command ID and current text type.
         If the command takes parameters, they default to 0."""
         command = SMA3.TextCommand()
-        if self.texttype == "Level name":
-            command.charID = commandID
-            command.params = bytes(0x100 - commandID)
-        elif self.texttype == "File select":
-            command.params = bytes(2)
-        else:
-            command.params = bytearray([commandID])
-            if commandID == 0x60 and self.texttype == "Standard message":
-                command.params += b"\x00\x00\x00\x80\x30\x00\x10"
-            elif self.texttype == "Credits" or (self.texttype == "Story intro"
-                                            and commandID not in (0x04, 0x31)):
-                command.params.append(0)
+        match self.texttype:
+            case "Level name":
+                command.charID = commandID
+                command.params = bytes(0x100 - commandID)
+            case "File select":
+                command.params = bytes(2)
+            case _:
+                command.params = bytearray([commandID])
+                if commandID == 0x60 and self.texttype == "Standard message":
+                    command.params += b"\x00\x00\x00\x80\x30\x00\x10"
+                elif self.texttype == "Credits" or (
+                        self.texttype == "Story intro" and
+                        commandID not in (0x04, 0x31)):
+                    command.params.append(0)
         self.textedit.textCursor().insertText(str(command))
         self.textedit.setFocus()
 
@@ -501,86 +526,87 @@ class QSMA3TextGraphics(QImage):
 
         for char in textdata:
             if isinstance(char, SMA3.TextCommand):
-                if textdata.texttype == "Standard message":
-                    commandID = char.params[0]
-                    if 5 <= commandID <= 8:
-                        # start non-buffered line
-                        startX = 0
-                        startY = (commandID - 5) << 4
-                    elif commandID == 0xE:
-                        # start buffered line
-                        startX = 0
-                        startY = 0x40
-                        # erase line
-                        e = (scrollY + 0x40) * width
-                        for i in range(e, min(e + 0x10*width, width*height)):
-                            pixelarray[i] = 0
-                    elif 0x11 <= commandID <= 0x14:
-                        # scroll message
-                        scrollY += (commandID & 0xF) * char.repcount
-                    elif 1 <= commandID <= 4:
-                        # erase line
-                        e = (scrollY + (commandID-1)*0x10) * width
-                        for i in range(e, min(e + 0x10*width, width*height)):
-                            pixelarray[i] = 0
-                    elif 0x30 <= commandID <= 0x3B:
-                        # change scale
-                        newscaleX, newscaleY = self.scalecommands[
-                            commandID & 0xF]
-                        if newscaleX: scaleX = newscaleX
-                        if newscaleY: scaleY = newscaleY
-                    elif 0x3D <= commandID <= 0x3F:
-                        # display life count digits (as 999)
-                        char = 0xA9
-                    elif commandID == 0x60:
-                        # large image
-                        self.displayimage(pixelarray, width, char, scrollY)
+                match textdata.texttype:
+                    case "Standard message":
+                        commandID = char.params[0]
+                        if 5 <= commandID <= 8:
+                            # start non-buffered line
+                            startX = 0
+                            startY = (commandID - 5) << 4
+                        elif commandID == 0xE:
+                            # start buffered line
+                            startX = 0
+                            startY = 0x40
+                            # erase line
+                            e = (scrollY + 0x40) * width
+                            for i in range(e, min(e + 0x10*width, width*height)):
+                                pixelarray[i] = 0
+                        elif 0x11 <= commandID <= 0x14:
+                            # scroll message
+                            scrollY += (commandID & 0xF) * char.repcount
+                        elif 1 <= commandID <= 4:
+                            # erase line
+                            e = (scrollY + (commandID-1)*0x10) * width
+                            for i in range(e, min(e + 0x10*width, width*height)):
+                                pixelarray[i] = 0
+                        elif 0x30 <= commandID <= 0x3B:
+                            # change scale
+                            newscaleX, newscaleY = self.scalecommands[
+                                commandID & 0xF]
+                            if newscaleX: scaleX = newscaleX
+                            if newscaleY: scaleY = newscaleY
+                        elif 0x3D <= commandID <= 0x3F:
+                            # display life count digits (as 999)
+                            char = 0xA9
+                        elif commandID == 0x60:
+                            # large image
+                            self.displayimage(pixelarray, width, char, scrollY)
 
-                elif textdata.texttype == "Level name":
-                    if char.charID == 0xFE:
+                    case "Level name":
+                        if char.charID == 0xFE:
+                            # set position
+                            startY, startX = char.params
+                        elif char.charID == 0xFF:
+                            # set X only
+                            startX = char.params[0]
+
+                    case "File select":
                         # set position
-                        startY, startX = char.params
-                    elif char.charID == 0xFF:
-                        # set X only
                         startX = char.params[0]
+                        startY = char.params[1] - 0x10
 
-                elif textdata.texttype == "File select":
-                    # set position
-                    startX = char.params[0]
-                    startY = char.params[1] - 0x10
+                    case "Ending":
+                        # restart line
+                        startX = 0
+                        if char.params[0] in (0x09, 0x0A):
+                            # new line
+                            startY += 0x10 * char.repcount
 
-                elif textdata.texttype == "Ending":
-                    # restart line
-                    startX = 0
-                    if char.params[0] in (0x09, 0x0A):
-                        # new line
-                        startY += 0x10 * char.repcount
-
-                elif textdata.texttype in ("Story intro", "Credits"):
-                    commandID = char.params[0]
-                    if commandID == 0x02:
-                        # set Y
-                        startY = char.params[1] * 2
-                    elif commandID == 0x03:
-                        # set X
-                        startX = char.params[1]
-                    elif commandID == 0x00:
-                        # single 1x scale character
-                        char = char.params[1]
-                        savedscale = scaleX, scaleY
-                        scaleX = 1
-                        scaleY = 1
-                    elif textdata.texttype == "Story intro":
-                        if commandID == 0x05:
-                            # single 2x scale character
+                    case "Story intro" | "Credits":
+                        commandID = char.params[0]
+                        if commandID == 0x02:
+                            # set Y
+                            startY = char.params[1] * 2
+                        elif commandID == 0x03:
+                            # set X
+                            startX = char.params[1]
+                        elif commandID == 0x00:
+                            # single 1x scale character
                             char = char.params[1]
                             savedscale = scaleX, scaleY
-                            scaleX = 2
-                            scaleY = 2
-                        elif commandID in (0x04, 0x31):
-                            # 2x scale for rest of message
-                            scaleX = 2
-                            scaleY = 2
+                            scaleX = 1
+                            scaleY = 1
+                        elif textdata.texttype == "Story intro":
+                            if commandID == 0x05:
+                                # single 2x scale character
+                                char = char.params[1]
+                                savedscale = scaleX, scaleY
+                                scaleX = 2
+                                scaleY = 2
+                            elif commandID in (0x04, 0x31):
+                                # 2x scale for rest of message
+                                scaleX = 2
+                                scaleY = 2
 
                 if isinstance(char, SMA3.TextCommand):
                     # if command has not been replaced by a character
@@ -702,17 +728,18 @@ class QSMA3FontGraphicsItem(QGraphicsPixmapItem):
 
         self.setPixmap(QPixmap.fromImage(image))
 
-class QMessageTextEdit(QTextEdit):
-    "Subclassed to change the default width?"
+class QMessageTextEdit(QPlainTextEdit):
+    "Subclassed to change the default width, and allow tabbing out."
     def __init__(self):
         super().__init__()
 
         self.defaultwidth = QtAdvFunc.basewidth(self) * 50
+        self.setTabChangesFocus(True)
 
     def sizeHint(self):
         return QSize(self.defaultwidth, 0x80)
 
-class QDialogLinkMessage(QDialog):
+class QDialogLinkMessage(QDialogBase):
     def __init__(self, parent, messages, msgID):
         super().__init__(parent)
 
@@ -752,8 +779,8 @@ class QDialogLinkMessage(QDialog):
 
     def accept(self):
         if self.msgID == self.linkdestinput.value:
-            QSimpleDialog(self, text="Cannot link a message with itself."
-                          ).exec()
+            QSimpleDialog(self, wordwrap=False,
+                text="Cannot link a message with itself.").exec()
             return
         self.messages.linkitem(self.msgID, self.linkdestinput.value)
         super().accept()
@@ -762,7 +789,7 @@ class QDialogLinkMessage(QDialog):
         self.linktext.setText(
             self.parent().messagelabeltext(self.linkdestinput.value))
 
-class QDialogAddTextCommand(QDialog):
+class QDialogAddTextCommand(QDialogBase):
     def __init__(self, parent, texttype, char=0xFF):
         super().__init__(parent)
 
@@ -784,7 +811,7 @@ class QDialogAddTextCommand(QDialog):
         else:
             self.commandlist.setCurrentRow(0)
         self.commandlist.itemDoubleClicked.connect(self.accept)
-        
+
         # init layout
 
         layoutMain = QVHBoxLayout()
@@ -800,4 +827,69 @@ class QDialogAddTextCommand(QDialog):
         except IndexError:
             return
         self.parent().insertcommand(commandID)
+        super().accept()
+
+class QDialogExportMessages(QDialogBase):
+    def __init__(self, parent, texttypes):
+        super().__init__(parent)
+
+        self.setWindowTitle("Export Messages")
+
+        self.texttypes = texttypes
+
+        layoutMain = QVHBoxLayout()
+        self.setLayout(layoutMain)
+
+        layoutMain.addWidget(QLabel("Message types to export:"))
+
+        self.checkboxes = {}
+        layoutCheckbox = QVBoxLayout()
+        layoutMain.addLayout(layoutCheckbox)
+        layoutCheckbox.setSpacing(0)
+        for seq in SMA3.Constants.msgtypes:
+            texttype = seq[0]
+            checkbox = QCheckBox(texttype)
+            checkbox.setChecked(True)
+            layoutCheckbox.addWidget(checkbox)
+            self.checkboxes[texttype] = checkbox
+        layoutMain.addAcceptRow(self, "Export")
+
+    def accept(self):
+        for key, checkbox in self.checkboxes.items():
+            if checkbox.isChecked():
+                self.texttypes.append(key)
+        if self.texttypes:
+            super().accept()
+        else:
+            QSimpleDialog(self, wordwrap=False,
+                text="Export file must include at least one message type."
+                ).exec()
+
+class QDialogImportMessages(QDialogBase):
+    def __init__(self, parent, newtexttypes):
+        super().__init__(parent)
+
+        self.setWindowTitle("Import Messages")
+
+        # init widgets
+
+        label = QLabel("".join((
+            "Replace these message types?\n"
+            "Messages can be viewed before saving.\n\n",
+            "\n".join(newtexttypes),
+            )))
+        self.checkbox = QCheckBox("Don't show this message again")
+
+        # init layout
+
+        layoutMain = QVHBoxLayout()
+        self.setLayout(layoutMain)
+
+        layoutMain.addWidget(label)
+        layoutMain.addWidget(self.checkbox)
+        layoutMain.addAcceptRow(self, "Load")
+
+    def accept(self):
+        if self.checkbox.isChecked():
+            setattr(AdvSettings, "warn_import_messages", False)
         super().accept()

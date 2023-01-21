@@ -6,7 +6,7 @@ import AdvEditor.Number
 from AdvGame import SMA3
 from .GeneralQt import *
 
-class QSMA3HeaderEditor(QDialog):
+class QSMA3HeaderEditor(QDialogBase):
     "Dialog for editing the current sublevel's header settings."
     def __init__(self, parent):
         super().__init__(parent)
@@ -29,8 +29,8 @@ class QSMA3HeaderEditor(QDialog):
             self.defaultmaxvalues.append(maxvalue)
 
             text = "".join((
-                format(i, "X"), ": ", name, " (",
-                "0"*AdvEditor.Number.hexlen(maxvalue), "-", format(maxvalue, "X"), ")",
+                format(i, "X"), ": ", name, " ",
+                AdvEditor.Number.hexstr_0tomax(maxvalue)
                 ))
             self.defaultlabeltext.append(text)
             self.labels.append(QLabel(text))
@@ -215,12 +215,14 @@ def setaction(headertoupdate, usemergeID=False):
         return
     elif len(headertoupdate) == 1:
         i = tuple(headertoupdate)[0]
-        actionstr = "Edit " + SMA3.Constants.headersettings[i]
+        headername = SMA3.Constants.headersettings[i]
+        if "/\n" in headername:
+            headername = headername.split("/\n")[0]
+        actionstr = "Edit " + headername
         if usemergeID:
             mergeID = "Header Value " + str(i)
         AdvWindow.statusbar.setActionText(
-            SMA3.Constants.headersettings[i].partition("/")[0].lower().capitalize() +
-            " updated.")
+            headername.lower().capitalize() + " updated.")
     else:
         actionstr = "Edit Header"
         AdvWindow.statusbar.setActionText("Sublevel header updated.")

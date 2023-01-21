@@ -10,34 +10,46 @@ import AdvMetadata, AdvEditor.Number
 _settingspath = os.path.join(AdvMetadata.appdir, "Advynia.cfg")
 
 class Settings:
+    # This class's single instance acts as the module, to customize setattr
     # All non-setting attributes/methods start with _ to avoid conflicting with
     #  setting attributes
 
     _enablecfgwrite = False
 
     _defaults = {
-        "click_insert":[[1, 67108864], [2, 0]],  # control+click, right-click
-        "click_selectdrag":[[1, 0]],  # click
-        "click_selectmulti":[[1, 33554432]],  # shift+click
-        "editor_lastversion":(0, 0, 0),
-        "extprefix":"Ex",
-        "mouse_resizeradius":3,
-        "ROM_autoload":True,
-        "ROM_recent":[],
-        "ROM_recent_max":10,
-        "text_imageoffbyone":True,
-        "text_simplified":False,
-        "undo_max":500,
-        "visual_dimscreens":1,
-        "visual_redcoins":True,
-        "visual_zoom":100,
-        "warn_import_SNES":True,
-        "warn_patch_all":True,
-        "warn_save_first":True,
-        "warn_save_itemmemory":True,
-        "warn_save_screencount":True,
-        "warn_unsaved":True,
-        "window_sidebarpos":1,
+        "click_insert": [[1, 67108864], [2, 0]],  # control+click, right-click
+        "click_selectdrag": [[1, 0]],  # click
+        "click_selectmulti": [[1, 33554432]],  # shift+click
+        "dir_graphicssuffix": "-Graphics",
+        "dir_tilemapssuffix": "-Tilemaps",
+        "editor_lastversion": (0, 0, 0),
+        "export_yileveltool_enable": False,
+        "extprefix": "Ex",
+        "import_includegraphics": True,
+        "import_includetilemaps": True,
+        "import_graphicstovanillaregion": True,
+        "mouse_resizeradius": 3,
+        "recovery_autoexport": True,
+        "ROM_autoload": True,
+        "ROM_recent": [],
+        "ROM_recent_max": 10,
+        "text_imageoffbyone": True,
+        "text_simplified": False,
+        "undo_max": 500,
+        "visual_dimscreens": 1,
+        "visual_redcoins": True,
+        "visual_zoom": 100,
+        "warn_export_all": True,
+        "warn_import_allentrances": True,
+        "warn_import_messages": True,
+        "warn_import_SNES": True,
+        "warn_patch_all": True,
+        "warn_save_expandROM": True,
+        "warn_save_first": True,
+        "warn_save_itemmemory": True,
+        "warn_save_screencount": True,
+        "warn_unsaved": True,
+        "window_sidebarpos": 1,
         "window_SMA3Editor": (64, 64, 0x400, 0x280),
     }
     from AdvEditor.PatchData import patches as _patches
@@ -45,7 +57,7 @@ class Settings:
         _defaults["warn_patch_" + _patchkey] = True
 
     _mouseinputs = tuple(_key for _key in _defaults
-                         if _key.startswith("mouseinput"))
+                         if _key.startswith("click_"))
 
     _keylen = 1 + max(len(i) for i in _defaults.keys())
 
@@ -118,8 +130,7 @@ class Settings:
             # case-insensitive sort
             output += [key.ljust(self._keylen), "= ", repr(getattr(self, key)),
                        "\n"]
-        with open(_settingspath, "w", encoding="UTF-8") as f:
-            f.write("".join(output))
+        open(_settingspath, "w", encoding="UTF-8").write("".join(output))
 
     def __setattr__(self, key, value):
         if key[0] != "_" and key not in self._defaults:

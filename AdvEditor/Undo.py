@@ -42,7 +42,7 @@ class UndoHistory(list):
         self.index = 0
         self.chain = 0
         self.mergeID = None
-        self.updatelastsave()
+        self._statechange()
 
     def addstate(self, data, action, mergeID=None, **kwargs):
         """Add a new undo state after the current index, replacing any states
@@ -62,7 +62,7 @@ class UndoHistory(list):
                 self.index += 1
             self.mergeID = mergeID
         self.chain = 0
-##        self._printstate()
+        self._statechange()
 
     def undo(self):
         "Step backward and return the new current state."
@@ -71,7 +71,7 @@ class UndoHistory(list):
             self.index -= 1
             self.chain = min(-1, self.chain - 1)
             self.mergeID = None
-##            self._printstate()
+            self._statechange()
             return self.data, updateset
 
     def redo(self):
@@ -81,17 +81,23 @@ class UndoHistory(list):
             updateset = self.state.updateset  # set of new state
             self.chain = max(1, self.chain + 1)
             self.mergeID = None
-##            self._printstate()
+            self._statechange()
             return self.data, updateset
 
     def updatelastsave(self):
         "Set the last saved state to be the current state."
         self.lastsave = self.state
+        self._statechange()
+
     def issaved(self):
         "Return whether the current state is the last saved state."
         return self.state is self.lastsave
 
-##    def _printstate(self):
+    def _statechange(self):
+        """Can be subclassed for actions that need to occur whenever the
+        current or last saved state changes."""
+        pass
+##        # print state
 ##        text = [str(self.index), "/", str(len(self)-1), " ",
 ##                str(self[self.index])]
 ##        if self.mergeID:
@@ -174,3 +180,7 @@ class SublevelUndoHistory(UndoHistory):
         else:
             # sublevel editing usually affects these
             AdvWindow.editor.reload({"Objects", "Sprites"})
+
+    def _statechange(self):
+        # disable saving if current state is last saved state
+        AdvWindow.editor.actions["Save Sublevel"].setDisabled(self.issaved())

@@ -102,7 +102,7 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
             sumY += item.y
         length = len(self)
         return sumX // length, sumY // length
-    
+
     def checklayers(self):
         """Check which layers are currently visible, to avoid selecting
         invisible items."""

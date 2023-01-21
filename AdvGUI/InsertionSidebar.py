@@ -39,12 +39,11 @@ class QInsertionSidebar(QDockWidget):
             self.metaicons.append(QLabel())
             self.metaicons[-1].hide()
 
-        self.graphicstypelabel = QLabel("\n")
+        self.graphicstypelabel = QLabelToolTip("\n", prefix="Graphics type:\n")
         self.graphicstypelabel.setWordWrap(True)
         self.graphicstypelabel.setFixedHeight(
             self.graphicstypelabel.sizeHint().height())
-        self.graphicstypelabel.setToolTip(
-            "Graphics type")
+        self.graphicstypelabel.setToolTip("")  # no initial tooltip
         self.graphicstypelabel.setSizePolicy(QSizePolicy(
             QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed))
 
@@ -192,10 +191,10 @@ class QInsertionSidebar(QDockWidget):
     iconlist = {
         "horiz":(None, "arrow-right", "arrow-left", "arrow-leftright"),
         "vert":(None, "arrow-down", "arrow-up", "arrow-updown"),
+        "layer0":(None, "layer0"),
         "itemmemory":(None, "yellowcoin", "redcoin", "greencoin"),
         "warp":(None, "door16", None),
         "rng":(None, "rng"),
-        "layer0":(None, None),
         "overlap":(None, "overlap-object-blue", "overlap-object-red",
                    "overlap-objspr-blue", "overlap-objspr-red",
                    "overlap-sprite-blue", "overlap-sprite-red"),
@@ -212,6 +211,7 @@ class QInsertionSidebar(QDockWidget):
         "redcoin":"Affected by item memory, high priority",
         "greencoin":"Affected by item memory, special",
         "door16":"Uses screen exit",
+        "layer0":"Uses layer 0 for foreground graphics",
         "rng":"Affected by RNG",
         "overlap-object-blue":"May change on overlap",
         "overlap-object-red":"Requires overlap to function",
@@ -233,7 +233,7 @@ class QInsertionSidebar(QDockWidget):
             if self.iconlist[key][iconID]:
                 iconname = self.iconlist[key][iconID]
                 iconpath = (
-                    AdvMetadata.datapath("icon", iconname+".png"))
+                    AdvMetadata.datapath("icon", iconname + ".png"))
                 self.metaicons[i].setPixmap(QPixmap("".join(iconpath)))
                 self.metaicons[i].setToolTip(self.icontooltips[iconname])
                 self.metaicons[i].show()
