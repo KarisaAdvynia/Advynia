@@ -10,7 +10,7 @@ Aiming to be a streamlined editor experience, providing what's needed for creati
 - Viewers for palettes, 8x8 tiles, and layer 1 16x16 tiles
 - Customizing sprite tileset and music in each sublevel
 - Inserting 16x16 tiles as objects
-- Exporting/importing sublevels, entrances, messages to Advynia-format .a3l files, including importing such data from SNES
+- Exporting/importing sublevels, entrances, and messages (using Advynia-format .a3l files), including SNES-GBA porting
 - Exporting/importing graphics and tilemaps to .bin files
 - Internal name editing
 - Various conveniences:
