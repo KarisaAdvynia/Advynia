@@ -6,7 +6,7 @@ import os, shutil
 
 # import from other files
 import AdvMetadata, AdvEditor.Export, AdvFile
-from AdvEditor import Adv3Attr, Adv3Sublevel
+from AdvEditor import Adv3Attr, Adv3Patch, Adv3Sublevel
 
 def _recoverydir(currentROMdir=True):
     """Return the recovery directory, if currentROMdir=False, or a
@@ -34,6 +34,7 @@ def restoreROM():
         shutil.copy2(
             os.path.join(_recoverydir(), Adv3Attr.filename),
             Adv3Attr.filepath)
+        Adv3Patch.detectpatches()
 
 def _recoveryexport(a3l):
     a3l.exporttofile(os.path.join(
