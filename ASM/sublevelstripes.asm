@@ -11,4 +11,6 @@
 .open "sma3test.gba", "sma3test-stripes.gba", 0x08000000
 
 .org 0x080137A0
-.long 0x2AAC
+.word 0x2AAC
+
+.close
