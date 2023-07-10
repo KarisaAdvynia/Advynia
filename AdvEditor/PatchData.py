@@ -3,34 +3,34 @@ Constants for Adv3Patch."""
 
 from AdvGame.SMA3 import PointersAdv
 
-patches = {  # key:(name, text)
-    "huffmantolz77":("Huffman to LZ77 Compression",
+patches = {  # key: (name, text)
+    "huffmantolz77": ("Huffman to LZ77 Compression",
         """Changes the compression format used by 7 Mario Bros. graphics files
 to match the rest of the game's compression. This slightly reduces their byte
 size, but has no other noticeable effect.<br><br>
 Advynia cannot modify these files without converting them to LZ77."""),
-    "midway6byte":("6-byte Midway Entrances",
+    "midway6byte": ("6-byte Midway Entrances",
         """Allows manually specifying the camera bytes in each midway entrance.
 The bytes can still be left as 00 to save/load them with the checkpoint, as
 in vanilla."""),
-    "musicoverride":("Music Override",
+    "musicoverride": ("Music Override",
         """Allows customizing the music ID and enabling/disabling pause menu
 items in every sublevel."""),
-    "object65":("Object 65: Arbitrary Single Tile",
+    "object65": ("Object 65: Arbitrary Single Tile",
         """Adds a rectangular custom object that can be any single 16x16
 tile ID."""),
-    "sublevelstripes":("Sublevel Sprite Tilesets",
+    "sublevelstripes": ("Sublevel Sprite Tilesets",
         """Allows customizing the 6 stripes for every sublevel.<br>
 Each sublevel's stripes will default to its current sprite tileset header
 setting. The header setting will no longer be used afterward."""),
-    "world6flag":("World 6 Tileset Flag",
+    "world6flag": ("World 6 Tileset Flag",
         """Allows access to the world 6 tileset (tileset 11) in any world, and
 to tileset 1 in world 6. Tilesets 10,12-1F also become selectable, but are
 clones of tilesets 0,2-F."""),
     }
 
 patchhexdata = {
-    "huffmantolz77":(
+    "huffmantolz77": (
         (0x08110C2A, bytes.fromhex("1E F0 4F FD")),  # bl swi_LZ77_VRAM
         (0x081116CA, bytes.fromhex("1D F0 FF FF")),  # bl swi_LZ77_VRAM
         (0x081116DE, bytes.fromhex("1D F0 F5 FF")),  # bl swi_LZ77_VRAM
@@ -38,14 +38,14 @@ patchhexdata = {
         (0x08112948, bytes.fromhex("1C F0 C0 FE")),  # bl swi_LZ77_VRAM
         (0x081186B4, bytes.fromhex("17 F0 0A F8")),  # bl swi_LZ77_VRAM
         ),
-    "midway6byte":(
+    "midway6byte": (
         (0x08002ED4, bytes.fromhex("""
             44 00 80 00 00 19 09 68 09 18 45 48
 0A 88 02 80 4A 88 42 80 8A 88 00 2A 01 D0 82 80
 09 E0 43 4A 11 78 01 71 11 79 41 71 03 E0 00 00
 00 00 00 00 00 00""")),  # patch hex code
         ),
-    "musicoverride":(
+    "musicoverride": (
         (0x0802C2D6, bytes.fromhex("95 F1 28 FE")),  # jump
         (0x081C1F2A, bytes.fromhex("""09 4A 10 78 0E 21
 88 42 02 D2 07 4A 13 68 70 47 88 43 06 4A 10 70
@@ -54,7 +54,7 @@ B6 4B 00 03 40 72 00 03 B8 48 00 03 B8 4C 00 03
 00 20 1C 08""")),  # patch hex code
         (PointersAdv.musicoverride, b"\xFF"*0x100),  # music ID table
         ),
-    "object65":(
+    "object65": (
         (0x0816828C + 0x65*4, 0x081C1FC1.to_bytes(4, "little")),  # init pointer
         (0x08168AAC + 0x65*4, 0x081C1FDF.to_bytes(4, "little")),  # main pointer
         (0x081C19D8 + 0x65, b"\x06"),  # signal flag
@@ -64,7 +64,7 @@ C3 86 24 02 2C 43 44 87 58 F6 4A F8 30 BD 42 8F
 4A 30 00 88 02 49 09 68 0A 52 70 47 14 4D 00 03
 10 70 00 03""")),  # patch hex code
         ),
-    "world6flag":(
+    "world6flag": (
         (0x08013480, bytes.fromhex("""
 0E 48 01 88 0E 48 00 88 0E 4A 12 5C 12 01 11 43
 C8 00 89 00 41 18 0C 48 0D 18 28 68 00 68 0B 49

@@ -6,12 +6,12 @@ from collections.abc import Iterable
 import itertools
 
 # import from other files
-import AdvEditor.Export, AdvEditor.ROM
+import AdvEditor
 from AdvEditor import AdvSettings, AdvWindow, Adv3Attr, Adv3Save, Adv3Visual
 from AdvEditor.PatchData import patches, patchhexdata
 from AdvGame import GBA, SMA3
 
-def applypatch(patchkey: str, warndialog=True):
+def applypatch(patchkey: str, *, warndialog=True):
     "Apply an Advynia patch, given the patch key."
 
     if getattr(Adv3Attr, patchkey) is not False:
@@ -201,7 +201,7 @@ def applysublevelstripes():
         stripeIDtableptr = f.readint(4)
         f.seek(stripeIDtableptr)
 
-        for i in range(SMA3.Constants.headermaxvalues[7] + 1):
+        for i in range(SMA3.Constants.header[7].maxvalue + 1):
             oldstripeIDs.append(f.read(6))
 
         # extract old sprite tileset header settings
@@ -209,7 +209,7 @@ def applysublevelstripes():
         mainptrtable = f.readint(4)
         f.seek(mainptrtable)
         sublevelmainptrs = []
-        for i in range(SMA3.Constants.maxsublevel + 1):
+        for i in range(SMA3.Constants.maxsublevelID + 1):
             sublevelmainptrs.append(f.readint(4))
 
         sublevelh7 = []

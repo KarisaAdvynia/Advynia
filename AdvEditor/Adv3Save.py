@@ -6,9 +6,9 @@ as opposed to AdvGame, which does not rely on Advynia globals or Qt."""
 import os, traceback
 
 # import from other files
-import AdvMetadata, AdvEditor.Number, AdvEditor.ROM, AdvEditor.Recovery, AdvFile
+import AdvMetadata, AdvEditor, AdvFile, AdvGame
 from AdvEditor import AdvSettings, AdvWindow, Adv3Attr, Adv3Patch, Adv3Visual
-from AdvGame import AdvGame, GBA, SMA3
+from AdvGame import GBA, SMA3
 from AdvGUI.GeneralQt import QSimpleDialog
 
 savewrapperactive = False
@@ -130,8 +130,7 @@ def expandROM(bytecount):
         global queuedalert
         queuedalert = QSimpleDialog(
             AdvWindow.editor, title="Notice", wordwrap=False,
-            text="".join(("ROM expanded to ",
-                          AdvEditor.Number.megabytetext(newsize), " MiB.")))
+            text=f"ROM expanded to {AdvEditor.Number.megabytetext(newsize)} MiB.")
     return newsize
 
 # Sublevel save functions
@@ -154,6 +153,11 @@ def savesubleveltoROM(sublevel, sublevelID):
             mainptr2 = f.readptr(SMA3.Pointers.sublevelmainptrs) + 4*sublevelID
             spriteptr2 = f.readptr(SMA3.Pointers.sublevelspriteptrs) +\
                          4*sublevelID
+
+            # save layer 2/3 Y offsets
+            f.seek(f.readptr(SMA3.Pointers.sublevellayerY) + 4*sublevelID)
+            f.writeint(sublevel.layerYoffsets[2], 2)
+            f.writeint(sublevel.layerYoffsets[3], 2)
 
         mainptr1 = savedatatoROM(maindata, AdvGame.PtrRef(mainptr2))
         spriteptr1 = savedatatoROM(spritedata, AdvGame.PtrRef(spriteptr2))
@@ -179,12 +183,9 @@ def savesubleveltoROM(sublevel, sublevelID):
 
     # update window title and status bar
     AdvWindow.editor.updatewindowtitle()
-    actiontext = ("Saved sublevel {sublevelID}: main data at {mainptr}, "
-        "sprite data at {spriteptr}.")
-    AdvWindow.statusbar.setActionText(actiontext.format(
-        sublevelID=format(sublevelID, "02X"),
-        mainptr=format(mainptr1, "08X"),
-        spriteptr=format(spriteptr1, "08X")))
+    AdvWindow.statusbar.setActionText(
+        f"Saved sublevel {sublevelID:02X}: main data at {mainptr1:08X}, "
+        f"sprite data at {spriteptr1:08X}.")
 
     return True
 
@@ -279,20 +280,23 @@ def saveentrances(mainentrances, midwayentrances, *, oldmidwaylen=None):
                 ptrs.tobytearray(nullptr=1), entrances.ptrref)
         else:
             ptrs.endmarker = False
-            GBA.overwritedata(
-                Adv3Attr.filepath, bytes(ptrs),
-                GBA.readptr(Adv3Attr.filepath, entrances.ptrref))
+            ptr = GBA.readptr(Adv3Attr.filepath, entrances.ptrref)
+            with GBA.Open(Adv3Attr.filepath, "r+b") as f:
+                f.seek(ptr)
+                f.write(bytes(ptrs))
 
     # copy entrances to recovery folder
     if AdvSettings.recovery_autoexport:
         AdvEditor.Recovery.exportentrances(mainentrances, midwayentrances)
 
+    # update entrance indicators
+    AdvEditor.Entrance.loadglobalentrdata(mainentrances, midwayentrances)
+    AdvWindow.editor.reload({"Entrances"})
+
     # update status bar
-    statustext = ("Saved main entrances to {mainptr}, "
-                  "midway entrances to {midwayptr}.")
-    AdvWindow.statusbar.setActionText(statustext.format(
-        mainptr=format(startptrs[0], "08X"),
-        midwayptr=format(startptrs[1], "08X")))
+    AdvWindow.statusbar.setActionText(
+        f"Saved main entrances to {startptrs[0]:08X}, "
+        f"midway entrances to {startptrs[1]:08X}.")
 
     return True
 
@@ -326,7 +330,7 @@ def savemessages(messages, texttypestosave=None):
     for texttype, ptr in newptrs:
         if texttype in ("Level name", "Standard message"):
             texttype += "s"
-        statustext += [texttype.lower(), " at ", format(ptr, "08X"), ", "]
+        statustext += [texttype.lower(), f" at {ptr:08X}", ", "]
     statustext[-1] = "."
     AdvWindow.statusbar.setActionText("".join(statustext))
 

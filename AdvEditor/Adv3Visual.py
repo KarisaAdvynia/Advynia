@@ -7,7 +7,8 @@ import itertools
 
 # import from other files
 from AdvEditor import AdvSettings, AdvWindow, Adv3Attr
-from AdvGame import AdvGame, GBA, SMA3
+import AdvGame
+from AdvGame import GBA, SMA3
 from AdvGUI.GeneralQt import *
 from AdvGUI import QtAdvFunc
 
@@ -21,6 +22,7 @@ cache8_layers = [None]*0x600
 cache8_spriteglobal = [None]*0x280
 cache8_stripes = {}
 cache16 = {}
+cachesprite = {}
 
 # Graphics loading functions
 
@@ -52,14 +54,14 @@ def loadgraphics(sublevel):
     resetcaches()
 
 def updatestripesfromsublevel():
-    if not Adv3Attr.sublevel.stripeIDs:
+    if not Adv3Attr.sublevelstripes or not Adv3Attr.sublevel.stripeIDs:
         # current sublevel might be from file; import stripeIDs from current ROM
         with GBA.Open(Adv3Attr.filepath) as f:
             Adv3Attr.sublevel.importspritetileset(f, Adv3Attr.sublevelstripes)
     for i, newID in enumerate(Adv3Attr.sublevel.stripeIDs):
         if newID != spritegraphics.stripeIDs[i]:
             spritegraphics.loadstripe(Adv3Attr.filepath, i, newID)
-    AdvWindow.editor.reload("8x8")
+    AdvWindow.editor.reload({"8x8"})
 
 def loadpalette(sublevel):
     global palette
@@ -83,6 +85,7 @@ def resetcaches():
     resetcache8_layers()
     resetcache8_sprites()
     resetcache16()
+    resetcachesprite()
 
 def resetcache8_layers(region=None):
     for i in _cachetoclear(region):
@@ -96,6 +99,14 @@ def resetcache8_sprites():
 def resetcache16():
     cache16.clear()
 
+def resetcachesprite(sprIDs=None):
+    if sprIDs is not None:
+        todelete = [key for key in cachesprite if key[0] in sprIDs]
+        for key in todelete:
+            del cachesprite[key]
+    else:
+        cachesprite.clear()
+
 def _cachetoclear(region=None):
     if not region:
         return range(0x600)
@@ -108,7 +119,7 @@ def _cachetoclear(region=None):
     if region == "Animated":
         return range(0x200, 0x240)
 
-# Cache retrieval functions
+# Tile cache retrieval functions
 
 def get8x8(tileID, paletterow=1, xflip=False, yflip=False,
            sprite=False, stripeID=None):
@@ -174,6 +185,14 @@ def get8x8(tileID, paletterow=1, xflip=False, yflip=False,
     cache[tileID][propindex] = pixmap
     return pixmap
 
+_octagoncolors = {
+    0x10EFF: qRgb(255, 0, 0),
+    0x10EFE: qRgb(255, 132, 0),
+    0x10EFD: qRgb(0, 231, 0),
+    0x10EFB: qRgb(0, 189, 189),
+    0x100A8: qRgba(0, 189, 189, 123),
+    }
+
 def get16x16(tileID):
     """Retrieve a particular layer 1 16x16 pixmap, using the cache if
     present. Otherwise generate the pixmap."""
@@ -182,33 +201,35 @@ def get16x16(tileID):
         return cache16[tileID]
     elif (tileID >= 0x10000 or tileID == 0x0010 or
             tileID not in Adv3Attr.tilemapL1_8x8):
-        # out of bounds tile ID, draw special 16x16 tile
-        if tileID == 0x10EFF:
-            image = QNumberedTile16("EFF", qRgb(255, 0, 0), shape="octagon")
-        elif tileID == 0x10EFE:
-            image = QNumberedTile16("EFE", qRgb(255, 132, 0), shape="octagon")
-        elif tileID == 0x10EFD:
-            image = QNumberedTile16("EFD", qRgb(0, 231, 0), shape="octagon")
+        # out of in-game range tile ID: draw special 16x16 tile
+        if qcolor := _octagoncolors.get(tileID):
+            # misc octagonal filler tile for invisible objects
+            image = QNumberedTile16(f"{tileID&0xFFF:02X}",
+                                    qcolor, shape="octagon")
         elif tileID == 0x0010:
-            image = QNumberedTile16("E80", qRgb(0, 189, 189), shape="octagon")
-        elif tileID == 0x10EFB:
-            image = QNumberedTile16("EFB", qRgb(0, 189, 189), shape="octagon")
+            # E80 visual (transparent teal)
+            image = QNumberedTile16("E80",
+                                    qRgba(0, 189, 189, 123), shape="octagon")
         elif 0x10E00 <= tileID < 0x10F00:
             # extended object filler tile (purple)
-            image = QNumberedTile16(format(tileID&0xFFF, "02X"),
-                qRgb(132, 0, 255), shape="square")
+            image = QNumberedTile16(f"{tileID&0xFFF:03X}",
+                                    qRgb(132, 0, 255), shape="square")
         elif 0x10000 <= tileID < 0x10100:
             # standard object filler tile (blue)
-            image = QNumberedTile16(format(tileID&0xFF, "02X"),
-                qRgb(0, 0, 255), shape="square")
+            image = QNumberedTile16(f"{tileID&0xFF:02X}",
+                                    qRgb(0, 0, 255), shape="square")
         elif 0x10600 <= tileID < 0x10700:
             # 16x16 viewer label tile (magenta)
-            image = QNumberedTile16(format(tileID&0xFF, "02X"),
-                qRgb(255, 0, 255), shape="square")
+            image = QNumberedTile16(f"{tileID&0xFF:02X}",
+                                    qRgb(255, 0, 255), shape="square")
+        elif 0x11000 <= tileID < 0x12000:
+            # object generation error tile (red)
+            image = QNumberedTile16(f"{tileID&0xFFF:02X}",
+                                    qRgb(255, 0, 66), shape="square")
         else:
-            # error tile (red)
-            image = QNumberedTile16(format(tileID&0xFFF, "02X"),
-            qRgb(255, 0, 64), shape="square")
+            # invalid tile ID error (orange)
+            image = QNumberedTile16(f"{tileID:04X}",
+                                    qRgb(255, 132, 0), shape="square")
         pixmap = QPixmap.fromImage(image)
     else:
         # ordinary 16x16 game graphics
@@ -222,7 +243,7 @@ def get16x16(tileID):
                 painter.drawPixmap(
                     (i&1)<<3, (i&2)<<2, get8x8(*GBA.splittilemap(tileprop)))
 
-            if 0xA300 <= tileID < 0xA314:
+            if AdvSettings.visual_redcoins and tileID >> 8 == 0xA3:
                 # draw red coin on poundable post tiles containing them
                 painter.setCompositionMode(
                     painter.CompositionMode.CompositionMode_SourceOver)
@@ -289,23 +310,193 @@ def getdynamicrect(width, height, ptr, paletterow, xflip=False, yflip=False):
         image.mirror(horizontal=xflip, vertical=yflip)
     return QPixmap.fromImage(image)
 
+# Pixel font pixmap generation
+
+def getfontpixmap(string, bgcolor, fontcolor, bordercolor=None):
+    "Draw a pixmap of an ASCII string."
+
+    widths = [AdvMetadata.fontwidths[ord(char)] for char in string]
+    width = 1 + sum(widths)
+    height = 1 + AdvMetadata.fontheight
+
+    image = QImage(width, height, QImage.Format.Format_Indexed8)
+    palette = [bgcolor, fontcolor]
+    if bordercolor is not None:
+        palette.append(bordercolor)
+    image.setColorTable(palette)
+    image.fill(0)
+
+    rowlength = image.bytesPerLine()  # account for multiple of 4 padding
+    pixelarray = image.bits().asarray(rowlength * height)
+
+    # draw border, if applicable
+    if bordercolor is not None:
+        for i in range(width):
+            pixelarray[i] = 2  # first row
+            pixelarray[rowlength*(height-1) + i] = 2  # last row
+        for i in range(0, rowlength*height, rowlength):
+            pixelarray[i] = 2  # first column
+            pixelarray[i + width - 1] = 2  # last column
+
+    # draw text
+    startX = 1
+    with open(AdvMetadata.datapath("font", "advpixelfont.bin"), "rb") as bitmap:
+        for char, charwidth in zip(string, widths, strict=True):
+            bitmap.seek(ord(char) * 8)
+
+            y = 1
+            for byte in bitmap.read(8):
+                x = startX
+                for bitindex in range(charwidth):
+                    if (byte >> (7-bitindex)) & 1:
+                        pixelarray[rowlength*y + x] = 1
+                    x += 1
+                y += 1
+            startX += charwidth
+
+    return QPixmap.fromImage(image)
+
+# Layer 2/3 pixmap generation
+
+def getlayerpixmap(layer, width, height):
+    "Draw a pixmap of the current sublevel's layer 2 or 3 image."
+
+    if layer == 2: layerIDoffset = 0
+    elif layer == 3: layerIDoffset = 0x200
+    else: raise ValueError("Layer must be 2 or 3.")
+
+    tilemap = layergraphics.tilemap[layer]
+
+    if len(tilemap) > 0x800: del tilemap[0x800:]
+    elif len(tilemap) < 0x800: tilemap[0:0] = [None] * (0x800 - len(tilemap))
+
+    layerpixmap = QTransparentPixmap(width, height)
+
+    with QPainterSource(layerpixmap) as painter:
+        # iterate over 16x16 tiles in tilemap
+        for y in range(height >> 4):
+            for x in range(width >> 4):
+                tileprop = tilemap[y * (width >> 4) | x]
+                if tileprop is None:
+                    continue
+                tileID_8, paletterow, xflip, yflip = GBA.splittilemap(tileprop)
+
+                xflip = bool(xflip)  # convert True from 0x400 to 1
+                yflip = bool(yflip)*2  # convert True from 0x800 to 2
+
+                for i, offset16 in enumerate((0, 1, 0x10, 0x11)):
+                    tilepixmap = get8x8(layerIDoffset + tileID_8 + offset16,
+                        paletterow, xflip, yflip)
+                    painter.drawPixmap(
+                        (i&1^xflip)<<3 | x<<4,
+                        (i&2^yflip)<<2 | y<<4,
+                        tilepixmap)
+
+    return layerpixmap
+
+def getscanlinepixmap(layer, width, height, offsets):
+    sourceimage = getlayerpixmap(layer, 0x200, 0x400).toImage()
+    sourceimage_linelen = sourceimage.bytesPerLine()
+    sourceimage_bytes = sourceimage.bits()
+    sourceimage_bytes.setsize(sourceimage.sizeInBytes())
+
+    newimage = QImage(width, len(offsets), sourceimage.format())
+    newimage_linelen = newimage.bytesPerLine()
+    newimage_bytes = newimage.bits()
+    newimage_bytes.setsize(newimage.sizeInBytes())
+    newimage.fill(0)
+
+    bytesperpixel = newimage.depth() // 8
+
+    for y, (offsetX, offsetY) in enumerate(offsets):
+        sourceoffset = offsetY * sourceimage_linelen + offsetX * bytesperpixel
+        destoffset = y * newimage_linelen
+        newimage_bytes[destoffset : destoffset + newimage_linelen] =\
+            sourceimage_bytes[sourceoffset : sourceoffset + newimage_linelen]
+    return QPixmap.fromImage(newimage)
+
+def _compressed8bpp_to_pixmap(ptrref, tilewidth):
+    with GBA.Open(Adv3Attr.filepath) as f:
+        f.readseek(ptrref)
+        graphics = AdvGame.GameGraphics(f.read_decompress(), tilesize=0x40)
+
+    tileheight = len(graphics) // tilewidth
+    if len(graphics) % tilewidth:
+        tileheight += 1  # round up
+
+    pixmap = QTransparentPixmap(tilewidth*8, tileheight*8)
+    with QPainter(pixmap) as painter:
+        for i, tile in enumerate(graphics):
+            painter.drawImage(i % tilewidth * 8, i // tilewidth * 8,
+                              QGBA8x8Tile_8bpp(tile, palette[0:0x100]))
+    return pixmap
+
 # Sprite pixmap generation
 
-# colors for fallback numbered circles: green, red, yellow(orange), pink
+# colors for fallback numbered circles and default text
+#  green, red, yellow(orange), pink
 parityqcolors = (0xFF29B129, 0xFFCE2929, 0xFFFFA529, 0xFFDE2994)
 
 class QPainterSprite(QPainter):
+    def __init__(self, pixmap):
+        super().__init__(pixmap)
+
+        self.size = pixmap.size()
+        self.lastopacity = None
+        self.subpixmap = None
+
     def drawTileattr(self, offsetX, offsetY, tileattr):
         """Draw a pixmap corresponding to an entry in the sprite metadata
         tilemap."""
         a = tileattr  # short name since tileattr is referenced so frequently
+
+        # draw all tiles with the same opacity to one sub-pixmap,
+        #  then apply it to the main pixmap on opacity change
+        if a.opacity != self.lastopacity:
+            self.finalize_subpixmap()
+            self.lastopacity = a.opacity
+            if a.opacity != 1:
+                self.subpixmap = QTransparentPixmap(self.size)
+        if a.opacity != 1:
+            with QPainterSprite(self.subpixmap) as subpainter:
+                subpainter.drawTileattr(offsetX, offsetY, a._replace(opacity=1))
+            return
 
         # adjust to absolute coordinates
         x = a.x - offsetX
         y = a.y - offsetY
 
         # generate pixmap
-        if a.dynamicptr:
+        if a.misc:
+            if a.misc == "Hookbill":
+                # Hookbill 8bpp graphics special handling
+                pixmap = _compressed8bpp_to_pixmap(SMA3.Pointers.LZ77_graphics[
+                        "Gameplay_Hookbill_L2_8bpp.bin"], 0x10)
+            else:
+                raise ValueError(
+                    "Invalid value for sprite tile attribute misc:\n" + a.misc)
+        elif a.text:
+            if a.paletterow < 4:
+                # repurpose paletterow as parity color
+                color = parityqcolors[a.paletterow]
+            else:
+                # repurpose paletterow as 15-bit color
+                color = QtAdvFunc.color15toQRGB(a.paletterow & 0x7FFF)
+            pixmap = getfontpixmap(a.text, color, 0xFFFFFFFF, 0xFF000000)                
+        elif a.layer:
+            if a.tileID is not None:
+                pixmap = getscanlinepixmap(a.layer, a.width, a.height,
+                    SMA3.ScanlineOffsetData.sprite[a.tileID])
+            elif a.size is not None:
+                pixmap = getlayerpixmap(a.layer, 0x200, 0x400).copy(
+                    *a.size, a.width, a.height)
+            else:
+                print(a)
+                raise ValueError(
+                    "Layer-based sprite graphics:\n" + str(a) +
+                    "\n...did not provide either a ScanlineOffsetData index,"
+                    " or a 4-argument rectangular region to crop.")
+        elif a.dynamicptr:
             pixmap = getdynamicrect(
                 a.width, a.height, a.dynamicptr, a.paletterow, a.xflip, a.yflip)
         elif a.width == 8 and a.height == 8:
@@ -317,7 +508,6 @@ class QPainterSprite(QPainter):
                 a.xflip, a.yflip, a.sprite, a.stripeID)
 
         # apply transformations if needed
-        self.setOpacity(a.opacity)
         if a.angle or a.scaleX != 1 or a.scaleY != 1:
             self.translate(x + pixmap.width()/2, y + pixmap.height()/2)
             self.rotate(-a.angle)
@@ -328,11 +518,35 @@ class QPainterSprite(QPainter):
         else:
             self.drawPixmap(x, y, pixmap)
 
+    def __exit__(self, *args):
+        if args[0] is None:  # exited normally, not via exception
+            self.finalize_subpixmap()
+        super().__exit__(*args)
+
+    def finalize_subpixmap(self):
+        """Apply a subpixmap with non-100% opacity to the main image.
+        Called when the opacity changes, and when the painter is finished."""
+        if self.subpixmap is not None:
+            self.setOpacity(self.lastopacity)
+            self.drawPixmap(0, 0, self.subpixmap)
+            self.setOpacity(1)
+            self.lastopacity = None
+            self.subpixmap = None
+
 def getspritepixmap(sprID, parity):
+    "Draw a pixmap of a specified sprite, from its metadata."
+
     pixmap = None
     offsetX, offsetY = 0, 0
 
     metadata = SMA3.SpriteMetadata[(sprID, parity)]
+
+    # if pixmap was cached, return that
+    cachekey = (sprID, parity & metadata.parity)
+    if cachekey in cachesprite:
+        return cachesprite[cachekey]
+
+    # else, generate sprite
     if sprID == 0x65 and not AdvSettings.visual_redcoins:
         # red coin: use yellow coin sprite's graphic if red coins are hidden
         metadata = SMA3.SpriteMetadata[(0x1AF, parity)]
@@ -353,12 +567,19 @@ def getspritepixmap(sprID, parity):
             # stripe graphics not loaded, or tile ID overflowed
             pixmap = None
 
-    if not pixmap:
-        # fallback image
-        image = QNumberedTile16(
-            format(sprID, "02X"), parityqcolors[parity & metadata.parity],
-            shape="circle")
-        pixmap = QPixmap.fromImage(image)
-        offsetX, offsetY = 0, 0
+    if pixmap:
+        cachesprite[cachekey] = (pixmap, offsetX, offsetY)
+        return pixmap, offsetX, offsetY
+    else:
+        # use fallback pixmap, don't cache
+        return getspritefallbackpixmap(sprID, parity), 0, 0
 
-    return pixmap, offsetX, offsetY
+def getspritefallbackpixmap(sprID, parityID):
+    """Draw a numbered circle containing a sprite ID, with varying color if
+    the sprite is affected by parity."""
+
+    image = QNumberedTile16(
+        f"{sprID:02X}",
+        parityqcolors[parityID & SMA3.SpriteMetadata[(sprID, parityID)].parity],
+        shape="circle")
+    return QPixmap.fromImage(image)

@@ -9,7 +9,7 @@ import AdvMetadata
 from AdvGame import SMA3
 from AdvGame.SpriteTilemapTextParser import processrawtilemap
 
-class Metadata:
+class MetadataSingle:
     def __repr__(self):
         output = ["<", self.__class__.__name__, ": {"]
         for key in dir(self):
@@ -19,9 +19,9 @@ class Metadata:
         output[-1] = "}>"
         return "".join(output)
 
-class ObjectMetadata(Metadata):
+class ObjectMetadataSingle(MetadataSingle):
     _objdata = ("ID", "extID", "x", "y", "adjwidth", "adjheight")
-    _tilesets = [format(i, "X") for i in range(0x10)] + ["11"]
+    _tilesets = [f"{i:X}" for i in range(0x10)] + ["11"]
     _resizing = ("wmin", "wmax", "wstep", "hmin", "hmax", "hstep")
     _strkeys = ("name", "tooltipbase", "graphicstype")
     _numkeys = ("enabled",
@@ -41,10 +41,10 @@ class ObjectMetadata(Metadata):
                          "hmin":1, "hmax":0x80, "hstep":1,
                          "horiz":0, "vert":0}
 
-class SpriteMetadata(Metadata):
-    _sprdata = ("ID", "extID", "x", "y")
+class SpriteMetadataSingle(MetadataSingle):
+    _sprdata = ("ID", "parityID", "x", "y")
     _strkeys = ("name", "tooltipbase", "tilemap", "graphicstype")
-    _numkeys = ("enabled", "parity",
+    _numkeys = ("enabled", "parity", "pairoffset",
                 "itemmemory", "rng", "overlap",
                 "nointeract", "enemy", "item", "standable", "warp")
 
@@ -53,11 +53,13 @@ class SpriteMetadata(Metadata):
             self.__setattr__(key, "")
         for key in self._numkeys:
             self.__setattr__(key, None)
-        self.preview = {"ID":0, "extID":None, "x":4, "y":4}
+        self.preview = {"ID":0, "parityID":None, "x":4, "y":4}
 
 class ObjectMetadataMapping(dict):
     "Subclass of dict, with fallback for objects with arbitrary extID."
     def __getitem__(self, key):
+        if isinstance(key, SMA3.Object):  # allow accepting objects as keys
+            key = (key.ID, key.extID)
         try:
             return dict.__getitem__(self, key)
         except KeyError:
@@ -65,7 +67,16 @@ class ObjectMetadataMapping(dict):
 
 class SpriteMetadataMapping(dict):
     "Subclass of dict, with fallback for undefined sprite parity values."
+    def __init__(self):
+        super().__init__()
+
+        # precalculated categories of sprites
+        self.uselayer = {2: set(), 3: set()}
+        self.pairable = {}
+
     def __getitem__(self, key):
+        if isinstance(key, SMA3.Sprite):  # allow accepting sprites as keys
+            key = (key.ID, key.parity())
         try:
             return dict.__getitem__(self, key)
         except KeyError:
@@ -79,7 +90,7 @@ class SpriteMetadataMapping(dict):
 def _importmetadata(file):
     """Convert metadata from the spreadsheet .tsv export to a list of dicts,
     with first row as keys."""
-    with open(file, mode="r", encoding="UTF-8") as f:
+    with open(file, "r", encoding="UTF-8") as f:
         keys = f.readline().rstrip("\n").split(sep="\t")
         lines = []
         while True:
@@ -99,26 +110,26 @@ def _importobjmetadata(file):
     for rawline in rawlines:
         objID = ast.literal_eval(rawline["ID"])
         extID = ast.literal_eval(rawline["extID"])
-        output[(objID, extID)] = ObjectMetadata()
+        output[(objID, extID)] = ObjectMetadataSingle()
         metadata = output[(objID, extID)]
 
-        for key in ObjectMetadata._objdata:
+        for key in ObjectMetadataSingle._objdata:
             if rawline[key]:
                 metadata.preview[key] = ast.literal_eval(rawline[key])
-        for key in ObjectMetadata._tilesets:
+        for key in ObjectMetadataSingle._tilesets:
             if rawline[key]:
                 metadata.tilesets.add(int(key, base=16))
-        for key in ObjectMetadata._resizing:
+        for key in ObjectMetadataSingle._resizing:
             if rawline[key]:
                 metadata.resizing[key] = ast.literal_eval(rawline[key])
-        for key in ObjectMetadata._numkeys:
+        for key in ObjectMetadataSingle._numkeys:
             if rawline[key]:
                 setattr(metadata, key, ast.literal_eval(rawline[key]))
             elif key == "enabled":
-                pass
+                setattr(metadata, key, -1)
             else:
                 setattr(metadata, key, 0)
-        for key in ObjectMetadata._strkeys:
+        for key in ObjectMetadataSingle._strkeys:
             setattr(metadata, key, rawline[key])
 
         # Construct graphics type string, if not already present
@@ -129,10 +140,14 @@ def _importobjmetadata(file):
             elif metadata.tilesets:
                 text.append("L1=")
                 text.append(" ".join(
-                    format(i, "X") for i in sorted(metadata.tilesets)))
+                    f"{i:X}" for i in sorted(metadata.tilesets)))
             if metadata.t_anim:
                 if text: text.append(" + ")
-                text += "A=", format(metadata.t_anim, "02X")
+                text.append("A=")
+                if isinstance(metadata.t_anim, int):
+                    # convert single value to tuple
+                    metadata.t_anim = metadata.t_anim,
+                text.append(" ".join(f"{i:02X}" for i in metadata.t_anim))
             metadata.graphicstype = "".join(text)
         # account for special graphics types
         elif metadata.graphicstype == "train":
@@ -156,15 +171,13 @@ def _importobjmetadata(file):
             tooltip.append(metadata.tooltipbase)
 
         if metadata.resizing["wmin"] == metadata.resizing["wmax"]:
-            tooltip.append("".join(
-                ("<i>Only width=", format(metadata.resizing["wmin"], "02X"),
-                 " supported</i>")))
+            tooltip.append(
+                f"<i>Only width={metadata.resizing['wmin']:02X} supported</i>")
         elif metadata.resizing["wmax"] <= 1:
             tooltip.append("<i>Only negative widths supported</i>")
         if metadata.resizing["hmin"] == metadata.resizing["hmax"]:
-            tooltip.append("".join(
-                ("<i>Only height=", format(metadata.resizing["hmin"], "02X"),
-                 " supported</i>")))
+            tooltip.append(
+                f"<i>Only heght={metadata.resizing['hmin']:02X} supported</i>")
         elif metadata.resizing["hmax"] <= 1:
             tooltip.append("<i>Only negative heights supported</i>")
         if metadata.itemmemory:
@@ -205,29 +218,31 @@ def _importsprmetadata(file):
     output = SpriteMetadataMapping()
     for rawline in rawlines:
         sprID = ast.literal_eval(rawline["ID"])
-        extID = ast.literal_eval(rawline["extID"])
-        if extID is not None and ((sprID, None) in output):
+        parityID = ast.literal_eval(rawline["parityID"])
+        if parityID is not None and ((sprID, None) in output):
             metadata = copy.deepcopy(output[(sprID, None)])
         else:
-            metadata = SpriteMetadata()
-        output[(sprID, extID)] = metadata
+            metadata = SpriteMetadataSingle()
+        output[(sprID, parityID)] = metadata
 
-        for key in SpriteMetadata._sprdata:
+        for key in SpriteMetadataSingle._sprdata:
             if rawline[key]:
                 metadata.preview[key] = ast.literal_eval(rawline[key])
-        for key in SpriteMetadata._numkeys:
+        for key in SpriteMetadataSingle._numkeys:
             if rawline[key]:
                 setattr(metadata, key, ast.literal_eval(rawline[key]))
-            elif extID is not None or key == "enabled":
+            elif parityID is not None:
                 pass
+            elif key == "enabled":
+                setattr(metadata, key, -1)
             else:
                 setattr(metadata, key, 0)
-        for key in SpriteMetadata._strkeys:
+        for key in SpriteMetadataSingle._strkeys:
             if rawline[key]:
                 setattr(metadata, key, rawline[key])
 
     for key, metadata in output.items():
-        sprID, extID = key
+        sprID, parityID = key
 
         tilemap, stripes, dynamic = processrawtilemap(metadata.tilemap)
 
@@ -266,7 +281,7 @@ def _importsprmetadata(file):
                 text = []
                 if stripes:
                     text.append("Stripe ")
-                    text.append("+".join(format(stripe, "02X")
+                    text.append("+".join(f"{stripe:02X}"
                                 for stripe in sorted(stripes)))
                 if dynamic:
                     if text: text.append(" + ")
@@ -282,14 +297,13 @@ def _importsprmetadata(file):
         # Construct full tooltip
 
         tooltipname = metadata.name
-        if extID is not None and extID < 4:
+        if parityID is not None and parityID < 4:
             # use base name for parity sprites
             tooltipname = output[sprID, None].name
         if not tooltipname:
             tooltipname = "<i>Unimplemented</i>"
 
-        tooltipstart = "".join((
-            "Sprite ", format(sprID, "03X"), ": ", tooltipname))
+        tooltipstart = f"Sprite {sprID:03X}: {tooltipname}"
 
         # make first line nonbreaking
         tooltip = [nonbreakingstr(tooltipstart)]
@@ -298,16 +312,16 @@ def _importsprmetadata(file):
             tooltip.append(metadata.tooltipbase)
 
         # add parity
-        if extID is not None and extID < 4:
+        if parityID is not None and parityID < 4:
             if metadata.parity == 3:
                 line = ["<i>Affected by YX parity:"]
                 for i in range(4):
                     line.append(" ")
-                    if i == extID: line.append("<b>")
+                    if i == parityID: line.append("<b>")
                     text = output[sprID, i].name
                     if not text: text = "???"
-                    line += ["[", format(i, "02b"), "]:", nonbreakingstr(text)]
-                    if i == extID: line.append("</b>")
+                    line += [f"[{i:02b}]:", nonbreakingstr(text)]
+                    if i == parityID: line.append("</b>")
                 line.append("</i>")
                 tooltip.append("".join(line))
             elif metadata.parity in (1, 2):
@@ -317,12 +331,12 @@ def _importsprmetadata(file):
                     line = ["<i>Affected by Y parity:"]
                 for i in (0, metadata.parity):
                     line.append(" ")
-                    if i == extID: line.append("<b>")
+                    if i == parityID: line.append("<b>")
                     text = output[sprID, i].name
                     if not text: text = "???"
                     line += ["[", str(i//metadata.parity), "]:",
                              nonbreakingstr(text)]
-                    if i == extID: line.append("</b>")
+                    if i == parityID: line.append("</b>")
                 line.append("</i>")
                 tooltip.append("".join(line))
 
@@ -332,6 +346,13 @@ def _importsprmetadata(file):
             tooltip.append("<i>Affected by RNG</i>")
 
         metadata.tooltiplong = "<br>".join(tooltip)
+
+        # add to sprite categories if applicable
+        if metadata.pairoffset:
+            output.pairable[key] = metadata.pairoffset
+        for attr in metadata.tilemap:
+            if attr.layer in [2, 3]:
+                output.uselayer[attr.layer].add(sprID)
 
     return output
 
@@ -368,10 +389,11 @@ if __name__ == "__main__":
     totalsprites = 512
     enabledcount = [0]*5
     paritycount = [0]*4
+    unimplemented = []
     for i in range(totalsprites):
         metadata = SpriteMetadata[(i, None)]
         enabled = metadata.enabled
-        if enabled is None:
+        if enabled == -1:
             enabled = 4
         enabledcount[enabled] += 1
         if enabled == 3:
@@ -384,13 +406,11 @@ if __name__ == "__main__":
         else:
             if enabled < 3:
                 totalsprites -= 1
+            else:
+                unimplemented.append(i)
 
-    print("".join((
-        "Sprite tilemaps implemented: ", str(tilemapcount),
-        "/", str(totalsprites))))
+    print(f"Sprite tilemaps implemented: {tilemapcount}/{totalsprites}")
+    print("Remaining: " + ", ".join("{i:03X}" for i in unimplemented))
     print("Sprites disabled:{0}, glitch:{1}, non-recommended:{2}, "
           "recommended:{3}, None:{4}".format(*enabledcount))
     print("Parity:  None:{0}, X:{1}, Y:{2}, XY:{3}".format(*paritycount))
-##    print(ObjectMetadata[(0xFD, 0)])
-##    print(ObjectMetadata[(0, 0x82)])
-##    print(SpriteMetadata[(0x1E, None)])

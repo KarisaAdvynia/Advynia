@@ -11,7 +11,8 @@ import itertools
 ##    sys.path.append(".")
 
 # import from other files
-from AdvGame import AdvGame, GBA, SNES
+import AdvGame
+from AdvGame import GBA, SNES
 from AdvGame.SMA3 import Pointers, PointersSNES, Constants
 
 # Misc info
@@ -26,8 +27,7 @@ def levelnumber(levelID, short=False):
     else:
         worldnum = levelID // 0xC + 1
         cursorpos = levelID % 0xC
-        output = "".join((
-            str(worldnum), "-", Constants.levelnumrighthalf[cursorpos]))
+        output = f"{worldnum}-{Constants.levelnumrighthalf[cursorpos]}"
         if short:
             # use only first letter of words
             output = output[0:3]
@@ -53,6 +53,7 @@ class Sublevel:
         self.objects = []
         self.exits = {}
         self.sprites = []
+        self.layerYoffsets = self.layerYoffsets_defaults.copy()
 
         self.datablocks = {}
 
@@ -63,6 +64,7 @@ class Sublevel:
         self.music = None
         self.obj65_7byte = obj65_7byte
 
+    layerYoffsets_defaults = {2: 0x034E, 3: 0x015E}
     headerbitcounts = (5,4,5,5,6,6,6,8,5,5,6,5,5,4,2)
 
     def __getattr__(self, name):
@@ -92,9 +94,14 @@ class Sublevel:
         raise AttributeError(" ".join((repr(self.__class__.__name__),
             "object has no attribute", repr(name))))
 
-    @property
-    def size(self):
-        return len(self.exportmaindata()), (len(self.sprites)+1)*4
+    def bytesize(self):
+        """Calculate the total byte size of this sublevel: the sum of the byte
+        lengths of this sublevel's main and sprite data."""
+##        return len(self.exportmaindata()) + (len(self.sprites)+1)*4
+        return (0x10 + sum(len(bytes(obj)) for obj in self.objects) +
+                7*len(self.exits) + 4*len(self.sprites))
+
+    # import methods
 
     @classmethod
     def importbyID(cls, filepath, sublevelID, objlengthprop=None):
@@ -112,6 +119,7 @@ class Sublevel:
                 if objlengthraw[0x65] & 0x3C:
                     sublevel.obj65_7byte = True
 
+            # load main/sprite data
             mainptrtable = f.readptr(Pointers.sublevelmainptrs)
             mainptr = f.readptr(mainptrtable, index=sublevelID)
 
@@ -125,6 +133,11 @@ class Sublevel:
             f.seek(spriteptr)
             sublevel.importspritedata(f)
             sublevel.datablocks["sprite"] = [spriteptr, f.tell() - spriteptr]
+
+            # load sublevel-indexed layer Y offsets
+            f.seek(f.readptr(Pointers.sublevellayerY) + 4*sublevelID)
+            sublevel.layerYoffsets[2] = f.readint(2)
+            sublevel.layerYoffsets[3] = f.readint(2)
 
         return sublevel
 
@@ -151,6 +164,7 @@ class Sublevel:
 
     def importobjectdata(self, f):
         "Import a sublevel's object data from a file object."
+        self.objects = []
         while (objectID := f.read(1)[0]) != 0xFF:
             objscreen = f.read(1)[0]
             objcoord = f.read(1)[0]
@@ -180,11 +194,13 @@ class Sublevel:
 
     def importexitdata(self, f, entrlength=6):
         "Import a sublevel's screen exit data from a file object."
+        self.exits = {}
         while (screenindex := f.read(1)[0]) != 0xFF:
             self.exits[screenindex] = Entrance(f.read(entrlength))
 
     def importspritedata(self, f):
         "Import a sublevel's sprite data from a file object."
+        self.sprites = []
         while (rawbytes := f.read(4)) != b"\xff\xff\xff\xff":
             if not rawbytes:
                 # prevent infinite loop
@@ -202,6 +218,8 @@ class Sublevel:
     def importspritetileset(self, f, sublevelstripes=False):
         spritetileset = self.ID if sublevelstripes else self.header[7]
         self.stripeIDs = loadstripeIDs(f, spritetileset)
+
+    # export methods
 
     def exportmaindata(self):
         "Export a sublevel's main data (header, objects, exits) to a bytearray."
@@ -306,8 +324,8 @@ class SublevelFromSNES(Sublevel):
         self.importexitdata(f, entrlength=4)
         for entr in self.exits.values():
             # fix Bandit minigame sublevel IDs
-            if 0xDE <= entr.sublevel <= 0xE7:
-                entr.sublevel += 0x18
+            if 0xDE <= entr.sublevelID <= 0xE7:
+                entr.sublevelID += 0x18
                 if 0xDE <= entr.anim <= 0xE7:
                     entr.anim += 0x18
 
@@ -337,6 +355,7 @@ class Object:
     width/height. Adjusted width of -1 is impossible, and will produce
     an actual width of 0 (adjusted width 1)."""
     def __init__(self, **kwargs):
+        # object attributes
         self.ID = 0
         self.x = 0
         self.y = 0
@@ -345,9 +364,11 @@ class Object:
         self.width = None
         self.height = None
 
+        # used by L1Tilemap
         self.tiles = frozenset()
         self.alltiles = frozenset()
         self.lasttile = (None, None)
+        self.error = None
 
         # if kwargs, construct an object manually
         for key, value in kwargs.items():
@@ -392,6 +413,9 @@ class Object:
         self.backup_y = self.y
         self.backup_width = self.width
         self.backup_height = self.height
+        self.backup_tiles = self.tiles
+        self.backup_alltiles = self.alltiles
+        self.backup_lasttile = self.lasttile
 
     def restorebackup(self):
         try:
@@ -399,11 +423,14 @@ class Object:
             self.y = self.backup_y
             self.width = self.backup_width
             self.height = self.backup_height
+            self.tiles = self.backup_tiles
+            self.alltiles = self.backup_alltiles
+            self.lasttile = self.backup_lasttile
         except AttributeError:
             pass
 
     def __bytes__(self):
-        # convert an object back to its in-game byte sequence
+        # Convert an object back to its in-game byte sequence
         output = [self.ID,
                   self.y & 0xF0 | self.x >> 4,
                   (self.y & 0xF) << 4 | self.x & 0xF]
@@ -416,7 +443,7 @@ class Object:
         return bytes(output)
 
     def idstr(self, extprefix=""):
-        text = [format(self.ID, "02X")]
+        text = [f"{self.ID:02X}"]
         if self.extID is not None:
             if self.ID == 0 and extprefix:
                 text = [extprefix]
@@ -429,13 +456,11 @@ class Object:
         return "".join(text)
 
     def __str__(self):
-        text = [self.idstr(),
-                " x", format(self.x, "02X"),
-                " y", format(self.y, "02X")]
+        text = [self.idstr(), f" x{self.x:02X} y{self.y:02X}"]
         if self.width is not None:
-            text += [" w", format(self.adjwidth, "+03X")]
+            text.append(f" w{self.adjwidth:+03X}")
         if self.height is not None:
-            text += [" h", format(self.adjheight, "+03X")]
+            text.append(f" h{self.adjheight:+03X}")
         return "".join(text)
     def __repr__(self):
         return "<SMA3.Object: " + self.__str__() + ">"
@@ -474,16 +499,13 @@ class Sprite:
         return bytes(output)
 
     def idstr(self):
-        text = format(self.ID, "03X")
+        text = f"{self.ID:03X}"
         if self.extID:
-            text += ["(", format(self.extID, "02X"), ")"]
-        return "".join(text)
+            text += f"({self.extID:02X})"
+        return text
 
     def __str__(self):
-        return "".join((
-            self.idstr(),
-            " x", format(self.x, "02X"),
-            " y", format(self.y, "02X")))
+        return self.idstr() + f" x{self.x:02X} y{self.y:02X}"
     def __repr__(self):
         return "<SMA3.Sprite: " + self.__str__() + ">"
 
@@ -491,16 +513,13 @@ class Entrance(bytearray):
     """SMA3-format entrance.
     Compatible with level entrances, midway entrances, and screen exits."""
 
-    attr = ("sublevel", "x", "y", "anim", "byte4", "byte5")
+    attr = ("sublevelID", "x", "y", "anim", "byte4", "byte5")
 
     def __init__(self, byteinput=None):
         self += b"\x00"*6
         if byteinput is not None:
             if len(byteinput) > 6:
-                print("Warning: Entrance length is limited to 6 bytes. "
-                      "Input ", byteinput, " has length ", len(byteinput), ".",
-                      sep="")
-                byteinput = byteinput[:6]
+                byteinput = byteinput[0:6]
             self[:len(byteinput)] = byteinput
 
     def __getattr__(self, name):
@@ -520,10 +539,13 @@ class Entrance(bytearray):
         return self != Entrance()
 
     def __str__(self):
-        return " ".join(format(i, "02X") for i in self)
+        return " ".join(f"{i:02X}" for i in self)
     def __repr__(self):
         return "<SMA3.Entrance: " + self.__str__() + ">"
 
+    @property
+    def destscreen(self):
+        return coordstoscreen(*self[1:3])
 
 # SMA3 level entrances
 
@@ -577,7 +599,7 @@ class MainEntrances(list):
             offsets = []
             f.seek(PointersSNES.entrancemainoffsets)
             f.seek(f.readint(3))
-            for levelID in range(Constants.maxlevel+1):
+            for levelID in range(Constants.maxlevelID+1):
                 offsets.append(f.readint(2))
 
             f.seek(PointersSNES.entrancemaintable)
@@ -612,7 +634,7 @@ class MainEntrances(list):
                  mainentrances.append(Entrance())
 
         # ensure all level IDs are included, if offset table was shorter
-        while len(mainentrances) < Constants.maxlevel + 1:
+        while len(mainentrances) < Constants.maxlevelID + 1:
             mainentrances.append(Entrance())
 
         return mainentrances
@@ -708,7 +730,7 @@ class MidwayEntrances(list):
             offsets = []
             f.seek(PointersSNES.entrancemidwayoffsets)
             f.seek(bank << 0x10 | f.readint(2))
-            for levelID in range(Constants.maxlevel+1):
+            for levelID in range(Constants.maxlevelID+1):
                 num = f.readint(2)
                 if num % 4 or num >= maxoffset:
                     offsets.append(None)
@@ -716,7 +738,7 @@ class MidwayEntrances(list):
                     offsets.append(num)
 
             midwayentrances = cls()
-            for levelID in range(Constants.maxlevel++1):
+            for levelID in range(Constants.maxlevelID+1):
                 midwayentrances.append([])
 
             # read entrances
@@ -766,7 +788,7 @@ class MidwayEntrances(list):
                 midwayentrances[levelID].append(entr)
 
         # ensure all level IDs are included, if offset table was shorter
-        while len(midwayentrances) < Constants.maxlevel + 1:
+        while len(midwayentrances) < Constants.maxlevelID + 1:
             midwayentrances.append([])
 
         return midwayentrances
@@ -806,3 +828,44 @@ def swapExtraSecret(seq):
     for secretID in range(8, 0x48, 0xC):
         extraID = secretID + 1
         seq[secretID], seq[extraID] = seq[extraID], seq[secretID]
+
+def import_tile16interact(filepath, length=0xA9):
+    "Import the 16x16 tile interaction values/flags for each high byte."
+    output = []
+    with GBA.Open(filepath, "rb") as f:
+        f.readseek(Pointers.tile16interact)
+        for _ in range(length):
+            output.append(f.read(3))
+            f.read(1)  # discard every 4th byte
+    return output
+
+def tile16interactstr(tileID, interactmap, numprefix=False, sep="\n"):
+    highbyte = tileID >> 8
+    flags, extra, slope = interactmap[highbyte]
+    proplist = []
+    if flags & 0x10: proplist.append("lava")
+    if flags & 0x08: proplist.append("liquid")
+    if flags & 0x04: proplist.append(f"slope (type {slope:02X})")
+    if flags & 0x02: proplist.append("solid")
+    if flags & 0x01: proplist.append("semisolid")
+    if flags & 0x20: proplist.append("?[20]")
+    if not proplist: proplist.append("non-solid")
+    propjoined = ", ".join(proplist)
+    propjoined = str.capitalize(propjoined[0]) + propjoined[1:]
+
+    text = []
+    # flag interaction text
+    if numprefix: text.append(f"{flags:02X}: ")
+    text.append(f"{propjoined}{sep}")
+
+    # extra interaction text
+    specialstr = Constants.tile16interact_special_highbyte.get(highbyte,
+              Constants.tile16interact_special_full.get(tileID))
+    if specialstr is not None:
+        if numprefix: text.append("Special: ")
+        text.append(specialstr)
+    else:
+        if numprefix: text.append(f"{extra:02X}: ")
+        text.append(Constants.tile16interact_extra.get(extra, "???"))
+
+    return "".join(text)

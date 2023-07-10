@@ -4,8 +4,9 @@
 import os, zlib
 
 # import from other files
+import AdvEditor
 from AdvEditor import AdvSettings, Adv3Sublevel
-from AdvGame import AdvGame
+import AdvGame
 from AdvGUI.Dialogs import *
 from AdvGUI.GeneralQt import *
 
@@ -85,7 +86,7 @@ def loadROM(filepath):
                 # to be filtered manually.
                 QDialogFileError(AdvWindow.editor, filepath, "".join(
                     ("File appears to be a ROM image of SMA3 ",
-                     {"A3AJ":"(J)", "A3AP":"(E)"}[internalID],
+                     {"A3AJ": "(J)", "A3AP": "(E)"}[internalID],
                      ". Advynia only supports the (U) version.",
                      ))).exec()
                 return False
@@ -118,18 +119,30 @@ def loadROM(filepath):
         return True
 
 def _loadROMvalidated(filepath):
+    # set global filepath
     Adv3Attr.filepath = filepath
     Adv3Attr.filename = os.path.basename(filepath)
+
+    # add to recent ROM menu
     AdvSettings._ROM_recent_add(filepath)
     AdvWindow.editor.updaterecentROMmenu()
+
+    # import other ROM-dependent data
     Adv3Attr.tilemapL1_8x8 = SMA3.importL1_8x8tilemaps(Adv3Attr.filepath)
     Adv3Attr.tilemapL0flags = SMA3.importL0flags(Adv3Attr.filepath)
+    Adv3Attr.tile16interact = SMA3.import_tile16interact(Adv3Attr.filepath)
     Adv3Patch.detectpatches()
     AdvWindow.editor.updatepatchlayouts()
-    if Adv3Attr.sublevel.ID:
-        Adv3Sublevel.loadsublevelID(Adv3Attr.sublevel.ID)
-    else:
-        Adv3Sublevel.loadsublevelID(0)
+    AdvEditor.Entrance.loadglobalentrdata()
+    if AdvSettings.dev_dispscreenexits:
+        AdvEditor.Entrance.loadglobalscreenexitdata()
+
+    # load a sublevel
+    sublevelID = Adv3Attr.sublevel.ID
+    if not sublevelID:
+        sublevelID = 0
+    Adv3Sublevel.loadsublevelID(sublevelID)
+
     AdvWindow.statusbar.setActionText("Opened ROM: " + filepath)
 
 def totalfreespace(filepath, minlength=0x200):

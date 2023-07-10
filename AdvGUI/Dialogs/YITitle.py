@@ -2,11 +2,12 @@
 
 # import from other files
 from AdvEditor import Adv3Attr, Adv3Visual
-from AdvGame import AdvGame, GBA, SMA3
-from .GeneralQt import *
-from .TileViewers import QTileGraphicsView
+import AdvGame
+from AdvGame import GBA, SMA3
+from AdvGUI.GeneralQt import *
+from AdvGUI.TileViewers import QTileGraphicsView
 
-class QYITitleDialog(QDialog):
+class QYITitleDialog(QDialogBase):
     def __init__(self, parent):
         super().__init__(parent)
 

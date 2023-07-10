@@ -5,7 +5,7 @@ Classes and functions for reading SNES ROMs."""
 import os
 
 # import from other files
-from . import AdvGame
+import AdvGame
 
 class Open(AdvGame.Open):
     "Wrapper for Python's open() function, for reading SNES ROM images."
@@ -25,8 +25,8 @@ class Open(AdvGame.Open):
         elif 0x40 <= bank < 0x60:  # HiROM region
             fileaddr = (bank & 0x3F) * 0x10000 + addr16
         else:
-            raise ValueError("Address " + format(ptr, "06X") +
-                             " is not a valid SNES SuperFX ROM pointer.")
+            raise ValueError(
+                f"Address ${ptr:06X} is not a valid SNES SuperFX ROM pointer.")
         if self.SMCheader:
             fileaddr += 0x200
         self.fileobj.seek(fileaddr)
@@ -39,4 +39,4 @@ def hasSMCheader(filepath):
         return True
     raise ValueError("Could not load file:\n" + filepath +
         "\nFile does not have an integer number of ROM banks. Could not detect "
-        "whether it's a headered ROM.")
+        "whether it includes an SMC header.")

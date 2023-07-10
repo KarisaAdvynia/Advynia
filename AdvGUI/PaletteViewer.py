@@ -5,14 +5,18 @@ import itertools, math, os
 
 # import from other files
 from AdvEditor import AdvSettings, AdvWindow, Adv3Attr, Adv3Visual
-from AdvGame import AdvGame, SMA3
+from AdvEditor.Number import hexstr_0tomax
+import AdvGame
+from AdvGame import SMA3
 from .GeneralQt import *
 from . import QtAdvFunc, HeaderEditor
 
-
-class QSMA3PaletteViewer(QDialogBase):
+class QSMA3PaletteViewer(QDialogViewerBase):
     """Dialog for displaying the currently loaded palette, and adjusting
     related sublevel settings."""
+
+    actionkey = "Palette Viewer"
+
     def __init__(self, parent):
         super().__init__(parent)
 
@@ -23,17 +27,76 @@ class QSMA3PaletteViewer(QDialogBase):
 
         spacing = 4
 
-        ## need to rewrite to split init widgets/init layout, like other windows
+        # init widgets
+
+        self.colorwidgets = [QSMA3PaletteColor(0, colorID=i)
+                             for i in range(0x218)]
+
+        rowlabels = []
+        font = QLabel().font()
+        font.setPointSize(font.pointSize() - 1)
+        for i in range(0x20):
+            label = QLabel(format(i, "X"))
+            label.setFont(font)
+            rowlabels.append(label)
+
+        self.currentcolor = QColorSquareLabel(0)
+        self.colorinfo = QLabel("\n")
+        self.colorinfo.setFixedWidth(QtAdvFunc.basewidth(self.colorinfo) * 45)
+        exportbutton = QPushButton("Export")
+        exportbutton.setToolTip("""<i></i>
+Export the layer or sprite colors to a .pal file.""")
+        exportbutton.setAutoDefault(False)
+        exportbutton.clicked.connect(QDialogExportPalette(self).open)
+
+        # widget keys match header setting keys,
+        #  except Yoshi Palette, which is not a header setting
+        labels = {}
+        self.lineedits = {}
+        self.dropdowns = {}
+        palettesettings = (
+            SMA3.Constants.headerpalettes + [SMA3.Constants._HeaderSetting(
+                "Yoshi Palette (display)", 0x48, maxvalue=7,
+                tooltip="""Determines palette row 15, which is used by certain
+sprites, such as morph bubbles. This setting is for Advynia display purposes
+only; it isn't saved with the sublevel.""")])
+
+        for setting in palettesettings:
+            key = setting.index
+            if key == 0xB:  # use dropdown for palette animation
+                labeltext = setting.name + ":"
+                self.dropdowns[key] = QComboBox()
+                for j, name in enumerate(SMA3.Constants.header[key].names):
+                    self.dropdowns[key].addItem(f"{j:02X}: {name}")
+                self.dropdowns[key].activated.connect(self.updatePalette)
+                self.dropdowns[key].setToolTip(setting.tooltip)
+            else:  # use line edit
+                labeltext = (f"{setting.name} {hexstr_0tomax(setting.maxvalue)}:")
+                self.lineedits[key] = QLineEditHex(
+                    "0", maxvalue=setting.maxvalue)
+                self.lineedits[key].editingFinished.connect(
+                    self.updateYoshiPalette if key == 0x48
+                    else self.updatePalette)
+                self.lineedits[key].setToolTip(setting.tooltip)
+            labels[key] = QLabel(labeltext)
+            labels[key].setToolTip(setting.tooltip)
+
+        # init layout
 
         layoutMain = QVHBoxLayout()
         self.setLayout(layoutMain)
 
+        # background gradient
         layoutMain.addRow()
         layoutMain[-1].setSpacing(spacing)
         layoutMain[-1].addWidget(QLabel("Background Gradient"))
+        for i in range(0x18):
+            layoutMain[0].addWidget(self.colorwidgets[i+0x200])
+        layoutMain[0].addStretch()
 
         layoutMain.addWidget(QHorizLine())
 
+        # layer/sprite palette grid
         layoutMain.addRow()
         layoutLayerPalette = QGridLayout()
         layoutSpritePalette = QGridLayout()
@@ -49,51 +112,31 @@ class QSMA3PaletteViewer(QDialogBase):
         layoutLayerPalette.setSpacing(spacing)
         layoutSpritePalette.setSpacing(spacing)
 
-        # color boxes
-        self.colorwidgets = [QSMA3PaletteColor(0, colorID=i)
-                             for i in range(0x218)]
-        for i in range(0x18):
-            layoutMain[0].addWidget(self.colorwidgets[i+0x200])
-        layoutMain[0].addStretch()
+        for i in range(0x10):
+            layoutLayerPalette.addWidget(
+                rowlabels[i], i+1, 0, Qt.AlignmentFlag.AlignRight)
+            layoutSpritePalette.addWidget(
+                rowlabels[i+0x10], i+1, 0, Qt.AlignmentFlag.AlignRight)
+
         for i in range(0x100):
             r = i // 0x10 + 1
             c = i % 0x10 + 1
             layoutLayerPalette.addWidget(self.colorwidgets[i], r, c)
             layoutSpritePalette.addWidget(self.colorwidgets[i+0x100], r, c)
 
-        # numeric labels
-        labels = []
-        font = QLabel().font()
-        font.setPointSize(font.pointSize() - 1)
-        for i in range(0x20):
-            label = QLabel(format(i, "X"))
-            label.setFont(font)
-            labels.append(label)
-        for i in range(0x10):
-            layoutLayerPalette.addWidget(
-                labels[i], i+1, 0, Qt.AlignmentFlag.AlignRight)
-            layoutSpritePalette.addWidget(
-                labels[i+0x10], i+1, 0, Qt.AlignmentFlag.AlignRight)
-
+        # below palette grid
         layoutMain.addWidget(QHorizLine())
-
         layoutMain.addRow()
 
         # color info sector
         layoutColorInfo = QVHBoxLayout()
         layoutMain[-1].addLayout(layoutColorInfo)
+
         layoutColorInfo.addRow()
         layoutColorInfo.addStretch()
-
-        self.currentcolor = QColorSquareLabel(0)
         layoutColorInfo[-1].addWidget(self.currentcolor)
-        self.colorinfo = QLabel("\n")
-        self.colorinfo.setFixedWidth(QtAdvFunc.basewidth(self.colorinfo) * 45)
         layoutColorInfo[-1].addWidget(self.colorinfo)
 
-        exportbutton = QPushButton("Export")
-        exportbutton.setAutoDefault(False)
-        exportbutton.clicked.connect(QDialogExportPalette(self).open)
         layoutColorInfo.addRow()
         layoutColorInfo[-1].addWidget(exportbutton)
         layoutColorInfo[-1].addStretch()
@@ -104,49 +147,22 @@ class QSMA3PaletteViewer(QDialogBase):
         layoutHeader = QVHBoxLayout()
         layoutMain[-1].addLayout(layoutHeader)
         layoutHeaderGrid = QGridLayout()
-        layoutHeaderGrid.addWidget(QVertLine(), 0, 2, 3, 1)
-        layoutPaletteAnim = QHBoxLayout()
-        layoutHeader.addRow()
-        layoutHeader[-1].addLayout(layoutHeaderGrid)
-        layoutHeader[-1].addStretch()
-        layoutHeader.addLayout(layoutPaletteAnim)
+        layoutHeaderGrid.addWidget(QVertLine(), 0, 2, -1, 1)
+        layoutHeader.addLayout(layoutHeaderGrid)
+        layoutHeader.addStretch()
 
-        labels = {}
-        self.lineedits = {}
-        self.dropdowns = {}
-        headerinfo = list(
-            (i, SMA3.Constants.headersettings[i],
-             SMA3.Constants.headermaxvalues[i])
-            for i in SMA3.Constants.headerpalettes)
-        headerinfo.append((0x48, "Yoshi Palette (display)", 7))
-        # widget keys match header setting keys,
-        #  except Yoshi Palette, which is not a header setting
-        for i, ((key, name, maxvalue), (x, y)) in enumerate(zip(
-                headerinfo,
-                ((0, 0), (0, 1), (0, 2), (3, 0), (3, 1), (None, None), (3, 2))
-                )):
-            if key == 0xB:
-                labels[key] = QLabel(name + ":")
-                self.dropdowns[key] = QComboBox()
-                layoutPaletteAnim.addWidget(labels[key])
-                layoutPaletteAnim.addWidget(self.dropdowns[key])
-                layoutPaletteAnim.addStretch()
-                for j in range(maxvalue+1):
-                    self.dropdowns[key].addItem("".join((
-                        format(j, "02X"), ": ",
-                        SMA3.Constants.headernames[0xB][j])))
-                self.dropdowns[key].activated.connect(self.updatePalette)
-            else:
-                labels[key] = QLabel("".join((
-                    name, " ", AdvEditor.Number.hexstr_0tomax(maxvalue), ":"
-                    )))
-                self.lineedits[key] = QLineEditByte("0", maxvalue=maxvalue)
+        gridpos = {2: (0, 0), 4: (0, 1), 6: (0, 2), 0: (3, 0),
+                   8: (3, 1), 0x48: (3, 2), 0xB: (None, None)}
+        widgets = self.lineedits | self.dropdowns
+        for key, (x, y) in gridpos.items():
+            if x is None:  # give exclusive row
+                layoutHeader.addRow()
+                layoutHeader[-1].addWidget(labels[key])
+                layoutHeader[-1].addWidget(widgets[key])
+                layoutHeader[-1].addStretch()
+            else:  # place in grid
                 layoutHeaderGrid.addWidget(labels[key], y, x)
-                layoutHeaderGrid.addWidget(self.lineedits[key], y, x+1)
-                if key == 0x48:
-                    self.lineedits[key].editingFinished.connect(self.updateYoshiPalette)
-                else:
-                    self.lineedits[key].editingFinished.connect(self.updatePalette)
+                layoutHeaderGrid.addWidget(widgets[key], y, x+1)
 
         layoutMain[-1].addStretch()
 
@@ -154,31 +170,9 @@ class QSMA3PaletteViewer(QDialogBase):
         self.setFixedSize(self.sizeHint())
 
     def show(self):
-        "Restore saved window position/size."
         if self.savedpos is None:
             self.setColorinfo(Adv3Visual.palette[0], 0)
-        else:
-            self.move(self.savedpos)
         super().show()
-        if self.queuedupdate:
-            self.runqueuedupdate()
-            self.queuedupdate = False
-
-    def closeEvent(self, event):
-        AdvWindow.editor.actions["Toggle Palette"].setChecked(False)
-        self.savedpos = self.pos()
-        self.close()
-
-    def reject(self):
-        "Overridden to prevent Esc from closing the dialog."
-        pass
-
-    def queueupdate(self):
-        if not self.isVisible():
-            self.queuedupdate = True
-            return
-        else:
-            self.runqueuedupdate()
 
     def runqueuedupdate(self):
         self.updatefromsublevel()
@@ -190,8 +184,8 @@ class QSMA3PaletteViewer(QDialogBase):
         headertoupdate = {}
         for key, widget in itertools.chain(
                 self.lineedits.items(), self.dropdowns.items()):
-            if key < len(SMA3.Constants.headersettings):
-                value = (widget.value if isinstance(widget, QLineEditByte)
+            if key < len(SMA3.Constants.header):
+                value = (widget.value if isinstance(widget, QLineEditHex)
                          else widget.currentIndex())
                 if (Adv3Attr.sublevel.header[key] != value):
                     headertoupdate[key] = value
@@ -204,7 +198,7 @@ class QSMA3PaletteViewer(QDialogBase):
         Adv3Visual.yoshipalID = self.lineedits[0x48].value
         Adv3Visual.palette.loadyoshipalette(
             Adv3Attr.filepath, Adv3Visual.yoshipalID)
-        AdvWindow.editor.reload("Sprite Graphics")
+        AdvWindow.editor.reload({"Sprite Graphics"})
         self.reloadPalette()
 
     def reloadPalette(self):
@@ -217,7 +211,8 @@ class QSMA3PaletteViewer(QDialogBase):
     def updatefromsublevel(self):
         """Update header selector widgets with the currently active sublevel's
         header settings."""
-        for i in SMA3.Constants.headerpalettes:
+        for setting in SMA3.Constants.headerpalettes:
+            i = setting.index
             if i in self.dropdowns:
                 self.dropdowns[i].setCurrentIndex(Adv3Attr.sublevel.header[i])
             else:
@@ -227,15 +222,10 @@ class QSMA3PaletteViewer(QDialogBase):
         """Update the layout region displaying the current color."""
         red, green, blue = AdvGame.color15split(color)
         if colorID >= 0x200:
-            text = ["Gradient Color ", format(colorID-0x200, "02X"),
-                         " (", Adv3Visual.palette.colortype[0], ")"]
+            text = f"Gradient Color {colorID-0x200:02X} ({Adv3Visual.palette.colortype[0]})"
         else:
-            text = ["Color ", format(colorID, "03X"), " (",
-                         Adv3Visual.palette.colortype[colorID], ")"]
-        text += [":\n", format(color, "04X"),
-                 " (R ", format(red, "02X"),
-                 ", G ", format(green, "02X"),
-                 ", B ", format(blue, "02X"), ")"]
+            text = f"Color {colorID:03X} ({Adv3Visual.palette.colortype[colorID]})"
+        text += f":\n{color:04X} (R {red:02X}, G {green:02X}, B {blue:02X})"
 
         self.currentcolor.setColor(color)
         self.colorinfo.setText("".join(text))
@@ -263,19 +253,18 @@ class QDialogExportPalette(QDialogBase):
         self.setFixedSize(self.sizeHint())
 
     def accept(self):
-        filename = "".join(
-            ("Sublevel", format(Adv3Attr.sublevel.ID, "02X"), "-{paltype}.pal"))
         if self.layersbutton.isChecked():
             paletteslice = Adv3Visual.palette[0:0x100]
-            filename = filename.format(paltype="Layers")
+            paltype = "Layers"
         elif self.spritesbutton.isChecked():
             paletteslice = Adv3Visual.palette[0x100:0x200]
-            filename = filename.format(paltype="Sprites")
+            paltype = "Sprites"
         else:
             # if somehow neither is checked, don't crash
             return
 
-        defaultpath = os.path.join(os.path.dirname(Adv3Attr.filepath), filename)
+        defaultpath = os.path.join(os.path.dirname(Adv3Attr.filepath),
+            f"Sublevel{Adv3Attr.sublevel.ID:02X}-{paltype}.pal")
 
         filepath, _ = QFileDialog.getSaveFileName(
             self, caption="Save Palette File", filter="Palette File (*.pal)",
@@ -303,9 +292,8 @@ class QColorSquareLabel(QLabel):
             self.bordercolor = bordercolor
             self.image.setColor(1, QtAdvFunc.color15toQRGB(bordercolor))
 
-            # Why are pixel rows padded to the next multiple of 4 bytes?
             rowlength = self.image.bytesPerLine()
-            pixelarray = self.image.bits().asarray(size*rowlength)
+            pixelarray = self.image.bits().asarray(self.image.sizeInBytes())
             for i in range(size):
                 pixelarray[i] = 1  # first row
                 pixelarray[rowlength*(size-1) + i] = 1  # last row

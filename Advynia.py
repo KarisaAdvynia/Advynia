@@ -7,19 +7,11 @@ Also requires PyQt6 installed; see AdvGUI.PyQtImport"""
 import sys
 
 # import from other files
-import AdvMetadata, AdvEditor.ROM
+import AdvMetadata, AdvEditor
 from AdvEditor import AdvSettings, Adv3Attr
 from AdvGUI.PyQtImport import QApplication
 from AdvGUI.Dialogs import QDialogAbout
 from AdvGUI.MainWindow import QSMA3Editor
-
-# Windows-specific: give unique taskbar icon
-try:
-    from ctypes import windll
-    windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-        AdvMetadata.appnamefull)
-except ImportError:
-    pass
 
 # Run editor
 
@@ -28,6 +20,14 @@ if __name__ == "__main__":
     def _excepthook(cls, value, traceback):
         sys.__excepthook__(cls, value, traceback)
     sys.excepthook = _excepthook
+
+    # Windows-specific: give unique taskbar icon
+    try:
+        from ctypes import windll
+        windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+            AdvMetadata.appnamefull)
+    except ImportError:
+        pass
 
     app = QApplication(sys.argv)
 

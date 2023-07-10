@@ -3,9 +3,11 @@ Classes for SMA3 text strings and commands."""
 
 # standard library imports
 import io, string
+from functools import partial
 
 # import from other files
-from AdvGame import AdvGame, GBA, SNES
+import AdvGame
+from AdvGame import GBA, SNES
 from AdvGame.SMA3 import Constants, Pointers, PointersSNES
 
 class TextCommand:
@@ -27,9 +29,9 @@ class TextCommand:
         return True
 
     def __str__(self):
-        output = ["@{", ",".join(format(i, "02X") for i in self.params)]
+        output = ["@{", ",".join(f"{i:02X}" for i in self.params)]
         if self.repcount > 1:
-            output += "#", format(self.repcount, "X")
+            output.append(f"#{self.repcount:X}")
         output.append("}")
         return "".join(output)
 
@@ -70,7 +72,7 @@ class Text(list):
                     output.append("\n")
                 output.append(str(char))
             elif Constants.sma3char[char] is None:
-                output += "\\{", format(char, "02X"), "}"
+                output.append("\\{" f"{char:02X}" "}")
             else:
                 output.append(Constants.sma3char[char])
         return "".join(output)
@@ -178,9 +180,9 @@ class Text(list):
         ptrref = cls.ptrref()
         ptrtable = GBA.PointerTable.importtable(
             filepath, ptrref, ptrref.vdest, cls.vlen, maxlen=0x1000)
-        with GBA.Open(filepath, "rb") as fileobj:
+        with GBA.Open(filepath, "rb") as f:
             return AdvGame.SharedPointerList(
-                ptrtable, lambda ptr : cls.importtext(fileobj, ptr))
+                ptrtable, partial(cls.importtext, f))
 
     @classmethod
     def importallfromSNES(cls, filepath):
@@ -199,13 +201,13 @@ class Text(list):
                 else:
                     ptrtable.append(None)
             return AdvGame.SharedPointerList(
-                ptrtable, lambda ptr : cls.importtext(f, ptr))
+                ptrtable, partial(cls.importtext, f))
 
     @classmethod
     def importallfrombytes(cls, bytedata, offsets):
         buffer = io.BytesIO(bytedata)
         return AdvGame.SharedPointerList(
-            offsets, lambda offset : cls.importtext(buffer, offset))
+            offsets, partial(cls.importtext, buffer))
 
     def updatefromstr(self, textstr, includenewlines=False):
         """Update the current text data using the contents of a string,
@@ -428,7 +430,7 @@ class StandardMessage(Text):
                 else:
                     output.append(str(char))
             elif Constants.sma3char[char] is None:
-                output += "\\{", format(char, "02X"), "}"
+                output.append("\\{" f"{char:02X}" "}")
             else:
                 output.append(Constants.sma3char[char])
         return "".join(output)
@@ -593,7 +595,7 @@ class CreditsText(StoryText):
             filepath, ptrref, ptrref.vdest, cls.vlen, maxlen=0x1000)
         with GBA.Open(filepath, "rb") as fileobj:
             output = AdvGame.SharedPointerList(
-                ptrtable, lambda ptr : cls.importtext(fileobj, ptr))
+                ptrtable, partial(cls.importtext, fileobj))
             for ptr in Pointers.text["Credits final"]:
                 # hardcoded pointers
                 newtext = cls.importtext(fileobj, fileobj.readptr(ptr))
@@ -663,9 +665,3 @@ def importalltext(filepath):
     for key, cls in textclasses.items():
         messages[key] = cls.importall(filepath)
     return messages
-
-if __name__ == "__main__":
-##    msgs = StandardMessage.importallfromSNES("../../../../2/YI hacks/yi.sfc")
-    msgs = LevelName.importallfromSNES("../../../../2/YI hacks/NEW!SMW2YI 2012-12-31.smc")
-    for ID, msg in enumerate(msgs):
-        print(format(ID, "02X"), repr(msg))

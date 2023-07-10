@@ -1,9 +1,11 @@
-"""Classes and functions for general game data processing, not associated
-with any particular console."""
+"""AdvGame
+
+Classes and functions for general game data processing, not associated
+with any particular console. Specific consoles/games are submodules."""
 
 # standard library imports
-import copy, itertools, math, os
-from collections.abc import Iterable, Callable
+import copy, itertools, os
+from collections.abc import Iterable, Callable, ByteString
 from typing import Any
 
 # General import/export functions
@@ -63,7 +65,7 @@ def findfreespace(filepath, start=0, end=None, minlength=0x80, width=1):
         end = os.path.getsize(filepath)
     if start % width != 0:
         # round up start of region, if misaligned
-        start = math.ceil(start/width)*width
+        start += width - start % width
 
     output = []
     with open(filepath, "rb") as f:
@@ -85,21 +87,21 @@ def findfreespace(filepath, start=0, end=None, minlength=0x80, width=1):
 
 class GameGraphics(list):
     "Imported 8x8 tiles, indexed by tile number."
-    def __init__(self, rawdata=None, tilesize=0x20):
+    def __init__(self, rawdata: ByteString = None, tilesize: int = 0x20):
         self.tilesize = tilesize
 
         if not rawdata:
             return
         if len(rawdata) % tilesize != 0:
-            raise ValueError("Graphics data length " + hex(len(rawdata)) +
-                  " does not correspond to an integer number of tiles.")
+            raise ValueError(f"Graphics data length {len(rawdata):#x} "
+                "does not correspond to an integer number of tiles.")
         for i in range(0, len(rawdata), tilesize):
             self.append(rawdata[i:i+tilesize])
 
-    def replacegraphics(self, graphics, byteoffset=0):
+    def replacegraphics(self, graphics: ByteString, byteoffset: int = 0):
         if byteoffset % self.tilesize != 0:
-            raise ValueError("".join(("Offset ", hex(byteoffset),
-                " does not correspond to an integer number of tiles.")))
+            raise ValueError(f"Offset {byteoffset:#x}"
+                " does not correspond to an integer number of tiles.")
         startindex = byteoffset // self.tilesize
         endindex = startindex + len(graphics)
         if len(self) < endindex:
@@ -121,7 +123,7 @@ class PtrRef(int):
 
     def __repr__(self):
         # add leading 0 if odd digits
-        digits = max(len(format(ptr, "X")) for ptr in itertools.chain(
+        digits = max(len(f"{ptr:X}") for ptr in itertools.chain(
             self.ptrs, [self.vdest]))
         if digits & 1: digits += 1
         formatstr = "0" + str(digits) + "X"
@@ -247,18 +249,17 @@ def collectionstr(collection, formatstr=""):
         output += ["-", format(prev, formatstr)]
     return "".join(output)
 
-def color15split(color):
+def color15split(color: int) -> tuple[int]:
     "Split a 15-bit GBA/GBC/SNES RGB color into components."
     if not 0 <= color < 0x10000:
-        raise ValueError("Color {color} is not a valid 16-bit integer.".format(
-            color=format(color, "X")))
-    return (color & 0b00011111, (color>>5) & 0b00011111, color>>10 & 0b00011111)
+        raise ValueError(f"Color {color:X} is not a valid 16-bit integer.")
+    return (color & 0b00011111, color>>5 & 0b00011111, color>>10 & 0b00011111)
 
-def color15merge(red, green, blue):
+def color15merge(red, green, blue) -> int:
     "Combine RGB 5-bit components into a 15-bit GBA/GBC/SNES color."
     return blue<<10 | green<<5 | red
 
-def color15interpolate(color1, color2):
+def color15interpolate(color1: int, color2: int) -> int:
     "Interpolate between two colors, rounded down to produce a 15-bit color."
     r1, g1, b1 = color15split(color1)
     r2, g2, b2 = color15split(color2)
@@ -267,7 +268,7 @@ def color15interpolate(color1, color2):
     blue = (b1+b2)//2
     return color15merge(red, green, blue)
 
-def color15to24(color):
+def color15to24(color: int) -> Iterable[int]:
     """Split a 15-bit GBA/GBC/SNES RGB color into components, and pad them to
     24-bit RGB. Returns the components.
 

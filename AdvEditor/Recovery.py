@@ -5,7 +5,7 @@ Creates and manages the Advynia/recovery folder."""
 import os, shutil
 
 # import from other files
-import AdvMetadata, AdvEditor.Export, AdvFile
+import AdvMetadata, AdvEditor, AdvFile
 from AdvEditor import Adv3Attr, Adv3Patch, Adv3Sublevel
 
 def _recoverydir(currentROMdir=True):

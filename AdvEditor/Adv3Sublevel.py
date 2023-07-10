@@ -5,13 +5,38 @@ import copy, traceback
 from collections import defaultdict
 
 # import from other files
-import AdvMetadata, AdvEditor.ROM
+import AdvMetadata, AdvEditor
 from AdvEditor import (AdvSettings, AdvWindow,
                        Adv3Attr, Adv3Save, Adv3Patch, Adv3Visual)
 from AdvGame import GBA, SMA3
 from AdvGUI.Dialogs import (QSimpleDialog, QDialogLoadValidation,
-                            QDialogSaveWarning)
+                            QDialogUnsavedWarning)
 from AdvGUI import QtAdvFunc
+
+dialogtext = {
+    "screencount": (
+        "The current sublevel uses {screens} screens. "
+        "If a sublevel uses more than {maxscreens} screens, it "
+        "will freeze the game on the loading screen!\n"
+        "If this sublevel loads in-game, please report this-- "
+        "there may be an error with how Advynia simulates object "
+        "screen memory allocation."
+        ),
+    "spritecount": (
+        "The current sublevel contains {sprites} sprites. "
+        "If a sublevel contains more than {maxsprites} sprites, "
+        "excess sprites may always respawn, or never spawn at all."
+        ),
+    "objF0F3check": (
+        "The current sublevel contains {count} (decimal) of objects F0-F3. "
+        "If more than {maxcount} are in a single sublevel, the excess objects "
+        "will no longer move vertically."
+        ),
+    "itemmemory": (
+        "Items in the same column detected on screen {screen} at x={x}.\n"
+        "If one item is collected, any others may vanish!"
+        ),
+    }
 
 def loadsublevel(sublevel):
     "Load a sublevel from an SMA3.Sublevel object."
@@ -32,7 +57,7 @@ def loadsublevel(sublevel):
         Adv3Visual.loadpalette(sublevel)
         Adv3Visual.loadgraphics(sublevel)
 
-        AdvWindow.editor.reload("All")
+        AdvWindow.editor.reload({"All"})
 
     except Exception as err:
         text = ("Error loading sublevel.\n"
@@ -53,31 +78,25 @@ def loadsublevel(sublevel):
     # window title and status bar
     if sublevel.ID is not None:
         if sublevel.datablocks:
-            actiontext = ("Loaded sublevel {sublevelID}: main data from "
-            "{mainptr}, sprite data from {spriteptr}.")
-            AdvWindow.statusbar.setActionText(actiontext.format(
-                sublevelID=format(sublevel.ID, "02X"),
-                mainptr=format(sublevel.datablocks["main"][0], "08X"),
-                spriteptr=format(sublevel.datablocks["sprite"][0], "08X")))
+            AdvWindow.statusbar.setActionText(
+                f"Loaded sublevel {sublevel.ID:02X}: main data from "
+                f"{sublevel.datablocks['main'][0]:08X}, "
+                f"sprite data from {sublevel.datablocks['sprite'][0]:08X}.")
     AdvWindow.editor.updatewindowtitle()
     AdvWindow.statusbar.updateByteText()
 
     if AdvMetadata.printtime: print("Total sublevel load:",
         QtAdvFunc.timerend(timer), "ms")  # debug
 
-    if sublevel.ID == 0x38:
+    if AdvSettings.warn_sublevel_intro and sublevel.ID == 0x38:
         QSimpleDialog(AdvWindow.editor, text="Sublevel 38 is used by the intro "
             "cutscene. The header is unused, and "
             "editing this may result in unexpected in-game behavior.",
-            title="Warning").exec()
-    if sublevel.header[9] == 9:
+            title="Warning", dontshow="warn_sublevel_intro").exec()
+    if AdvSettings.warn_sublevel_raphael and sublevel.header[9] == 9:
         QSimpleDialog(AdvWindow.editor, text="This is the Raphael arena. "
             "Editing this may result in unexpected in-game behavior.",
-            title="Warning").exec()
-    elif sublevel.header[9] == 0xD:
-        QSimpleDialog(AdvWindow.editor, text="This is the Froggy arena. "
-            "Editing this may result in unexpected in-game behavior.",
-            title="Warning").exec()
+            title="Warning", dontshow="warn_sublevel_raphael").exec()
     return True
 
 def loadsublevelID(sublevelID):
@@ -92,17 +111,30 @@ def savesublevel_action():
     # check for screen count
     if AdvSettings.warn_save_screencount:
         screencount = AdvWindow.sublevelscene.layer1.tilemap.screencount()
-        if screencount >= 0x40:
-            QSimpleDialog(AdvWindow.editor, title="Warning",
-                          dontshow="warn_save_screencount",
-                          text="".join(
-                ("The current sublevel uses ", format(screencount, "02X"),
-                 " screens. If a sublevel uses more than 3F screens, it "
-                 "will freeze the game on the loading screen!\n"
-                 "If this sublevel loads in-game, please report this-- "
-                 "there may be an error with how Advynia simulates object "
-                 "screen memory allocation."
-                          ))).exec()
+        if screencount > SMA3.Constants.maxlayer1screens:
+            QSimpleDialog(
+                AdvWindow.editor, title="Warning",
+                dontshow="warn_save_screencount",
+                text=dialogtext["screencount"].format(
+                    screens=f"{screencount:02X}",
+                    maxscreens=f"{SMA3.Constants.maxlayer1screens:02X}")
+                ).exec()
+
+    # check for sprite count
+    if AdvSettings.warn_save_spritecount:
+        spritecount = len(Adv3Attr.sublevel.sprites)
+        if spritecount > SMA3.Constants.maxspritecount:
+            QSimpleDialog(
+                AdvWindow.editor, title="Warning",
+                dontshow="warn_save_spritecount",
+                text=dialogtext["spritecount"].format(
+                    sprites=f"{spritecount:02X}",
+                    maxsprites=f"{SMA3.Constants.maxspritecount:02X}")
+                ).exec()
+
+    # check for vertical shift object overflow
+    if AdvSettings.warn_save_objF0F3:
+        objF0F3check()
 
     # check for item memory errors
     if AdvSettings.warn_save_itemmemory:
@@ -116,7 +148,7 @@ def savesublevel_action():
 
 def savecheck():
     if AdvSettings.warn_unsaved and not AdvWindow.undohistory.issaved():
-        result = QDialogSaveWarning(AdvWindow.editor).exec()
+        result = QDialogUnsavedWarning(AdvWindow.editor).exec()
         # 1=Save, 2=Don't Save, 0=Cancel
         if result == 0:
             return False
@@ -175,22 +207,49 @@ def countitems():
     QSimpleDialog(AdvWindow.editor, title="Count Items", wordwrap=False,
         text=text.format(redcoins=redcoins, flowers=flowers)).exec()
 
+def objF0F3check():
+    count = 0
+    for obj in Adv3Attr.sublevel.objects:
+        if 0xF0 <= obj.ID <= 0xF3:
+            count += 1
+    if count > SMA3.Constants.maxobjF0F3:
+        QSimpleDialog(
+            AdvWindow.editor, title="Warning", dontshow="warn_save_objF0F3",
+            text=dialogtext["objF0F3check"].format(
+                count=count, maxcount=SMA3.Constants.maxobjF0F3)
+            ).exec()
+
 def itemmemorycheck(*, dialog_on_pass=True):
     # check for sprite conflicts, and track any item memory sprites
     sprcolstatus = defaultdict(int)
     for spr in Adv3Attr.sublevel.sprites:
-        itemattr = SMA3.SpriteMetadata[(spr.ID, spr.parity())].itemmemory
-        if spr.ID == 0x0B6:
-            # if ring of 8 coins: activate 5 nearby columns, low priority
-            for x in (spr.x-2, spr.x-1, spr.x+1, spr.x+2, spr.x+3):
-                if not 0 <= x < SMA3.Constants.maxtileX:
+        itemattr = SMA3.SpriteMetadata[spr].itemmemory
+        if spr.ID == 0x0B6:  # ring of 8 coins
+            # activate X positions of the 2 possible coin rings, low priority
+            sprkey = (SMA3.coordstoscreen(spr.x, spr.y), spr.x)
+            tocheck = set()
+            for offsetX, offsetY in (
+                (-2, -1), (-2, +1), (+2, -1), (+2, +1),  #\ centered
+                (-1, -2), (-1, +2), (+1, -2), (+1, +2),  #/
+                (-1, -1), (-1, +1), (+3, -1), (+3, +1),  #\ 1 tile right
+                (-0, -2), (-0, +2), (+2, -2), (+2, +2),  #/
+                ):
+                x = spr.x + offsetX
+                y = spr.y + offsetY
+                if not (0 <= x < SMA3.Constants.maxtileX and
+                        0 <= y < SMA3.Constants.maxtileY):
                     continue
-                screen = SMA3.coordstoscreen(x, spr.y)
-                if sprcolstatus[(screen, x)] >= 2:
-                    _itemmemoryerror(screen, x)
+                screen = SMA3.coordstoscreen(x, y)
+                key = (screen, x)
+                if key != sprkey:  # prevent sprite from conflicting with itself
+                    tocheck.add((screen, x))
+            for key in tocheck:
+                if sprcolstatus[key] >= 2:
+                    _itemmemoryerror(*key)
                     return
-                sprcolstatus[(screen, x)] = 1
-            itemattr = 2
+                sprcolstatus[key] = 1  # surrounding coins are low priority
+            itemattr = 2  # 0B6 itself is high priority
+
         if itemattr:
             # sprite uses item memory
             screen = SMA3.coordstoscreen(spr.x, spr.y)
@@ -210,7 +269,8 @@ def itemmemorycheck(*, dialog_on_pass=True):
                 return
 
     if dialog_on_pass:
-        QSimpleDialog(AdvWindow.editor, title="Item Memory Check", wordwrap=False,
+        QSimpleDialog(
+            AdvWindow.editor, title="Item Memory Check", wordwrap=False,
             text="No item memory errors detected.").exec()
 
 def _itemmemorycolcheck(tilemap, x, startY, colstatus=0):
@@ -230,8 +290,9 @@ def _itemmemorycolcheck(tilemap, x, startY, colstatus=0):
     return True
 
 def _itemmemoryerror(screen, x):
-    text = """Items in the same column detected on screen {screen} at x={x}.
-If one item is collected, any others may vanish!"""
-    QSimpleDialog(AdvWindow.editor, title="Item Memory Check", wordwrap=False,
-                  text=text.format(
-        screen=format(screen, "02X"), x=format(x, "02X"))).exec()
+    QSimpleDialog(
+        AdvWindow.editor, title="Item Memory Check", wordwrap=False,
+        text=dialogtext["itemmemory"].format(
+            screen=f"{screen:02X}", x=f"{x:02X}")
+        ).exec()
+
