@@ -1,8 +1,8 @@
 """Main Window Status Bar"""
 
 # import from other files
+import AdvEditor
 from AdvEditor import Adv3Attr
-import AdvEditor.Number
 from AdvEditor.Format import pluralize
 from .GeneralQt import *
 
@@ -43,20 +43,20 @@ class QMainEditorStatusBar(QStatusBar):
             self.hovertext.clear()
             return
 
-        text = ["x", format(x, "02X"), " y", format(y, "02X")]
+        text = [f"x{x:02X} y{y:02X}"]
         if tileID is not None:
-            text += [" | ", format(tileID, "04X")]
+            text.append(f" | {tileID:04X}")
         if spr is not None:
-            text += [" | sprite ", str(spr)]
+            text.append(f" | sprite {spr}")
         elif obj is not None:
-            text += [" | object ", str(obj)]
+            text.append(f" | object {obj}")
         self.hovertext.setText("".join(text))
 
     def setActionText(self, text=""):
         self.actiontext.setText(text)
 
     def updateByteText(self):
-        self.setSizeText(newbytecount=sum(Adv3Attr.sublevel.size))
+        self.setSizeText(newbytecount=Adv3Attr.sublevel.bytesize())
 
     def setSizeText(self, newbytecount=None, newscreencount=None):
         if newbytecount is not None: self.bytecount = newbytecount

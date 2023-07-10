@@ -6,6 +6,7 @@ def pluralize(num, singular, plural=None, numformat=""):
     or plural word, depending on the number.
     The number may be formatted by specifying a format string.
     If a unique plural is not specified, the plural defaults to adding "s"."""
+
     if plural is None:
         plural = singular + "s"
     return format(num, numformat) + " " + (singular if num == 1 else plural)
@@ -17,6 +18,7 @@ def sublevelitemstr(objects=(), sprites=(), long=False):
     If there's 1 object or 1 sprite, the ID is included (or the entire
     object/sprite string form, if there's a single item and long==True),
     else only the count of objects/sprites is included."""
+
     result = []
     if len(objects) == 1:
         result.append("object ")

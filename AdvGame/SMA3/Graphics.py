@@ -5,9 +5,9 @@ Classes and functions for SMA3 graphics and palettes."""
 from collections import defaultdict
 
 # import from other files
-from AdvGame import AdvGame, GBA
+import AdvGame
+from AdvGame import GBA, GameGraphics
 from AdvGame.SMA3 import Pointers
-GameGraphics = AdvGame.GameGraphics  # shortened name
 
 # Level graphics
 
@@ -95,7 +95,7 @@ class LayerVRAM(GameGraphics):
                 animgfxptrs += Pointers.levelgfxanimIDs[0x3]
                 animgfxptrs += Pointers.levelgfxanimIDs[0xC]
 
-        if animID in (0x07, 0x0D) and self.layer1ID == 0xA:
+        if animID in (0x07, 0x0D) and self.layer1ID & 0xF == 0xA:
             # animation 07 uses different graphics in tileset A
             animgfxptrs[-4:] = Pointers.levelgfxanimIDs[(0x07,0x0A)]
 
@@ -133,8 +133,8 @@ class LayerVRAM(GameGraphics):
             tilemapraw = f.read_decompress(ptr)
         tilemap = []
         if len(tilemapraw) % 2 != 0:
-            raise ValueError("Tilemap data length " + hex(len(rawdata)) +\
-                  " does not correspond to an integer number of tiles.")
+            raise ValueError(f"Tilemap data length {len(tilemapraw):#x} "
+                "does not correspond to an integer number of tiles.")
         for i in range(len(tilemapraw)//2):
             tilemap.append(int.from_bytes(tilemapraw[2*i:2*i+2], "little"))
         return tilemap
@@ -199,7 +199,7 @@ class _PaletteColorTypes(list):
         if index and index % 0x10 == 0:
             return "Transparent"
         elif self.parent.animated[index] is not None:
-            return "Palette Animation " + format(self.parent.animID, "02X")
+            return f"Palette Animation {self.parent.animID:02X}"
         else:
             return super().__getitem__(index)
 
@@ -222,7 +222,7 @@ class LevelPalette(list):
         self.BGpalID = None
         self.animID = None
 
-        with GBA.Open(filepath, mode="rb") as f:
+        with GBA.Open(filepath, "rb") as f:
             # load global layer 1 colors (fixed color table index of 0x98)
             f.seek(Pointers.colortable + 0x98)
             for paletterow in (1, 2, 3):
@@ -261,7 +261,7 @@ class LevelPalette(list):
 
     def __getitem__(self, key):
         if isinstance(key, slice):
-            indices = slice.indices(self, len(self._palette))
+            indices = slice.indices(key, len(self._palette))
             output = []
             for i in range(*indices):
                 if self.animated[i] is not None:
@@ -276,11 +276,11 @@ class LevelPalette(list):
 
     def loadBGpalette(self, filepath, paletteID):
         self.BGpalID = paletteID
-        with GBA.Open(filepath, mode="rb") as f:
+        with GBA.Open(filepath, "rb") as f:
             colorindex = paletteID*2
             f.seek(Pointers.colortable + colorindex)
             self._palette[0] = f.readint(2)
-            self.colortype[0] = "Background Color " + format(paletteID, "02X")
+            self.colortype[0] = f"Background Color {paletteID:02X}"
 
             for colorID in range(0x80, 0xA0, 4):
                 # account for layer 3 image region copying background color
@@ -299,9 +299,9 @@ class LevelPalette(list):
 
     def loadL1palette(self, filepath, paletteID):
         self.layer1ID = paletteID
-        colortype = "Layer 1 Palette " + format(paletteID, "X")
+        colortype = f"Layer 1 Palette {paletteID:X}"
 
-        with GBA.Open(filepath, mode="rb") as f:
+        with GBA.Open(filepath, "rb") as f:
             f.seek(f.readptr(Pointers.levelpalL1) + paletteID*2)
             colorindex = f.readint(2)
             f.seek(Pointers.colortable + colorindex)
@@ -327,9 +327,9 @@ class LevelPalette(list):
 
     def loadL2palette(self, filepath, paletteID):
         self.layer2ID = paletteID
-        colortype = "Layer 2 Palette " + format(paletteID, "02X")
+        colortype = f"Layer 2 Palette {paletteID:02X}"
 
-        with GBA.Open(filepath, mode="rb") as f:
+        with GBA.Open(filepath, "rb") as f:
             f.seek(f.readptr(Pointers.levelpalL2) + paletteID*2)
             colorindex = f.readint(2)
             f.seek(Pointers.colortable + colorindex)
@@ -341,8 +341,8 @@ class LevelPalette(list):
 
     def loadL3palette(self, filepath, paletteID):
         self.layer3ID = paletteID
-        colortype = "Layer 3 Palette " + format(paletteID, "02X")
-        with GBA.Open(filepath, mode="rb") as f:
+        colortype = f"Layer 3 Palette {paletteID:02X}"
+        with GBA.Open(filepath, "rb") as f:
             f.seek(f.readptr(Pointers.levelpalL3) + paletteID*2)
             colorindex = f.readint(2)
             f.seek(Pointers.colortable + colorindex)
@@ -362,9 +362,9 @@ class LevelPalette(list):
             if imageID == 0x18:
                 stop = 0xA0
 
-            with GBA.Open(filepath, mode="rb") as f:
+            with GBA.Open(filepath, "rb") as f:
                 ptr = f.readptr(f.readptr(Pointers.levelpalL3image) + index*4)
-                colortype = "Layer 3 Image " + format(imageID, "02X")
+                colortype = f"Layer 3 Image {imageID:02X}"
 
                 if imageID == 0x23 and self.layer3ID == 0x1C:
                     # game hardcodes a different palette for this combo
@@ -386,8 +386,8 @@ class LevelPalette(list):
         self._setuninitialized(stop, 0xA0)
 
     def loadspritepalette(self, filepath, paletteID):
-        colortype = "Sprite Palette " + format(paletteID, "X")
-        with GBA.Open(filepath, mode="rb") as f:
+        colortype = f"Sprite Palette {paletteID:X}"
+        with GBA.Open(filepath, "rb") as f:
             ptr = f.readptr(f.readptr(Pointers.levelpalsprite), paletteID)
             f.seek(ptr)
             for colorID in range(0x160, 0x180):
@@ -397,8 +397,8 @@ class LevelPalette(list):
                               "SNES leftover/Sprite Palette ")
 
     def loadyoshipalette(self, filepath, paletteID):
-        colortype = "Yoshi Palette " + format(paletteID, "X")
-        with GBA.Open(filepath, mode="rb") as f:
+        colortype = f"Yoshi Palette {paletteID:X}"
+        with GBA.Open(filepath, "rb") as f:
             f.seek(Pointers.levelpalyoshi + 0x20*paletteID)
             for colorID in range(0x150, 0x160):
                 self._palette[colorID] = f.readint(2)
@@ -414,7 +414,7 @@ class LevelPalette(list):
         if animID in Pointers.levelpalanim:
             animpalptrs += Pointers.levelpalanim[animID]
 
-        with GBA.Open(filepath, mode="rb") as f:
+        with GBA.Open(filepath, "rb") as f:
             for ptr, startindex, num in animpalptrs:
                 f.seek(ptr)
                 for colorID in range(startindex, startindex+num):
@@ -426,7 +426,7 @@ class LevelPalette(list):
             f.seek(Pointers.colortable + colorindex)
             for colorID in range((paletterow << 4) + 1, (paletterow + 1) << 4):
                 self._palette[colorID] = f.readint(2)
-                self.colortype[colorID] = basestr + format(paletteID, "X")
+                self.colortype[colorID] = basestr + f"{paletteID:X}"
 
     def _setuninitialized(self, start, stop):
         for colorID in range(start, stop):
@@ -441,31 +441,33 @@ class LevelPalette(list):
 def importL1_8x8tilemaps(filepath):
     "Import the 8x8 tilemap for each layer 1 16x16 tile ID."
 
-    def importfunc(f):
-        tilemap = []
-        for j in range(4):
-            tilemap.append(f.readint(2))
-        return tilemap
-
-    with GBA.Open(filepath, mode="rb") as f:
+    with GBA.Open(filepath, "rb") as f:
         f.seek(Pointers.tilemapL1_8x8)
-        return _importtilemaptables(f, importfunc, {}, 8)
+        return _importtilemaptables(f, _importL1_8x8tilemaps_func, {}, 8)
+
+def _importL1_8x8tilemaps_func(f):
+    "Function passed to _importtilemaptables by importL1_8x8tilemaps"
+    tilemap = []
+    for j in range(4):
+        tilemap.append(f.readint(2))
+    return tilemap
 
 def importL0flags(filepath):
     "Import the layer 0 8x8 tile flags for each layer 1 16x16 tile ID."
 
-    def importfunc(f):
-        flags = f.read(1)[0]
-        return [flags&8, flags&4, flags&2, flags&1]
-
-    with GBA.Open(filepath, mode="rb") as f:
+    with GBA.Open(filepath, "rb") as f:
         f.seek(Pointers.tilemapL0flags)
         data = _importtilemaptables(
-            f, importfunc, defaultdict(lambda : [0, 0, 0, 0]), 1)
+            f, _importL0flags_func, defaultdict(lambda : [0, 0, 0, 0]), 1)
 
     if 0x6001 not in data:  # account for vanilla overflow, if unchanged
         data[0x6001] = data[0x6100].copy()
     return data
+
+def _importL0flags_func(f):
+    "Function passed to _importtilemaptables by importL0flags"
+    flags = f.read(1)[0]
+    return [flags&8, flags&4, flags&2, flags&1]
 
 def _importtilemaptables(f, importfunc, outputdict, bytespertile):
     "Shared code for importing data indexed by layer 1 16x16 tile ID."

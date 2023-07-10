@@ -6,15 +6,14 @@ associated with a specific game."""
 from operator import itemgetter
 
 # import from other files
-from . import AdvGame
+import AdvGame
 
 class Open(AdvGame.Open):
     "Wrapper for Python's open() function, for reading/writing GBA ROM images."
     def seek(self, ptr):
         "Seek to a GBA ROM pointer."
         if not 0x08000000 <= ptr < 0x0A000000:
-            raise ValueError("Address " + format(ptr, "08X") +
-                             " is not a valid GBA ROM pointer.")
+            raise ValueError(f"Address {ptr:08X} is not a valid GBA ROM pointer.")
         self.fileobj.seek(ptr - 0x08000000)
 
     def tell(self):
@@ -25,8 +24,8 @@ class Open(AdvGame.Open):
         """Seek to the given pointer, offset with a pointer table index if
         provided, then read a GBA pointer from the ROM."""
         if ptr % 4 != 0:
-            print("Warning: Pointer " + format(ptr, "08X") +
-                  " is not a multiple of 4. It may be misaligned.")
+            print(f"Warning: Pointer {ptr:08X} is not a multiple of 4. "
+                  "It may be misaligned.")
         self.seek(ptr + index*4)
         return self.readint(4)
 
@@ -52,9 +51,9 @@ class Open(AdvGame.Open):
         if ptr is not None:
             self.seek(ptr)
         startaddr = self.tell()
-        if startaddr & 3:
-            print("Warning: Pointer " + format(startaddr, "08X") +
-                  " is not a multiple of 4. It may be misaligned.")
+        if startaddr % 4 != 0:
+            print(f"Warning: Pointer {startaddr:08X} is not a multiple of 4. "
+                  "It may be misaligned.")
 
         # process compression header
         compresstype = self.read(1)[0]
@@ -64,18 +63,15 @@ class Open(AdvGame.Open):
         elif compresstype & 0xF0 == 0x20:  # Huffman
             bitlength = compresstype & 0xF
             if bitlength != 8:
-                raise NotImplementedError("".join((
-                    "Only Huffman data with bit length 8 is currently "
-                    "supported. Data at ", format(startaddr, "08X"),
-                    " has bit length ", str(bitlength), "."
-                    )))
+                raise NotImplementedError(
+                    "Only Huffman data with bit length 8 is currently supported. "
+                    f"Data at {startaddr:08X} has bit length {bitlength}.")
             output = _decompressHuffman(self.fileobj, length, bitlength)
         else:
-            raise ValueError("".join((
-                "Data at ", format(startaddr, "08X"),
-                " is not valid GBA LZ77/Huffman data. "
+            raise ValueError(
+                f"Data at {startaddr:08X} is not valid GBA LZ77/Huffman data. "
                 "Only LZ77/Huffman formats are supported."
-                )))
+                )
 
         endaddr = self.tell()
         if endaddr & 3:
@@ -83,8 +79,8 @@ class Open(AdvGame.Open):
 
         # cleanup
         if len(output) != length:
-            print("Warning: Final length of " + hex(len(output)) +
-                  " does not match declared length of " + hex(length) + ".")
+            print(f"Warning: Final length of {len(output):#x}"
+                  f" does not match declared length of {length:#x}.")
         return output
 
 def _decompressLZ77(f, length):
@@ -92,7 +88,7 @@ def _decompressLZ77(f, length):
 
     output = bytearray()
 
-    while len(output) < length:
+    while True:
         flags = f.read(1)[0]
 
         # process compression flags highest to lowest
@@ -101,15 +97,13 @@ def _decompressLZ77(f, length):
             if bit:   # use 16-bit parameter to copy previous data
                 block = f.read(2)
                 copylength = (block[0] >> 4) + 3
-                offset = block[1] + ((block[0]&0xF)<<8) + 1
+                offset = block[1] + ((block[0]&0xF) << 8) + 1
                 for i in range(copylength):
                     output.append(output[-offset])
             else:   # uncompressed byte
                 output += f.read(1)
             if len(output) >= length:
-                break
-
-    return output
+                return output
 
 def _decompressHuffman(f, length, bitlength):
     """Called by GBA.Open.read_decompress, to handle Huffman-format data.
@@ -120,27 +114,27 @@ def _decompressHuffman(f, length, bitlength):
     treeraw += f.read(treeraw[0]*2 + 1)
     treemap = {}
     _followHuffnode(treeraw, treemap, offset=1)
-##    print([("".join(str(i) for i in bits), "%02X"%byte)
-##           for bits, byte in treemap.items()])
+##    print("\n".join(
+##        "".join(str(i) for i in bits) + " " +
+##        (f"{byte:02X}" if byte is not None else "None")
+##        for bits, byte in treemap.items()))
 
     # decompress data
     output = bytearray()
 
     bitkey = []
-    while len(output) < length:
+    while True:
         bitstream = int.from_bytes(f.read(4), "little")
         for bitoffset in reversed(range(32)):
             bitkey.append((bitstream >> bitoffset) & 1)
             try:
                 output.append(treemap[tuple(bitkey)])
                 if len(output) >= length:
-                    break
+                    return output
                 bitkey.clear()
             except KeyError:
                 # keep appending bits until a valid key is found
                 pass
-
-    return output
 
 def _followHuffnode(treeraw, treemap, offset, bits=(), dataflag=False):
     """Recursive function to follow the left and right nodes of the Huffman
@@ -166,15 +160,14 @@ def _followHuffnode(treeraw, treemap, offset, bits=(), dataflag=False):
 def addrtofile(addr):
     "Convert a GBA ROM pointer to a file offset, both expressed in integers."
     if not 0x08000000 <= addr < 0x0A000000:
-        raise ValueError("Address " + format(addr, "08X") +
-                         " is not a valid GBA ROM pointer.")
+        raise ValueError(f"Address {addr:08X} is not a valid GBA ROM pointer.")
     return addr - 0x08000000
 
 def addrfromfile(addr):
     "Convert a file offset to a GBA ROM pointer, both expressed in integers."
     if addr >= 0x02000000:
-        raise ValueError("Offset " + format(addr, "08X") +
-                         " is larger than the maximum GBA ROM size, 32 MiB.")
+        raise ValueError(f"Offset {addr:08X} is larger than the maximum GBA "
+            "ROM size, 32 MiB.")
     return addr + 0x08000000
 
 def readinternalname(filepath):
@@ -225,10 +218,7 @@ def decompress(filepath, addr=0):
     specified file."""
 
     if addr >= 0x08000000:
-        # addr is a GBA ROM pointer
-        if addr % 4 != 0:
-            print("Warning: Pointer " + format(addr, "08X") +
-                  " is not a multiple of 4. It may be misaligned.")
+        pass
     else:
         # load as if addr is a GBA ROM pointer
         addr = addrfromfile(addr)
@@ -242,8 +232,8 @@ def compressLZ77(data):
 
     length = len(data)
     if length > 0x40000:
-        raise ValueError("Data size " + hex(length) +\
-                         " is too large for a GBA's RAM to process.")
+        raise ValueError(
+            f"Data size {length:#x} is too large for a GBA's RAM to process.")
 
     output = bytearray()
     output.append(0x10)  # LZ77 compression type
@@ -328,16 +318,6 @@ def savedatatofreespace(filepath, data, ptrref,
                 f.seek(ptr)
                 f.writeint(newptr, 4)
     return newptr
-
-def overwritedata(filepath, data, ptr, expectedlen=None):
-    if expectedlen is not None and len(data) != expectedlen:
-        raise ValueError("".join((
-            "Data to be overwritten at ", format(ptr, "08X"),
-            " did not match expected length ", hex(expectedlen), "."
-            )))
-    with Open(filepath, "r+b") as f:
-        f.seek(ptr)
-        f.write(data)
 
 def erasedata(filepath, ptr, bytecount):
     "Wrapper for GBA.Open.erasedata, to overwrite data with 00 bytes."

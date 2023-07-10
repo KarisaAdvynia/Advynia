@@ -63,7 +63,7 @@ class AdvyniaFileData(dict):
         output = [os.path.splitext(os.path.basename(sourcefilepath))[0],
                   "-", prefix]
         if ID is not None:
-            output.append(format(ID, "02X"))
+            output.append(f"{ID:02X}")
         output.append(cls().ext)
         return "".join(output)
 
@@ -110,16 +110,15 @@ class AdvyniaFileData(dict):
     def importfromfile(cls, filepath):
         "Create a new instance with the data from an Advynia export file."
         extension = os.path.splitext(filepath)[1].lower()
-        if len(extension) != 4 or extension != cls().ext:
+        if extension != cls().ext:
             raise ValueError("Unrecognized file extension: " + extension)
 
         rawdata = open(filepath, "rb").read()
 
         # check validation bytes
         if rawdata[0:7] != b"Advynia" or rawdata[7] != ord(extension[2]):
-            raise ValueError("".join((
-                "Not a valid ", extension, " file: validation bytes ",
-                repr(rawdata[0:8]), " failed verification.")))
+            raise ValueError(f"Not a valid {extension} file: validation bytes "
+                f"{repr(rawdata[0:8])} failed verification.")
 
         versionlist = []
         for i in range(8, 0xE, 2):
@@ -145,23 +144,22 @@ class AdvyniaFileData(dict):
             data[key] = rawdata[dataoffset:dataoffset+length]
             actuallength = len(data[key])
             if actuallength != length:  # end of file
-                raise ValueError("".join((
-                    "Failed to parse ", extension, " file: "
-                    "reached end of file when importing key 0x",
-                    format(key, "02X"), " data. ",
-                    "(Expected length: 0x", format(length, "X"),
-                    ", actual length: 0x", format(actuallength, "X"), ")",
-                    )))
+                raise ValueError(
+                    f"Failed to parse {extension} file: "
+                    f"reached end of file when importing key 0x{key:02X} data. "
+                    f"(Expected length: 0x{length:X}, "
+                    f"actual length: 0x{actuallength:X})"
+                    )
 
         return data
 
     def __repr__(self):
         keystr = ", ".join(hex(key) for key in self)
-        maintext = ["".join(("keys: (", keystr, ")"))]
+        maintext = [f"keys: ({keystr})"]
         if self.version is not None:
-            maintext += ["version: " + str(self.version)]
+            maintext += [f"version: {self.version}"]
         if self.gamecode is not None:
-            maintext += ["gamecode: " + str(self.gamecode)]
+            maintext += [f"gamecode: {self.gamecode}"]
         return "".join((
             "<", self.__class__.__name__, ": ",
             ", ".join(maintext), ">"))

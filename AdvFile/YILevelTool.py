@@ -65,9 +65,9 @@ def export_ylt(sublevel, filepath):
     for screenindex, entr in sublevel.exits.items():
         data.append(screenindex)
         # adjust Bandit minigame sublevel IDs
-        if 0xF6 <= entr.sublevel <= 0xFF:
+        if 0xF6 <= entr.sublevelID <= 0xFF:
             entr = copy.copy(entr)
-            entr.sublevel -= 0x18
+            entr.sublevelID -= 0x18
             if 0xF6 <= entr.anim <= 0xFF:
                 entr.anim -= 0x18
         data += entr[0:4]  # truncate last 2 bytes

@@ -49,8 +49,10 @@ class QSublevelMouseHandler(QGraphicsRectItem):
         """Process status bar tile/object/sprite hover text, object tooltip,
         and detecting resize handles."""
         x, y, obj = self.detectobj(event)
-        tileID = self.scene().layer1.tilemap[y][x]
-        if not self.scene().layer1.isVisible():
+        if self.scene().layer1.isVisible():
+            tilemap = self.scene().layer1.tilemap
+            tileID = tilemap[y][x]
+        else:
             obj = None
             tileID = None
 
@@ -60,7 +62,18 @@ class QSublevelMouseHandler(QGraphicsRectItem):
 
         # tooltip detection
         if obj is not None and spr is None:
-            tooltip = SMA3.ObjectMetadata[(obj.ID, obj.extID)].tooltiplong
+            tooltip = SMA3.ObjectMetadata[obj].tooltiplong
+            if obj.ID == 0x65:
+                # add interaction tooltip for 16x16 tile
+                tooltip += "<br>" + SMA3.tile16interactstr(
+                    tileID, Adv3Attr.tile16interact, numprefix=False, sep=", ")
+                # add item memory warning for coin tiles
+                if obj.extID >> 8 in (0x60, 0x74, 0xA3, 0xA4):
+                    tooltip += "<br><i><b>Not</b> affected by item memory</i>"
+            if obj.error:
+                # error: object generated no selectable tiles
+                tooltip += f"""<br><i><span style="color:#ff0000">
+{obj.error}</span></i>"""
             self.setToolTip(tooltip.format(
                 objID=obj.idstr(AdvSettings.extprefix),
                 extprefix=AdvSettings.extprefix))
@@ -172,6 +185,7 @@ class QSublevelMouseHandler(QGraphicsRectItem):
     def mouseReleaseEvent(self, event):
         "Delete the current mouse action, to run its finalizer if applicable."
         self.action = None
+        self.pantimer.stop()
 
     def panscene(self, x, y, pandist, cooldown):
         """Scroll the scene if the provided mouse coordinates are near any edge.
@@ -196,12 +210,12 @@ class QSublevelMouseHandler(QGraphicsRectItem):
         elif y < topleft.y() + panheight:
             shiftY = -pandist
 
+        if shiftX or shiftY:
+            self.pantimer.start(cooldown)            
         if shiftX:
-            self.pantimer.start(cooldown)
             view.horizontalScrollBar().setValue(
                 view.horizontalScrollBar().value() + shiftX)
         if shiftY:
-            self.pantimer.start(cooldown)
             view.verticalScrollBar().setValue(
                 view.verticalScrollBar().value() + shiftY)
 
@@ -220,7 +234,7 @@ class MouseMoveItems:
             self.startX + SMA3.Constants.maxtileX - maxX,
             self.startY - minY,
             self.startY + SMA3.Constants.maxtileY - maxY]
-##        print("init mouserange:", [format(i, "02X") for i in self.mouserange])
+##        print("init mouserange:", [f"{i:02X}" for i in self.mouserange])
 
     def mousemove(self, event):
         x, y = mousetilepos(event, *self.mouserange)
@@ -255,13 +269,10 @@ class MouseMoveItems:
         self.moved = True
 
         # update status bar
+        itemstr = AdvEditor.Format.sublevelitemstr(
+            AdvWindow.selection.objects, AdvWindow.selection.sprites)
         AdvWindow.statusbar.setActionText(
-            "Moved {items} x{x} y{y}".format(
-                items=AdvEditor.Format.sublevelitemstr(
-                    AdvWindow.selection.objects, AdvWindow.selection.sprites),
-                x=format(x - self.startX, "+03X"),
-                y=format(y - self.startY, "+03X")
-                ))
+            f"Moved {itemstr} x{x-self.startX:+03X} y{y-self.startY:+03X}")
 
     def __del__(self):
         if self.moved:
@@ -292,7 +303,7 @@ class MouseResizeObjects:
             self.oldsizes.append((obj.width, obj.height))
 
             # calculate initial resize range limits
-            resizing = SMA3.ObjectMetadata[(obj.ID, obj.extID)].resizing
+            resizing = SMA3.ObjectMetadata[obj].resizing
             if resizing["horiz"]:
                 minX = min(minX, resizing["wmin"] - obj.width)
                 maxX = max(maxX, resizing["wmax"] - obj.width)
@@ -342,15 +353,6 @@ class MouseResizeObjects:
             except SMA3.L1TilemapOverflowError as err:
                 self.offsetX -= err.dir[0]
                 self.offsetY -= err.dir[1]
-                # cap resize ranges to prevent repeated overflow
-                if err.dir[1] > 0:
-                    self.rangeY[1] = self.offsetY
-                elif err.dir[1] < 0:
-                    self.rangeY[0] = self.offsetY
-                if err.dir[0] > 0:
-                    self.rangeX[1] = self.offsetX
-                elif err.dir[0] < 0:
-                    self.rangeX[0] = self.offsetX
                 if err.dir == [0, 0]:
                     # no direction: something went wrong, break infinite loop
                     raise

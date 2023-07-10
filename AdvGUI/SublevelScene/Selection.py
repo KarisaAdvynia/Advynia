@@ -5,8 +5,8 @@ Handles displaying, changing, and manipulating the selected items."""
 import itertools
 
 # import from other files
+import AdvEditor
 from AdvEditor import AdvSettings, AdvWindow, Adv3Attr
-import AdvEditor.Format
 from AdvGame import SMA3
 from AdvGUI.GeneralQt import *
 
@@ -14,7 +14,6 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
     def __init__(self):
         super().__init__()
         self.tiles = set()
-        self.alltiles = set()
         self.objects = set()
         self.spriteitems = set()
         self.objpath = QPainterPath()
@@ -116,7 +115,7 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
         vert = set()
         for obj in self.objects:
             # defines to save lookups during iteration
-            r = SMA3.ObjectMetadata[(obj.ID, obj.extID)].resizing
+            r = SMA3.ObjectMetadata[obj].resizing
             if rhoriz := r["horiz"]:
                 widthpositive = (obj.width >= 0 and rhoriz != 2)
                 lastX = obj.lastX if hasattr(obj, "lastX") else obj.lasttile[0]
@@ -138,12 +137,9 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
                                 vert.add((x, y+1))  # bottom edge
                         elif (x, y-1) not in self.tiles:
                             vert.add((x, y))  # top edge
-##        print("horiz", " ".join((format(x, "02X") + format(y, "02X"))
-##                  for (x, y) in sorted(horiz)),
-##              "vert", " ".join((format(x, "02X") + format(y, "02X"))
-##                  for (x, y) in sorted(vert, key=lambda item : item[1])),
-##              "diag", " ".join((format(x, "02X") + format(y, "02X"))
-##                  for (x, y) in sorted(diag)))
+##        print("horiz", " ".join(f"{x:02X}{y:02X}" for (x, y) in sorted(horiz)),
+##              "vert", " ".join(f"{x:02X}{y:02X}" for (x, y) in sorted(vert, 
+##                  key=lambda item : item[1])) )
         return horiz, vert
 
     # Select/deselect methods
@@ -162,7 +158,6 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
             self.selectionchanged = True
 
         self.tiles.clear()
-        self.alltiles.clear()
 
         if not objset:
             # streamlined deselect
@@ -176,7 +171,6 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
         self.objects = objset
         for obj in objset:
             self.tiles |= obj.tiles
-            self.alltiles |= obj.alltiles
 
         # update dashed border
         # exterior borders occur once
@@ -216,6 +210,7 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
         affecting the currently selected objects.
         This accepts sprite items, not sprites!
         sprset=None can be used to deselect all sprites."""
+
         if self.spriteitems != sprset:
             self.selectionchanged = True
 
@@ -240,6 +235,7 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
 
     def selectall(self):
         "Select all visible items."
+
         selectobjects, selectsprites = self.checklayers()
         if not (selectobjects or selectsprites):
             return
@@ -261,6 +257,7 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
         """Move the items in the current selection by offsetX, offsetY tiles.
         If said location would place an item out of bounds, return False, or
         optionally reraise an L1TilemapOverflowError if one was raised."""
+
         if not self:
             return
 
@@ -292,10 +289,9 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
 
             if setaction:
                 statustext = [
-                    "Moved ", AdvEditor.Format.sublevelitemstr(
-                        self.objects, self.sprites),
-                    " x", format(offsetX, "+03X"),
-                    " y", format(offsetY, "+03X")]
+                    "Moved ", 
+                    AdvEditor.Format.sublevelitemstr(self.objects, self.sprites),
+                    f" x{offsetX:+03X} y{offsetY:+03X}"]
                 AdvWindow.statusbar.setActionText("".join(statustext))
                 AdvWindow.undohistory.addaction(
                     "Move", mergeID="Move Selection")
@@ -305,6 +301,7 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
         """Move the items in the current selection to a specified location.
         If said location would place an item out of bounds, move as close as
         possible."""
+
         centerX, centerY = self.centertile()
         offsetX = x - centerX
         offsetY = y - centerY
@@ -336,15 +333,17 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
         offsets away from 0 if needed.
         If said location would extend an object out of bounds, return False, or
         optionally reraise the L1TilemapOverflowError."""
+
         if not self.objects:
             return
 
         update = False
         for obj in self.objects:
             obj.backup()
-            resizing = SMA3.ObjectMetadata[(obj.ID, obj.extID)].resizing
+            resizing = SMA3.ObjectMetadata[obj].resizing
+
             if resizing["horiz"]:  # object allows horiz resizing
-                if offsetX > 0:
+                if offsetX > 0:  # increase width
                     maxwidth = resizing["wmax"]
                     if maxwidth == 0x80 and Adv3Attr.sublevel.header[1] == 2:
                         maxwidth = 0x100
@@ -352,25 +351,30 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
                     while obj.width < newwidth:
                         obj.width += resizing["wstep"]
                         update = True
-                elif offsetX < 0:
+                    obj.width = min(obj.width, maxwidth)
+                elif offsetX < 0:  # decrease width
                     minwidth = resizing["wmin"]
-                    if minwidth < 1 and Adv3Attr.sublevel.header[1] == 2:
-                        minwidth = 1
+                    if minwidth < 0 and Adv3Attr.sublevel.header[1] == 2:
+                        minwidth = 0
                     newwidth = max(obj.width + offsetX, minwidth)
                     while obj.width > newwidth:
                         obj.width -= resizing["wstep"]
                         update = True
+                    obj.width = max(obj.width, minwidth)
             if resizing["vert"]:  # object allows vert resizing
-                if offsetY > 0:
+                if offsetY > 0:  # increase height
                     newheight = min(obj.height + offsetY, resizing["hmax"])
                     while obj.height < newheight:
                         obj.height += resizing["hstep"]
                         update = True
-                elif offsetY < 0:
+                    obj.height = min(obj.height, resizing["hmax"])
+                elif offsetY < 0:  # decrease height
                     newheight = max(obj.height + offsetY, resizing["hmin"])
                     while obj.height > newheight:
                         obj.height -= resizing["hstep"]
                         update = True
+                    obj.height = max(obj.height, resizing["hmin"])
+
         if update:
             try:
                 self.scene().updateobjects(self.objects)
@@ -382,10 +386,9 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
                 return False  # resize failed
             else:
                 statustext = [
-                    "Resized ",
-                    AdvEditor.Format.sublevelitemstr(self.objects)]
-                if offsetX: statustext += [" w", format(offsetX, "+03X")]
-                if offsetY: statustext += [" h", format(offsetY, "+03X")]
+                    "Resized ", AdvEditor.Format.sublevelitemstr(self.objects)]
+                if offsetX: statustext.append(f" w{offsetX:+03X}")
+                if offsetY: statustext.append(f" h{offsetY:+03X}")
                 AdvWindow.statusbar.setActionText("".join(statustext))
                 if setaction:
                     AdvWindow.undohistory.addaction(
@@ -395,6 +398,7 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
     def moveobjectorder(self, direction, *, setaction=True):
         """Move selected objects forward/backward. Does not affect sprite order.
         Directions: +1:forward, +2:to front, -1:backward, -2:to back"""
+
         if not self.objects or not direction:
             return
 
@@ -404,8 +408,7 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
         if abs(direction) == 1:
             # move backward/forward: calculate set of tiles, for overlap check
             tiles = set()
-            for obj in objects:
-                tiles |= obj.alltiles
+            for obj in objects: tiles |= obj.alltiles
 
         if direction == 1:
             # move forward
@@ -467,6 +470,7 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
 
     def deleteitems(self, *, setaction=True):
         "Delete all objects/sprites in the current selection."
+
         if not self:
             return
         objects = self.objects
@@ -486,6 +490,7 @@ class QSublevelSelection(QAbstractGraphicsShapeItem):
             AdvWindow.statusbar.setActionText("".join(statustext))
 
 class QSublevelRectSelect(QGraphicsRectItem):
+    "Shaded rectangle graphic, depicted when drag-selecting multiple items."
     def __init__(self):
         super().__init__()
 

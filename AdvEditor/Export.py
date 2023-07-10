@@ -4,11 +4,11 @@
 import itertools, os, traceback
 
 # import from other files
-import AdvMetadata, AdvEditor, AdvFile
+import AdvMetadata, AdvEditor, AdvFile, AdvGame
 from AdvEditor import (AdvSettings, AdvWindow,
                        Adv3Attr, Adv3Patch, Adv3Save, Adv3Sublevel, Adv3Visual)
 from AdvEditor.Format import pluralize
-from AdvGame import AdvGame, GBA, SMA3
+from AdvGame import GBA, SNES, SMA3
 from AdvGUI.Dialogs import (QFileDialog, QSimpleDialog, QDialogFileError,
     QDialogLoadValidation, QDialogImportPatch, QDialogSMA3ImportMultiple,
     QDialogImportGraphics)
@@ -102,9 +102,8 @@ def importA3L_action():
 
         case _:
             QSimpleDialog(AdvWindow.editor, title="Error", wordwrap=False,
-                          text="".join((
-                "Importing from file extension ", ext, " is not supported."
-                ))).exec()
+                text=f"Importing from file extension {ext} is not supported."
+                ).exec()
 
 def _processgeneralA3L(filepath, a3l):
     datatype = a3l.datatype()
@@ -119,7 +118,6 @@ def _processgeneralA3L(filepath, a3l):
                 for patchkey in newpatches:
                     # warn if any specific patch warning is enabled
                     if getattr(AdvSettings, "warn_patch_" + patchkey):
-                        print("warn_patch_" + patchkey)
                         warn = True
             if warn:
                 # load warning dialog
@@ -140,9 +138,8 @@ def _importsublevel(sublevel, filepath, warnSNES):
 
     Adv3Sublevel.loadsublevel(sublevel)
 
-    AdvWindow.statusbar.setActionText("".join((
-        "Imported sublevel ", format(Adv3Attr.sublevel.ID, "02X"),
-        " from ", filepath)))
+    AdvWindow.statusbar.setActionText(
+        f"Imported sublevel {Adv3Attr.sublevel.ID:02X} from {filepath}")
 
     if warnSNES and AdvSettings.warn_import_SNES:
         text = (
@@ -183,8 +180,8 @@ def exportsublevel_action():
 
     # get filepath from user
     filepath, _ = QFileDialog.getSaveFileName(
-        AdvWindow.editor, caption="Export Sublevel",
-        filter=AdvFile.A3LFileData.longext, directory=defaultpath)
+        AdvWindow.editor, caption="Export Sublevel", directory=defaultpath,
+        filter=AdvFile.A3LFileData.longext)
 
     # export data
     if filepath:
@@ -199,7 +196,7 @@ def export_ylt():
     # generate default filepath
     defaultpath = os.path.join(
         os.path.dirname(Adv3Attr.filepath),
-        "level_" + format(Adv3Attr.sublevel.ID, "02X") + ".ylt")
+        f"level_{Adv3Attr.sublevel.ID:02X}.ylt")
 
     # get filepath from user
     filepath, _ = QFileDialog.getSaveFileName(
@@ -232,12 +229,12 @@ def export_yet():
     maincount = sum(bool(entr) for entr in mainentr)
     if maincount > 56:
         errorlines.append("".join((
-            "This ROM contains ", str(maincount), " (decimal) main entrances. "
+            f"This ROM contains {maincount} (decimal) main entrances. "
             "The .ylt format only supports 56.")))
     midwaycount = sum(len(level) for level in midwayentr)        
     if midwaycount > 122:
         errorlines.append("".join((
-            "This ROM contains ", str(midwaycount), " (decimal) midway entrances. "
+            f"This ROM contains {midwaycount} (decimal) midway entrances. "
             "The .ylt format only supports 122.")))
 
     if errorlines:
@@ -304,16 +301,14 @@ def importmultiple():
                     case "Sublevel":
                         sublevel = a3l.tosublevel()
                         if sublevel.ID in newsublevels:
-                            duplicates.add("Sublevel " +
-                                           format(sublevel.ID, "02X"))
+                            duplicates.add(f"Sublevel {sublevel.ID:02X}")
                         newsublevels[sublevel.ID] = sublevel
                         newpatches.update(Adv3Patch.detectpatches_sublevel(
                             sublevel))
                     case "Entrances: Single Level":
                         levelID, main, midways = a3l.toentrances()
                         if allentrances or levelID in newentrances:
-                            duplicates.add("Level entrance " +
-                                           format(levelID, "02X"))
+                            duplicates.add(f"Level entrance {levelID:02X}")
                         newentrances[levelID] = (main, midways)
                         if Adv3Patch.detectpatches_midway([midways]):
                             newpatches.add("midway6byte")
@@ -322,7 +317,7 @@ def importmultiple():
                             duplicates.add("All level entrances")
                         elif newentrances:
                             duplicates.update(
-                                "Level entrance " + format(levelID, "02X")
+                                f"Level entrance {levelID:02X}"
                                 for levelID in newentrances)
                         allentrances = a3l.toentrances()
                         if Adv3Patch.detectpatches_midway(allentrances[1]):
@@ -331,7 +326,7 @@ def importmultiple():
                         messagestoadd = a3l.totextdata()
                         for key in messagestoadd:
                             if key in newmessages:
-                                duplicates.add("Messages: " + key)
+                                duplicates.add(f"Messages: {key}")
                         newmessages.update(messagestoadd)
                     case _:
                         raise ValueError
@@ -426,6 +421,8 @@ def exportallYIdata(sourcefilepath, outputdir, console="GBA"):
             sublevel = Sublevel.importbyID(sourcefilepath, sublevelID)
             if console == "GBA":
                 Adv3Patch.loadsublevelpatchattr(sublevel)
+            elif console == "SNES":
+                sublevel.layerYoffsets.clear()
             a3l = AdvFile.A3LFileData.fromsublevel(sublevel)
             exportpath = os.path.join(outputdir,
                 a3l.defaultfilename(sourcefilepath))
@@ -463,7 +460,7 @@ def exportallYIdata(sourcefilepath, outputdir, console="GBA"):
         pass
 
 def exportall_action():
-    _exportallwarning()
+    if not _exportallwarning(): return
 
     outputdir = QFileDialog.getExistingDirectory(
         AdvWindow.editor, caption="Select Export Folder",
@@ -475,13 +472,22 @@ def exportall_action():
         "Exported sublevels, entrances, and messages to " + outputdir)
 
 def exportSNESdata_action():
-    _exportallwarning()
+    if not _exportallwarning(): return
 
     filepath, _ = QFileDialog.getOpenFileName(
         AdvWindow.editor, caption="Open SNES ROM",
         directory=os.path.dirname(Adv3Attr.filepath),
         filter="SNES ROM Image (*.sfc *.smc)")
     if not filepath: return
+
+    with SNES.Open(filepath) as f:
+        f.seek(0x00FFD6)
+        nextbyte = f.read(1)[0]
+        if nextbyte != 0x15:  # not SuperFX
+            QDialogFileError(AdvWindow.editor, filepath,
+                "File does not appear to be a valid SNES Yoshi's Island ROM."
+                             ).exec()
+            return
 
     outputdir = QFileDialog.getExistingDirectory(
         AdvWindow.editor, caption="Select Export Folder",
@@ -496,10 +502,11 @@ def exportSNESdata_action():
 def _exportallwarning():
     "Shared warning for exporting all data to A3Ls, from GBA or SNES."
     if AdvSettings.warn_export_all:
-        QSimpleDialog(AdvWindow.editor, title="Export All Data", wordwrap=True,
-            dontshow="warn_export_all",
+        return QSimpleDialog(AdvWindow.editor, title="Export All Data",
+            dontshow="warn_export_all", wordwrap=True,
             text="This will create a large number of files, including one per "
                  "sublevel. An empty folder is recommended.").exec()
+    return True
 
 # Graphics import/export
 
@@ -659,7 +666,7 @@ def importgraphics(filepath):
     with GBA.Open(filepath, "r+b") as f:
         # erase old compressed data
         for ptr, length in toerase:
-##            print("Erasing:", hex(length), "bytes from", format(ptr, "08X"))
+##            print(f"Erasing: {length:#x} bytes from {ptr:08X}")
             f.seek(ptr)
             f.write(bytes(length))
 
@@ -692,7 +699,7 @@ def _insertcompresseddata(toinsert):
             try:
                 for start, end in SMA3.Pointers.vanillacompressedregions:
                     if start <= ptrref.vdest < end:
-##                        print("Trying region", format(start, "08X"), format(end, "08X"))
+##                        print(f"Trying region {start:08X} {end:08X}")
                         newptr = Adv3Save.savedatatoROM(
                             compresseddata, ptrref, start, end)
                         break
@@ -701,7 +708,7 @@ def _insertcompresseddata(toinsert):
         if newptr is None:
             # save to freespace
             newptr = Adv3Save.savedatatoROM(compresseddata, ptrref)
-##        print("Saved", hex(len(compresseddata)), "bytes to", format(newptr, "08X"))
+##        print(f"Saved {len(compresseddata):#x} bytes to {newptr:08X}")
 
 def _testhuffman(f, pathstart, exporttypes):
     """Test if the Huffman to LZ77 patch needs to be applied, before inserting

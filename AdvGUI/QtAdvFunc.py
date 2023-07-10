@@ -1,20 +1,19 @@
 "Misc Qt Functions"
 
 # Qt imports
-from .PyQtImport import QApplication, qRgb, QTimer
+from .PyQtImport import Qt, QApplication, qRgb, QTimer
 
 # import from other files
-from AdvGame import AdvGame
+from AdvGame import color15to24
 
-def basewidth(widget):
+def basewidth(widget) -> int:
     """Return a dynamic character width of the widget's font, used for
     cross-platform fixed widget widths."""
     return widget.fontMetrics().horizontalAdvance("_")
 
-def color15toQRGB(color):
+def color15toQRGB(color: int) -> int:
     "Convert a 15-bit RGB color to a 24-bit qRgb color."
-    red, green, blue = AdvGame.color15to24(color)
-    return qRgb(red, green, blue)
+    return qRgb(*color15to24(color))
 
 def createtogglefunc(widget):
     return lambda : widget.setVisible(not widget.isVisible())
@@ -24,7 +23,7 @@ def createdialogtogglefunc(dialog):
         if checked:
             dialog.show()
         else:
-            dialog.done(1)
+            dialog.close()
     return _togglefunc
 
 def protectedmoveresize(window, x, y, width, height):
@@ -39,13 +38,14 @@ def protectedmoveresize(window, x, y, width, height):
     window.move(x, y)
     window.resize(width, height)
 
-def timerstart():
-    "Start a one-shot timer."
+def timerstart() -> QTimer:
+    "Start a one-shot timer, to measure intervals up to 100 seconds."
     timer = QTimer()
+    timer.setTimerType(Qt.TimerType.PreciseTimer)
     timer.setSingleShot(True)
-    timer.start(1000000000)
+    timer.start(100000)
     return timer
 
 def timerend(timer):
     "Return time elapsed by a one-shot timer."
-    return 1000000000 - timer.remainingTime()
+    return 100000 - timer.remainingTime()

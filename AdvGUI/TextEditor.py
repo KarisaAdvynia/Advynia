@@ -306,8 +306,8 @@ ignored.
         self.msgID = msgID
         textdata = self.messages[self.texttype][msgID]
         if not isinstance(textdata, SMA3.Text):
-            raise TypeError("".join(("Attempted to load non-text data ",
-                                    repr(textdata), " as text data.")))
+            raise TypeError(
+                f"Attempted to load non-text data {repr(textdata)} as text data.")
         self.textdata = textdata
 
         self.loadmessagestr()
@@ -465,8 +465,7 @@ ignored.
         else:
             charstr = str(SMA3.Text(charID))
 
-        self.charinfo.setText("".join((
-            format(charID, "02X"), ": ", charstr)))
+        self.charinfo.setText(f"{charID:02X}: {charstr}")
 
     def insertchar(self):
         "Insert the currently hovered font character."
@@ -667,8 +666,9 @@ class QSMA3TextGraphics(QImage):
         startY = command.params[7] + scrollY
         imagetilewidth = (command.params[4] + 7) >> 3
         imageheight = min(command.params[5], 0x50 - startY)
-        offsetXperbyte = 8
-        if AdvSettings.text_imageoffbyone:
+        if AdvSettings.fix_text_imageoffbyone:
+            offsetXperbyte = 8
+        else:
             # account for in-game off-by-one error
             startX += 8
             offsetXperbyte = 7
@@ -750,7 +750,7 @@ class QDialogLinkMessage(QDialogBase):
 
         # init widgets
 
-        self.linkdestinput = QLineEditByte(maxvalue=len(messages)-1)
+        self.linkdestinput = QLineEditHex(maxvalue=len(messages)-1)
         self.linktext = QLabel()
 
         self.linkdestinput.editingFinished.connect(self.updatelinktext)
@@ -790,10 +790,14 @@ class QDialogLinkMessage(QDialogBase):
             self.parent().messagelabeltext(self.linkdestinput.value))
 
 class QDialogAddTextCommand(QDialogBase):
-    def __init__(self, parent, texttype, char=0xFF):
+    def __init__(self, parent, texttype, char=None):
         super().__init__(parent)
 
         self.setWindowTitle("Add Command")
+        
+        if char is None:
+            # default char if Add Command button was clicked
+            char = 0xFE if texttype == "Level name" else 0xFF
 
         # init widgets
 
@@ -805,7 +809,8 @@ class QDialogAddTextCommand(QDialogBase):
             if num is None:
                 self.commandlist.addItem(desc)
             else:
-                self.commandlist.addItem(format(num, "02X") + ": " + desc)
+                self.commandlist.addItem(f"{num:02X}: {desc}")
+
         if texttype == "Level name":
             self.commandlist.setCurrentRow(char & 1)
         else:
@@ -873,11 +878,11 @@ class QDialogImportMessages(QDialogBase):
 
         # init widgets
 
-        label = QLabel("".join((
+        label = QLabel(
             "Replace these message types?\n"
-            "Messages can be viewed before saving.\n\n",
-            "\n".join(newtexttypes),
-            )))
+            "Messages can be viewed before saving.\n\n" +
+            "\n".join(newtexttypes)
+            )
         self.checkbox = QCheckBox("Don't show this message again")
 
         # init layout

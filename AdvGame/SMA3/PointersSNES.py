@@ -2,7 +2,7 @@
 Locations of SMW2:YI (V1.0 U) data pointers, used for extracting data from the
 SNES version."""
 
-from AdvGame.AdvGame import PtrRef
+from AdvGame import PtrRef
 
 ### Movable pointers, so that the code can still find the data if it's been
 ###  moved to another location

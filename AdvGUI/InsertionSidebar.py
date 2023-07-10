@@ -26,7 +26,7 @@ class QInsertionSidebar(QDockWidget):
 
         self.scene = QGraphicsScene(0, 0, 0x90, 0x90)
         self.layer1 = QSMA3Layer1(
-            self.scene, width=9, height=9, allowYoverflow=True)
+            self.scene, width=9, height=9, is_sidebar=True)
         self.spritelayer = QSMA3SpriteLayer(self.scene)
         self.view = QGraphicsViewTransparent(self.scene)
         self.view.setHorizontalScrollBarPolicy(
@@ -54,7 +54,7 @@ class QInsertionSidebar(QDockWidget):
         self.objectlist = QListWidgetResized(width=200)
         self.objects = []
         for key, metadata in SMA3.ObjectMetadata.items():
-            if metadata.enabled in (0, 1):
+            if 0 <= metadata.enabled < 2:
                 continue
             obj = SMA3.Object(**metadata.preview)
             self.objects.append(obj)
@@ -66,9 +66,9 @@ class QInsertionSidebar(QDockWidget):
         self.spritelist = QListWidgetResized(width=200)
         self.sprites = []
         for key, metadata in SMA3.SpriteMetadata.items():
-            if metadata.enabled in (0, 1):
+            if 0 <= metadata.enabled < 2:
                 continue
-            if metadata.preview["extID"] is not None:
+            if metadata.preview["parityID"] is not None:
                 continue
             spr = SMA3.Sprite(**metadata.preview)
             self.sprites.append(spr)
@@ -129,7 +129,7 @@ class QInsertionSidebar(QDockWidget):
         self.sublevel.objects = [obj]
         self.sublevel.sprites.clear()
 
-        metadata = SMA3.ObjectMetadata[(obj.ID, obj.extID)]
+        metadata = SMA3.ObjectMetadata[obj]
 
         tooltip = metadata.tooltiplong.format(objID=obj.idstr(
             AdvSettings.extprefix), extprefix=AdvSettings.extprefix)
@@ -154,7 +154,7 @@ class QInsertionSidebar(QDockWidget):
 
         metadata = SMA3.SpriteMetadata[(spr.ID, None)]
 
-        tooltip = SMA3.SpriteMetadata[(spr.ID, 0)].tooltiplong.format(
+        tooltip = SMA3.SpriteMetadata[spr].tooltiplong.format(
             extprefix=AdvSettings.extprefix)
         self.view.setToolTip(tooltip)
 
@@ -189,39 +189,39 @@ class QInsertionSidebar(QDockWidget):
             self.selectsprite()
 
     iconlist = {
-        "horiz":(None, "arrow-right", "arrow-left", "arrow-leftright"),
-        "vert":(None, "arrow-down", "arrow-up", "arrow-updown"),
-        "layer0":(None, "layer0"),
-        "itemmemory":(None, "yellowcoin", "redcoin", "greencoin"),
-        "warp":(None, "door16", None),
-        "rng":(None, "rng"),
-        "overlap":(None, "overlap-object-blue", "overlap-object-red",
+        "horiz": (None, "arrow-right", "arrow-left", "arrow-leftright"),
+        "vert": (None, "arrow-down", "arrow-up", "arrow-updown"),
+        "layer0": (None, "layer0"),
+        "itemmemory": (None, "yellowcoin", "redcoin", "greencoin"),
+        "warp": (None, "door16", None),
+        "rng": (None, "rng"),
+        "overlap": (None, "overlap-object-blue", "overlap-object-red",
                    "overlap-objspr-blue", "overlap-objspr-red",
                    "overlap-sprite-blue", "overlap-sprite-red"),
-        "parity":(None, "parityX", "parityY", "parityYX"),
+        "parity": (None, "parityX", "parityY", "parityYX"),
         }
     icontooltips = {
-        "arrow-right":"Positive width only",
-        "arrow-left":"Negative width only",
-        "arrow-leftright":"Positive/negative width allowed",
-        "arrow-down":"Positive height only",
-        "arrow-up":"Negative height only",
-        "arrow-updown":"Positive/negative height allowed",
-        "yellowcoin":"Affected by item memory",
-        "redcoin":"Affected by item memory, high priority",
-        "greencoin":"Affected by item memory, special",
-        "door16":"Uses screen exit",
-        "layer0":"Uses layer 0 for foreground graphics",
-        "rng":"Affected by RNG",
-        "overlap-object-blue":"May change on overlap",
-        "overlap-object-red":"Requires overlap to function",
-        "overlap-objspr-blue":"May change if overlapping a tile",
-        "overlap-objspr-red":"Requires overlapping a tile to function",
-        "overlap-sprite-blue":"May change if overlapping a sprite",
-        "overlap-sprite-red":"Requires overlapping a sprite to function",
-        "parityX":"Affected by X parity",
-        "parityY":"Affected by Y parity",
-        "parityYX":"Affected by YX parity",
+        "arrow-right": "Positive width only",
+        "arrow-left": "Negative width only",
+        "arrow-leftright": "Positive/negative width allowed",
+        "arrow-down": "Positive height only",
+        "arrow-up": "Negative height only",
+        "arrow-updown": "Positive/negative height allowed",
+        "yellowcoin": "Affected by item memory",
+        "redcoin": "Affected by item memory, high priority",
+        "greencoin": "Affected by item memory, special",
+        "door16": "Uses screen exit",
+        "layer0": "Uses layer 0 for foreground graphics",
+        "rng": "Affected by RNG",
+        "overlap-object-blue": "May change on overlap",
+        "overlap-object-red": "Requires overlap to function",
+        "overlap-objspr-blue": "May change if overlapping a tile",
+        "overlap-objspr-red": "Requires a tile to function",
+        "overlap-sprite-blue": "May change if overlapping another sprite",
+        "overlap-sprite-red": "Requires another sprite to function",
+        "parityX": "Affected by X parity",
+        "parityY": "Affected by Y parity",
+        "parityYX": "Affected by YX parity",
         }
     def setMetaIcons(self, **kwargs):
         """Display icons for for object metadata properties. Inputs are
@@ -232,9 +232,8 @@ class QInsertionSidebar(QDockWidget):
         for i, (key, iconID) in enumerate(kwargs.items()):
             if self.iconlist[key][iconID]:
                 iconname = self.iconlist[key][iconID]
-                iconpath = (
-                    AdvMetadata.datapath("icon", iconname + ".png"))
-                self.metaicons[i].setPixmap(QPixmap("".join(iconpath)))
+                self.metaicons[i].setPixmap(QPixmap(
+                    AdvMetadata.datapath("icon", iconname + ".png")))
                 self.metaicons[i].setToolTip(self.icontooltips[iconname])
                 self.metaicons[i].show()
                 icons = True

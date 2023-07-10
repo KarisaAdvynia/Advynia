@@ -4,13 +4,14 @@ specialized file."""
 
 # standard library imports
 import os, time
+from collections.abc import ByteString, Sequence
 
 # Qt imports
 from .PyQtImport import *
 
 # import from other files
-import AdvMetadata, AdvEditor.Number
-from AdvEditor import AdvSettings, Adv3Attr
+import AdvMetadata, AdvEditor
+from AdvEditor import AdvSettings, AdvWindow, Adv3Attr
 from . import QtAdvFunc
 
 # Misc Qt classes
@@ -59,7 +60,7 @@ class QSimpleDialog(QDialogBase):
               attribute that, if True, displays the dialog.
     """
     def __init__(self, *args, text="", title="Error", wordwrap=True,
-                 dontshow=None):
+                 dontshow: str = None):
         super().__init__(*args)
         self.setWindowTitle(title)
 
@@ -138,13 +139,19 @@ class QLabelToolTip(QLabel):
         else:
             self.setToolTip("")
 
-class QLineEditByte(QLineEdit):
-    "QLineEdit displaying a single user-editable hex number."
-    def __init__(self, *args, minvalue=0, maxvalue=0xFF):
+class QLineEditHex(QLineEdit):
+    """QLineEdit displaying a single user-editable hex number.
+
+    If absorbEnter is set, the Return/Enter key will only emit the
+    editingFinished signal, without any other effect, such as closing the
+    dialog."""
+
+    def __init__(self, *args, minvalue=0, maxvalue=0xFF, absorbEnter=False):
         super().__init__(*args)
         self.minvalue = minvalue
         self.maxvalue = maxvalue
         self.value = minvalue
+        self.absorbEnter = absorbEnter
 
         maxlength = AdvEditor.Number.hexlen(maxvalue)
 
@@ -153,7 +160,7 @@ class QLineEditByte(QLineEdit):
         self.setMaxLength(maxlength)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setValidator(QRegularExpressionValidator(QRegularExpression(
-            "([0-9]|[A-F]|[a-f])+")))
+            "[0-9A-Fa-f]+")))
 
         # apply maximum value
         self.editingFinished.connect(
@@ -169,13 +176,16 @@ class QLineEditByte(QLineEdit):
         self.setText(format(self.value, "0"+str(self.maxLength())+"X"))
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key.Key_Up:
+        key = event.key()
+        if key == Qt.Key.Key_Up:
             self.editingFinished.emit()
             self.setValue(self.value + 1)
             self.editingFinished.emit()
-        elif event.key() == Qt.Key.Key_Down:
+        elif key == Qt.Key.Key_Down:
             self.editingFinished.emit()
             self.setValue(self.value - 1)
+            self.editingFinished.emit()
+        elif self.absorbEnter and key in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
             self.editingFinished.emit()
         else:
             super().keyPressEvent(event)
@@ -207,9 +217,53 @@ class QPlainTextEdit(QPlainTextEdit):
 
 class QTransparentPixmap(QPixmap):
     "QPixmap that's initialized to transparent."
-    def __init__(self, width, height):
-        super().__init__(width, height)
+    def __init__(self, *args):
+        super().__init__(*args)
         self.fill(QColor(0, 0, 0, 0))
+
+class QDialogViewerBase(QDialogBase):
+    """Base class for persistent non-modal editor subwindows.
+    Includes a system to delay updating while the viewer is closed.
+    Saves position on close, and prevents Esc from closing the dialog."""
+
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.queuedupdate = True
+        self.savedpos = None
+        self.savedsize = None
+
+    def show(self):
+        "Restore saved window position/size, and update if queued."
+        if self.savedpos is not None:
+            self.move(self.savedpos)
+        if self.savedsize is not None:
+            self.resize(self.savedsize)
+        super().show()
+        if self.queuedupdate:
+            self.runqueuedupdate()
+            self.queuedupdate = False
+
+    def closeEvent(self, event):
+        "Save window position/size on close, and uncheck the toolbar button."
+        AdvWindow.editor.actions[self.actionkey].setChecked(False)
+        self.savedpos = self.pos()
+        self.savedsize = self.size()
+        self.close()
+
+    def reject(self):
+        "Overridden to prevent Esc from closing the dialog."
+        pass
+
+    def queueupdate(self):
+        if not self.isVisible():
+            self.queuedupdate = True
+            return
+        else:
+            self.runqueuedupdate()
+
+    def runqueuedupdate(self):
+        raise NotImplementedError
 
 class QVHBoxLayout(QVBoxLayout):
     """QVBoxLayout with on-demand adding of QHBoxLayout rows, and sequence-like
@@ -282,14 +336,14 @@ class Q8x8Tile(QImage):
         super().__init__(8, 8, QImage.Format.Format_Indexed8)
         self.fill(0)
 
-    def setPalette(self, palette):
+    def setPalette(self, palette: Sequence[int]):
         self.setColorTable(QtAdvFunc.color15toQRGB(color) for color in palette)
         self.setColor(0, 0)   # color 0 is always transparent
 
 class QGBA8x8Tile(Q8x8Tile):
     """A visual representation of single 8x8 tile, given its GBA 4bpp graphics
     and 0x10-byte palette."""
-    def __init__(self, tile, paletterow=(0,)*0x10):
+    def __init__(self, tile: ByteString, paletterow=(0,)*0x10):
         super().__init__()
         self.setPalette(paletterow)
         if not tile:
@@ -300,9 +354,22 @@ class QGBA8x8Tile(Q8x8Tile):
             pixelarray[i] = byte & 0xF
             pixelarray[i+1] = byte >> 4
 
+class QGBA8x8Tile_8bpp(Q8x8Tile):
+    """A visual representation of single 8x8 tile, given its GBA 8bpp graphics
+    and 0x100-byte palette."""
+    def __init__(self, tile: ByteString, palette=(0,)*0x100):
+        super().__init__()
+        self.setPalette(palette)
+        if not tile:
+            return
+
+        bits = self.bits()
+        bits.setsize(64)
+        bits[:] = tile
+
 class QNumberedTile16(QImage):
-    """Image of a 16x16 square, circle, or other shape, containing a 4x7 hex
-    number. Intended to provide compact numbered graphics."""
+    """Image of a 16x16 square, circle, or other shape, containing a hex number
+    with up to 3 4x7 digits. Intended to provide compact numbered graphics."""
     def __init__(self, numstr, qcolor, shape="square", textcolorindex=3):
         super().__init__(16, 16, QImage.Format.Format_Indexed8)
 
@@ -317,40 +384,45 @@ class QNumberedTile16(QImage):
         except FileNotFoundError:
             print("Image " + filename + " not found!")
 
-        startY = 4
-        if shape == "star":
-            startY = 5
-        self.dispnumstr(numstr, 1, startY, textcolorindex)
+        offsetY = 1 if shape=="star" else 0
+        self.dispnumstr(numstr, offsetY, textcolorindex)
 
     def setImage(self, filepath):
         # read color indexes from an external file
         newpixels = open(filepath, "rb").read()
-        pixelarray = self.bits().asarray(0x100)
-        for i in range(0x100):
-            pixelarray[i] = newpixels[i]
+        bits = self.bits()
+        bits.setsize(0x100)
+        bits[:] = newpixels
 
-    def dispnumstr(self, numstr, startX, startY, textcolorindex=3):
-        if len(numstr) > 3:
+    startcoords = {
+        1: [(6, 4)],
+        2: [(3, 4), (8, 4)],
+        3: [(1, 4), (6, 4), (11, 4)],
+        4: [(3, 1), (8, 1), (4, 9), (9, 9)],
+        5: [(1, 1), (6, 1), (11, 1), (4, 9), (9, 9)],
+        6: [(1, 1), (6, 1), (11, 1), (1, 9), (6, 9), (11, 9)],
+        }
+
+    def dispnumstr(self, numstr, offsetY=0, textcolorindex=3):
+        if len(numstr) > 6:
             raise ValueError(
-                'Insufficient space to display string "' + numstr + '".')
+                f'Insufficient space to display string "{numstr}" in a 16x16 tile.')
         elif len(numstr) == 0:
             return
-        else:
-            startX += (None, 5, 2, 0)[len(numstr)]
+##        else:
+##            startX += (None, 5, 2, 0)[len(numstr)]
 
         pixelarray = self.bits().asarray(0x100)
-        with open(AdvMetadata.datapath("font", "5x8font.bin"), "rb") as bitmap:
-            for char in bytes(numstr, encoding="ASCII"):
+        with open(AdvMetadata.datapath("font", "advpixelfont.bin"), "rb") as bitmap:
+            for char, (x0, y) in zip(bytes(numstr, encoding="ASCII"),
+                                              self.startcoords[len(numstr)]):
                 bitmap.seek(char*8)
 
-                y = startY
                 # shorten loop since digits fit in 4x7
                 for byte in bitmap.read(7):
-                    x = startX
+                    x = x0
                     for bitindex in range(4):
-                        bit = (byte >> (7-bitindex)) & 1
-                        if bit:
+                        if byte & (1 << (7-bitindex)):
                             pixelarray[16*y + x] = textcolorindex
                         x += 1
                     y += 1
-                startX += 5

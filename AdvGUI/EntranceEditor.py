@@ -4,6 +4,7 @@ class."""
 
 # standard library imports
 import copy
+from functools import partial
 
 # import from other files
 import AdvEditor, AdvFile
@@ -63,49 +64,61 @@ class QDialogSMA3Entrances(QDialogBase):
             ("levelnum", ""),
             ("entrname", "Entrance data:"),
             (0, "Sublevel:"), (1, "X"), (2, "Y"), (3, ""),
-            (4, "Camera byte 4?"), (5, "Camera byte 5?"),
+            ("4hi", "Affects layer 1 Y (0-F)"), ("4lo", "Unknown scroll-related (0-F)"),
             ("destscreen", ""),
-            ("bandit", "Bandit minigame"),
             ("newscreen", "New screen number:"),
             ):
             self.labels[key] = QLabel(text)
 
         self.lineeditbytes = {}
         for key, maxvalue in (
-            (0, SMA3.Constants.maxsublevel), (1, SMA3.Constants.maxtileX),
+            (0, SMA3.Constants.maxsublevelID), (1, SMA3.Constants.maxtileX),
             (2, SMA3.Constants.maxtileY), (3, 0xFF),
-            (4, 0xFF), (5, 0xFF),
+            ("4hi", 0xF), ("4lo", 0xF),
             ("newscreen", SMA3.Constants.maxscreen),
-            ("entrlist", SMA3.Constants.maxlevel),
+            ("entrlist", SMA3.Constants.maxlevelID),
             ):
-            self.lineeditbytes[key] = QLineEditByte(maxvalue=maxvalue)
+            self.lineeditbytes[key] = QLineEditHex(
+                maxvalue=maxvalue, absorbEnter=(key=="entrlist"))
 
-        for i in range(6):
-            self.lineeditbytes[i].editingFinished.connect(
-                self._genlineeditcallback(i))
+            if isinstance(key, int):
+                self.lineeditbytes[key].editingFinished.connect(
+                    self._genlineeditcallback(key))
+            elif isinstance(key, str) and key[0] == "4":
+                self.lineeditbytes[key].editingFinished.connect(
+                    self.updatebyte4fromwidgets)
+
+        self.byte5checkboxes = []
+        for bitindex, text in (
+            (0, "Disable horizontal"),
+            (1, "Disable vertical"),
+            (2, "Limit downward"),
+            ):
+            checkbox = QCheckBox(text)
+            checkbox.clicked.connect(partial(self.byte5toggle, 1 << bitindex))
+            self.byte5checkboxes.append(checkbox)
+            
 
         self.animdropdown = QComboBox()
         for i, text in enumerate(SMA3.Constants.entranceanim):
-            text = "".join((format(i, "02X"), ": ", text))
-            self.animdropdown.addItem(text)
+            self.animdropdown.addItem(f"{i:02X}: {text}")
         self.animdropdown.setPlaceholderText("(invalid)")
         self.animdropdown.activated.connect(self.animdropdowncallback)
 
-        self.banditcheckbox = QCheckBox()
+        self.banditcheckbox = QCheckBox("Bandit minigame")
         self.banditcheckbox.clicked.connect(self.banditcheckboxcallback)
 
         self.banditIDlookup = {}
         self.banditdropdown = QComboBox()
         for sublevelID, text in zip(
-                range(SMA3.Constants.maxsublevel + 1,
-                      SMA3.Constants.maxsublevelscreenexit + 1),
+                range(SMA3.Constants.maxsublevelID + 1,
+                      SMA3.Constants.maxsublevelIDscreenexit + 1),
                 SMA3.Constants.banditminigames,
                 strict=True):
             self.banditIDlookup[sublevelID] = len(self.banditdropdown)
             if not text:
                 continue
-            text = "".join((format(sublevelID, "02X"), ": ", text))
-            self.banditdropdown.addItem(text, sublevelID)
+            self.banditdropdown.addItem(f"{sublevelID:02X}: {text}", sublevelID)
         self.banditdropdown.activated.connect(self.banditdropdowncallback)
 
         # init layout
@@ -141,6 +154,7 @@ class QDialogSMA3Entrances(QDialogBase):
         layoutR[-1].addStretch(1000)
         layoutR[-1].addWidget(self.buttons["Copy"])
         layoutR[-1].addWidget(self.buttons["Paste"])
+
         layoutR.addWidget(QHorizLine())
 
         layoutR.addRow()
@@ -159,15 +173,22 @@ class QDialogSMA3Entrances(QDialogBase):
         layoutR[-1].addWidget(self.lineeditbytes[3])
         layoutR[-1].addWidget(self.animdropdown)
         layoutR.addRow()
-        layoutR[-1].addWidget(self.labels[4])
-        layoutR[-1].addWidget(self.lineeditbytes[4])
-        layoutR[-1].addSpacing(10)
-        layoutR[-1].addWidget(self.labels[5])
-        layoutR[-1].addWidget(self.lineeditbytes[5])
-        layoutR.addRow()
-        layoutR[-1].addWidget(self.labels["bandit"])
         layoutR[-1].addWidget(self.banditcheckbox)
         layoutR[-1].addWidget(self.banditdropdown)
+
+        layoutR.addWidget(QHorizLine())
+        layoutR.addWidget(QLabel("Scrolling setings:"))
+        layoutR.addRow()
+        layoutR[-1].addWidget(self.byte5checkboxes[0])
+        layoutR[-1].addWidget(self.byte5checkboxes[1])
+        layoutR.addRow()
+        layoutR[-1].addWidget(self.byte5checkboxes[2])
+        layoutR[-1].addSpacing(10)
+        layoutR[-1].addWidget(self.labels["4hi"])
+        layoutR[-1].addWidget(self.lineeditbytes["4hi"])
+        layoutR.addRow()
+        layoutR[-1].addWidget(self.labels["4lo"])
+        layoutR[-1].addWidget(self.lineeditbytes["4lo"])
 
         layoutR.addStretch()
 
@@ -209,27 +230,39 @@ class QDialogSMA3Entrances(QDialogBase):
             self.loadentrancebyte(i, value)
 
     def loadentrancebyte(self, i, value):
-        self.lineeditbytes[i].setValue(value)
-        if i == 0:
-            if self.entrancelayout == "levelmain":
-                return
-            # swap normal/Bandit layout based on sublevel ID
-            elif value > SMA3.Constants.maxsublevel:
-                self.setEntranceLayout("bandit")
-                self.banditcheckbox.setChecked(True)
-                self.banditdropdown.setCurrentIndex(self.banditIDlookup[value])
-                self.lineeditbytes[0].setText(format(value, "02X"))
-            else:
-                self.setEntranceLayout("normal")
-                self.banditcheckbox.setChecked(False)
-        elif i == 3:
-            if value >= len(self.animdropdown):
-                value = -1
-            self.animdropdown.setCurrentIndex(value)
-        elif i in (1, 2):
-            # update dest screen number
-            self.labels["destscreen"].setText(
-                "Screen: " + format(SMA3.coordstoscreen(*self.entr[1:3]), "02X"))
+        if i <= 3:
+            # update byte input
+            self.lineeditbytes[i].setValue(value)
+
+        match i:
+            case 0:
+                if self.entrancelayout == "levelmain":
+                    return
+                # swap normal/Bandit layout based on sublevel ID
+                elif value > SMA3.Constants.maxsublevelID:
+                    self.setEntranceLayout("bandit")
+                    self.banditcheckbox.setChecked(True)
+                    self.banditdropdown.setCurrentIndex(
+                        self.banditIDlookup[value])
+                    self.lineeditbytes[0].setText(f"{value:02X}")
+                else:
+                    self.setEntranceLayout("normal")
+                    self.banditcheckbox.setChecked(False)
+            case 3:
+                if value >= len(self.animdropdown):
+                    value = -1
+                self.animdropdown.setCurrentIndex(value)
+            case 1 | 2:
+                # update dest screen number
+                self.labels["destscreen"].setText(
+                    f"Screen: {self.entr.destscreen:02X}")
+
+            case 4:
+                self.lineeditbytes["4hi"].setValue(value >> 4)
+                self.lineeditbytes["4lo"].setValue(value & 0xF)
+            case 5:
+                for i in range(3):
+                    self.byte5checkboxes[i].setChecked(value & (1<<i))
 
     def setentrancebyte(self, i, value):
         self.entr[i] = value
@@ -240,7 +273,7 @@ class QDialogSMA3Entrances(QDialogBase):
     def addentrancerow(self, prefix, entr):
         "Add a new row to the entrance list, with the provided prefix."
         text = [prefix, ":"]
-        text += (format(i, "02X") for i in entr[0:3])
+        text += (f"{i:02X}" for i in entr[0:3])
         self.entrlistwidget.addItem(" ".join(text))
 
     def setEntranceLayout(self, key):
@@ -251,7 +284,7 @@ class QDialogSMA3Entrances(QDialogBase):
 
         for widget in (
                 self.labels[3], self.lineeditbytes[3], self.animdropdown,
-                self.labels["bandit"], self.banditcheckbox, self.banditdropdown,
+                self.banditcheckbox, self.banditdropdown,
                 ):
             widget.setDisabled(True)
         for widget in (self.labels[0], self.lineeditbytes[0]):
@@ -265,7 +298,7 @@ class QDialogSMA3Entrances(QDialogBase):
             return
 
         for widget in (self.labels[3], self.animdropdown, self.lineeditbytes[3],
-                       self.labels["bandit"], self.banditcheckbox):
+                       self.banditcheckbox):
             widget.setEnabled(True)
         if key == "normal":
             self.animdropdown.show()
@@ -300,6 +333,14 @@ class QDialogSMA3Entrances(QDialogBase):
         "Overridden by subclasses."
         raise NotImplementedError
 
+    def updatebyte4fromwidgets(self):
+        self.setentrancebyte(4,
+            self.lineeditbytes["4hi"].value << 4 |
+            self.lineeditbytes["4lo"].value)
+
+    def byte5toggle(self, bitmask):
+        self.setentrancebyte(5, self.entr[5] ^ bitmask)
+
     # button functions
 
     def copyentr(self):
@@ -318,19 +359,28 @@ class QDialogSMA3Entrances(QDialogBase):
             return
 
         try:
-            entr = SMA3.Entrance.fromhex(clipboardtext)
+            entrraw = bytes.fromhex(clipboardtext)
+            if len(entrraw) == 0:
+                raise ValueError
+            if len(entrraw) > 6:
+                QSimpleDialog(self, title="Warning", text=
+                    f'Clipboard contents "{clipboardtext[:100]}"'
+                    f" were parsed as {len(entrraw)} bytes. "
+                    "Any bytes beyond the first 6 were truncated."
+                    ).exec()
+            entr = SMA3.Entrance(entrraw)
         except ValueError:
-            QSimpleDialog(self, title="Error", text="".join((
-                         'Clipboard contents "', clipboardtext[:100],
-                         '" could not be parsed as entrance data.'
-                         ))).exec()
+            QSimpleDialog(self, title="Error", text=
+                         f'Clipboard contents "{clipboardtext[:100]}"'
+                         " could not be parsed as entrance data."
+                         ).exec()
         else:
             if self.entrancelayout == "levelmain":
                 # don't change byte 3 of main entrances
                 entr[3] = self.entr[3]
                 # don't allow main entrances to use Bandit minigame IDs
-                if entr[0] > SMA3.Constants.maxsublevel:
-                    entr[0] = SMA3.Constants.maxsublevel
+                if entr[0] > SMA3.Constants.maxsublevelID:
+                    entr[0] = SMA3.Constants.maxsublevelID
             for i in range(6):
                 self.setentrancebyte(i, entr[i])
             self.loadentrance(entr)
@@ -363,7 +413,7 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
     def open(self):
         if not AdvEditor.ROM.exists(): return
 
-        self.mainentrances, self.midwayentrances = self.loadentrances()
+        self.mainentrances, self.midwayentrances = AdvEditor.Entrance.loadentrances()
 
 ##        import itertools
 ##        print([hex(i) for i in itertools.chain(
@@ -375,12 +425,6 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
         if Adv3Save.savewrapper(Adv3Save.saveentrances,
                 self.mainentrances, self.midwayentrances):
             super().accept()
-
-    @staticmethod
-    def loadentrances():
-        return SMA3.importlevelentrances(
-            Adv3Attr.filepath, maxmidpoints=Adv3Attr.maxmidpoints,
-            midwaylen = 6 if Adv3Attr.midway6byte else 4)
 
     def reloadsidebar(self):
         row = self.entrlistwidget.currentRow()
@@ -426,9 +470,7 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
         elif row >= 0:
             self.setEntranceLayout("normal")
             self.loadentrance(self.midwayentrances[self.levelID][row-1])
-            self.labels["entrname"].setText("".join((
-                "Midway Entrance ", format(row-1, "X"), ":"
-                )))
+            self.labels["entrname"].setText(f"Midway Entrance {row-1:X}:")
 
     # button functions
 
@@ -453,13 +495,13 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
         returnvalue = self.exportdialog.exec()
         if returnvalue == 1:
             caption = "Export Level Entrance"
-            statustext = ["Exported level ", format(self.levelID, "02X")]
+            statustext = f"Exported level {self.levelID:02X}"
             dataargs = (self.mainentrances[self.levelID],
                         self.midwayentrances[self.levelID],
                         self.levelID)
         elif returnvalue == 2:
             caption = "Export Level Entrances"
-            statustext = ["Exported all"]
+            statustext = "Exported all"
             dataargs = (self.mainentrances, self.midwayentrances)
         else:
             return
@@ -479,8 +521,8 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
         if filepath:
             a3l.exporttofile(filepath)
 
-            statustext += [" entrances to ", filepath]
-            AdvWindow.statusbar.setActionText("".join(statustext))
+            statustext += f" entrances to {filepath}"
+            AdvWindow.statusbar.setActionText(statustext)
 
     def importentrances_dialog(self):
         filepath, _ = QFileDialog.getOpenFileName(
@@ -516,10 +558,9 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
                     self.mainentrances[newlevelID] = main
                     self.midwayentrances[newlevelID] = midways
                     self.reloadsidebar()
-                    AdvWindow.statusbar.setActionText("".join((
-                        "Imported level ", format(newlevelID, "02X"),
-                        " entrances from ", filepath
-                        )))
+                    AdvWindow.statusbar.setActionText(
+                        f"Imported level {newlevelID:02X}"
+                        f" entrances from {filepath}")
                 return
 
             elif datatype == "Entrances: All Levels":
@@ -543,9 +584,9 @@ class QDialogSMA3LevelEntrances(QDialogSMA3Entrances):
             warnSNES = True
 
         else:
-            QDialogFileError(AdvWindow.editor, filepath, text="".join((
-                "Importing from file extension ", ext, " is not supported."
-                ))).exec()
+            QDialogFileError(AdvWindow.editor, filepath,
+                text=f"Importing from file extension {ext} is not supported."
+                ).exec()
             return
 
         if warnSNES and not AdvSettings.warn_import_SNES:
@@ -595,12 +636,12 @@ class QDialogSMA3Import1LevelEntr(QDialogBase):
         # init widgets
 
         levellabel = QLabel("Replace level:")
-        self.levelinput = QLineEditByte(maxvalue=SMA3.Constants.maxlevel)
+        self.levelinput = QLineEditHex(maxvalue=SMA3.Constants.maxlevelID)
         self.levelinput.setValue(levelID)
 
         entrdesc = [
-            "Main Entrance:\n", str(main), "\n\n"
-            "Midway Entrances:  ", format(len(midway), "X")]
+            f"Main Entrance:\n{main}\n\n"
+            f"Midway Entrances:  {len(midway):X}"]
         for entr in midway:
             entrdesc += ["\n", str(entr)]
         entrlabel = QLabel("".join(entrdesc))
@@ -684,8 +725,7 @@ class QDialogSMA3ScreenExits(QDialogSMA3Entrances):
                 self.entrlistwidget.setCurrentRow(0)
             else:
                 self.loadentrance(SMA3.Entrance())
-        self.labels["entrlist"].setText(
-            "Sublevel " + format(Adv3Attr.sublevel.ID, "02X"))
+        self.labels["entrlist"].setText(f"Sublevel {Adv3Attr.sublevel.ID:02X}")
         super().open()
 
     def accept(self):
@@ -702,7 +742,7 @@ class QDialogSMA3ScreenExits(QDialogSMA3Entrances):
         "Load lines of text representing each screen exit to the sidebar."
         self.entrlistwidget.clear()
         for screen in sorted(self.exits.keys()):
-            self.addentrancerow(format(screen, "02X"), self.exits[screen])
+            self.addentrancerow(f"{screen:02X}", self.exits[screen])
         self._setselectedscreen(self.screen)
 
     def entrselectcallback(self):

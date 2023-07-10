@@ -21,9 +21,9 @@
 .org 0x081186B4         ; decompress Mario Bros. title screen sprite graphics
     bl swi_LZ77_VRAM
 
-.org 0x08112934         ; decompress ??? (082F1968 or 082F1B24 or 082F1D0C)
+.org 0x08112934         ; decompress Mario Bros. bonus game results tilemap (1-3 players)
     bl swi_LZ77_VRAM
-.org 0x08112948         ; decompress ??? (082F1F20)
+.org 0x08112948         ; decompress Mario Bros. bonus game results tilemap (4 players)
     bl swi_LZ77_VRAM
 
 .close

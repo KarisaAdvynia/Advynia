@@ -5,14 +5,16 @@ Contains global settings, and handles reading/writing the .cfg file."""
 import ast, os, sys
 
 # import from other files
-import AdvMetadata, AdvEditor.Number
+import AdvMetadata, AdvEditor
+from .Number import capvalue
 
 _settingspath = os.path.join(AdvMetadata.appdir, "Advynia.cfg")
 
 class Settings:
-    # This class's single instance acts as the module, to customize setattr
-    # All non-setting attributes/methods start with _ to avoid conflicting with
-    #  setting attributes
+    """This class's single instance acts as the AdvSettings module, to
+    customize setattr.
+    All non-setting attributes/methods start with _ to avoid conflicting with
+    setting attributes."""
 
     _enablecfgwrite = False
 
@@ -20,11 +22,14 @@ class Settings:
         "click_insert": [[1, 67108864], [2, 0]],  # control+click, right-click
         "click_selectdrag": [[1, 0]],  # click
         "click_selectmulti": [[1, 33554432]],  # shift+click
+        "dev_dispscreenexits": False,
         "dir_graphicssuffix": "-Graphics",
         "dir_tilemapssuffix": "-Tilemaps",
         "editor_lastversion": (0, 0, 0),
         "export_yileveltool_enable": False,
         "extprefix": "Ex",
+        "fix_objects": 0,
+        "fix_text_imageoffbyone": False,
         "import_includegraphics": True,
         "import_includetilemaps": True,
         "import_graphicstovanillaregion": True,
@@ -33,10 +38,10 @@ class Settings:
         "ROM_autoload": True,
         "ROM_recent": [],
         "ROM_recent_max": 10,
-        "text_imageoffbyone": True,
         "text_simplified": False,
         "undo_max": 500,
         "visual_dimscreens": 1,
+        "visual_itemcontents": True,
         "visual_redcoins": True,
         "visual_zoom": 100,
         "warn_export_all": True,
@@ -47,10 +52,14 @@ class Settings:
         "warn_save_expandROM": True,
         "warn_save_first": True,
         "warn_save_itemmemory": True,
+        "warn_save_objF0F3": True,
         "warn_save_screencount": True,
+        "warn_save_spritecount": True,
+        "warn_sublevel_intro": True,
+        "warn_sublevel_raphael": True,
         "warn_unsaved": True,
-        "window_sidebarpos": 1,
-        "window_SMA3Editor": (64, 64, 0x400, 0x280),
+        "window_editor": (64, 64, 0x400, 0x280),
+        "window_editor_sidebarpos": 1,
     }
     from AdvEditor.PatchData import patches as _patches
     for _patchkey in _patches:
@@ -135,8 +144,7 @@ class Settings:
     def __setattr__(self, key, value):
         if key[0] != "_" and key not in self._defaults:
             # keys that don't start with underscore should match a setting
-            raise AttributeError(
-                "'" + key + "' is not a valid Advynia setting.")
+            raise AttributeError(f"'{key}' is not a valid Advynia setting.")
         object.__setattr__(self, key, value)
         if self._enablecfgwrite and key in self._defaults:
             # also save to file
@@ -145,7 +153,7 @@ class Settings:
     def _capsetting(self, key, minvalue, maxvalue):
         "Ensure an int setting is within a valid range."
         value = getattr(self, key)
-        newvalue = AdvEditor.Number.capvalue(value, minvalue, maxvalue)
+        newvalue = capvalue(value, minvalue, maxvalue)
         if newvalue != value: setattr(self, key, newvalue)
 
     def _resetsetting(self, key):

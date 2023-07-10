@@ -1,5 +1,5 @@
 appname = "Advynia"
-version = (0, 4, 1)
+version = (0, 5, 0)
 printtime = False
 
 aboutadvynia = '''
@@ -10,9 +10,33 @@ For more information, join the Discord:
 <a href="https://discord.gg/mS5EcyRb8W">https://discord.gg/mS5EcyRb8W</a>
 '''
 
-import os
+# pixelwidths of AdvData/advpixelfont.bin
+fontwidths = [
+    0,0,0,0,0,0,0,0, 0,5,0,0,0,0,0,0,  ## unprintable
+    0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,  ## unprintable
+    2,3,4,6,5,5,5,3, 4,4,4,4,3,4,3,5,  #  !"#$%&'()*+,-./
+    5,5,5,5,5,5,5,5, 5,5,3,3,4,4,4,5,  # 0123456789:;<=>?
+    6,5,5,5,5,5,5,6, 5,5,5,5,5,7,6,5,  # @ABCDEFGHIJKLMNO
+    5,5,5,5,5,5,5,7, 5,5,5,4,5,4,4,5,  # PQRSTUVWXYZ[\]^_
+    3,5,5,5,5,5,5,5, 5,3,5,5,3,7,5,5,  # `abcdefghijklmno
+    5,5,5,5,5,5,5,7, 5,5,5,5,5,3,5,0]  # pqrstuvwxyz{|}~
+fontheight = 9
 
-appdir = os.path.dirname(__file__)
+# calculate app directory
+
+import os
+from pathlib import Path
+
+_path = Path(__file__)
+for _i, _part in enumerate(_path.parts):
+    if _part.endswith(".app"):
+        # if this is a Mac app, use first directory outside the .app
+        appdir = _Path(*_path.parts[0:_i]).as_posix()
+        break
+else:
+    # use directory of the executable
+    appdir = _path.parent.as_posix()
+
 datadir = os.path.join(appdir, "AdvData")
 def datapath(*relpath):
     "Generate an absolute path to Advynia's data folder."
@@ -30,12 +54,12 @@ class ProgramVersion(tuple):
         return self != (0, 0, 0, "")
 
     def __str__(self):
-        output = [str(self[0]), ".", str(self[1])]
+        output = f"{self[0]}.{self[1]}"
         if self[2] or self[3]:
-            output += ".", str(self[2])
+            output += f".{self[2]}"
         if self[3]:
-            output += "-", self[3]
-        return "".join(output)
+            output += f"-{self[3]}"
+        return output
 
     # ignore text components when comparing
     def __lt__(self, other):
@@ -48,4 +72,4 @@ class ProgramVersion(tuple):
         return self[0:3] >= other[0:3]
 
 version = ProgramVersion(version)
-appnamefull = " ".join((appname, str(version)))
+appnamefull = f"{appname} {version}"

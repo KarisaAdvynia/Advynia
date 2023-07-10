@@ -11,7 +11,9 @@ filename = ""
 savedversion = None
 tilemapL1_8x8 = None
 tilemapL0flags = None
+tile16interact = None
 sublevel = SMA3.Sublevel()
+sublevelentr = {}
 
 # initialize patch flags
 for key in PatchData.patches:

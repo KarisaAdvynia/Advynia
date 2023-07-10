@@ -11,56 +11,13 @@ from AdvGame import GBA, SMA3
 from .GeneralQt import *
 from . import QtAdvFunc, HeaderEditor
 
-# Viewer dialog base class
-
-class QTileViewer(QDialogBase):
-    "Base class for the 8x8 and 16x16 tile viewers."
-    def __init__(self, parent):
-        super().__init__(parent)
-
-        self.queuedupdate = True
-        self.savedpos = None
-        self.savedsize = None
-
-    def show(self):
-        "Restore saved window position/size, and update graphics if queued."
-        if self.savedpos is not None:
-            self.move(self.savedpos)
-        if self.savedsize is not None:
-            self.resize(self.savedsize)
-        super().show()
-        if self.queuedupdate:
-            self.runqueuedupdate()
-            self.queuedupdate = False
-
-    def closeEvent(self, event):
-        "Save window position/size on close, and uncheck the toolbar button."
-        AdvWindow.editor.actions[self.actionkey].setChecked(False)
-        self.savedpos = self.pos()
-        self.savedsize = self.size()
-        self.close()
-
-    def reject(self):
-        "Overridden to prevent Esc from closing the dialog."
-        pass
-
-    def queueupdate(self):
-        if not self.isVisible():
-            self.queuedupdate = True
-            return
-        else:
-            self.runqueuedupdate()
-
-    def runqueuedupdate(self):
-        raise NotImplementedError
-
 # Viewer dialog main classes
 
-class Q8x8TileViewer(QTileViewer):
+class Q8x8TileViewer(QDialogViewerBase):
     """Dialog for displaying the currently loaded 8x8 tiles, and adjusting
     related sublevel settings."""
 
-    actionkey = "Toggle 8x8"
+    actionkey = "8x8 Viewer"
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -115,38 +72,43 @@ class Q8x8TileViewer(QTileViewer):
         for key, minvalue, maxvalue, startvalue in (
                 ("layer", 0, 0xF, 1),
                 ("sprite", 0x10, 0x1F, 0x10)):
-            self.paletteinputs[key] = QLineEditByte(
+            self.paletteinputs[key] = QLineEditHex(
                 minvalue=minvalue, maxvalue=maxvalue)
             self.paletteinputs[key].setValue(startvalue)
             self.paletteinputs[key].editingFinished.connect(self.reloadgraphics)
 
         self.headerdropdowns = {}
         self.headerlabels = {}
-        for key in SMA3.Constants.headergraphics:
+        for setting in SMA3.Constants.headergraphics:
+            key = setting.index
             self.headerdropdowns[key] = QComboBox()
             if key == 1:
                 self.headerdropdowns[1].activated.connect(self.world6patchcheck)
             self.headerdropdowns[key].activated.connect(
                 self.updateheaderfromviewer)
-            self.headerlabels[key] = QLabel(SMA3.Constants.headersettings[key] + ":")
 
-            if key in SMA3.Constants.headernames:
-                for i, settingname in enumerate(SMA3.Constants.headernames[key]):
-                    self.headerdropdowns[key].addItem("".join((
-                        format(i, "02X"), ": ", settingname)))
+            self.headerlabels[key] = QLabel(setting.name + ":")
+
+            self.headerdropdowns[key].setToolTip(setting.tooltip)
+            self.headerlabels[key].setToolTip(setting.tooltip)
+
+            names = SMA3.Constants.header[key].names
+            if names:
+                for i, name in enumerate(names):
+                    self.headerdropdowns[key].addItem(f"{i:02X}: {name}")
             else:
-                for i in range(SMA3.Constants.headermaxvalues[key]+1):
-                    self.headerdropdowns[key].addItem(format(i, "02X"))
+                for i in range(setting.maxvalue + 1):
+                    self.headerdropdowns[key].addItem(f"{i:02X}")
 
         self.stripelabels = []
         self.stripedropdowns = []
         stripetext = []
         self.stripeIDtoindex = {}
         for i, (ID, desc) in enumerate(SMA3.Constants.stripes):
-            stripetext.append("".join((format(ID, "02X"), ": ", desc)))
+            stripetext.append(f"{ID:02X}: {desc}")
             self.stripeIDtoindex[ID] = i
         for i in range(6):
-            self.stripelabels.append(QLabel("Stripe " + str(i) + ":"))
+            self.stripelabels.append(QLabel(f"Stripe {i:X}:"))
             self.stripedropdowns.append(QComboBox())
             self.stripedropdowns[-1].addItems(stripetext)
             self.stripedropdowns[-1].activated.connect(
@@ -234,8 +196,8 @@ class Q8x8TileViewer(QTileViewer):
                 vertbar = self.views[key].verticalScrollBar()
                 vertbar.setValue(vertbar.minimum())
 
-    viewpages = {0:["layer"], 1:["sprite"], 2:range(6)}
-    headerpages = {0:[1, 3, 5, 0xA], 1:[], 2:[7]}
+    viewpages = {0: ["layer"], 1: ["sprite"], 2: range(6)}
+    headerpages = {0: [1, 3, 5, 0xA], 1: [], 2: [7]}
     def setLayoutPage(self, page, reload=True):
         "Show/hide widgets as needed when swapping between graphics types."
         self.page = page
@@ -276,8 +238,8 @@ class Q8x8TileViewer(QTileViewer):
         of the dropdowns. Then reload this window's graphics."""
         headertoupdate = {}
         for key in self.headerdropdowns:
-            if Adv3Attr.sublevel.header[key] !=\
-                    self.headerdropdowns[key].currentIndex():
+            if (Adv3Attr.sublevel.header[key] !=
+                    self.headerdropdowns[key].currentIndex()):
                 headertoupdate[key] = self.headerdropdowns[key].currentIndex()
 
         if headertoupdate:
@@ -363,52 +325,47 @@ class Q8x8TileViewer(QTileViewer):
                     self.pixmapitems[i].pixmap)
 
     def settileinfo(self, tileID, pixmap=None, stripeindex=None):
-        "Set text and image for hovering over a given tile."
+        "Set text and image for hovering over a given 8x8 tile."
 
         if tileID is None:
-            text = ["Layer tile\nVRAM"]
+            text = "Layer tile\nVRAM"
 
         elif self.page == 0:  # layers
-            if tileID < len(Adv3Visual.layergraphics.animated) and\
-                    Adv3Visual.layergraphics.animated[tileID] is not None:
-                tiletype = "Graphics Animation " +\
-                           format(Adv3Attr.sublevel.header[0xA], "02X")
+            if (tileID < len(Adv3Visual.layergraphics.animated) and
+                    Adv3Visual.layergraphics.animated[tileID] is not None):
+                tiletype = f"Graphics Animation {Adv3Attr.sublevel.header[0xA]:02X}"
             elif 0x80 <= tileID < 0x100:
                 tiletype = "Layer 1 Global"
             elif tileID < 0x200:
-                tiletype = "Layer 1 Tileset " +\
-                           format(Adv3Attr.sublevel.header[1], "X")
+                tiletype = f"Layer 1 Tileset {Adv3Attr.sublevel.header[1]:X}"
             elif 0x240 <= tileID < 0x250:
                 tiletype = "Global Animation"
             elif 0x250 <= tileID < 0x280:
                 tiletype = "Misc Global"
             elif 0x280 <= tileID < 0x380:
-                tiletype = "Layer 2 Image " +\
-                           format(Adv3Attr.sublevel.header[3], "02X")
+                tiletype = f"Layer 2 Image {Adv3Attr.sublevel.header[3]:02X}"
             elif 0x380 <= tileID < 0x480:
-                tiletype = "Layer 3 Image " +\
-                           format(Adv3Attr.sublevel.header[5], "02X")
+                tiletype = f"Layer 3 Image {Adv3Attr.sublevel.header[5]:02X}"
             else:
                 tiletype = "Unknown"
 
-            text = ["Layer tile ", format(tileID, "03X"), " (", tiletype, ")\n"
-                    "VRAM ", format(0x06000000 + tileID*0x20, "08X")]
+            vram = 0x06000000 + tileID*0x20
+            text = f"Layer tile {tileID:03X} ({tiletype})\nVRAM {vram:08X}"
             if tileID > 0x200:
-                text += ["  |  Layer 3: Tile ", format(tileID-0x200, "03X")]
+                text += f"  |  Layer 3: Tile {tileID-0x200:03X}"
 
         elif self.page == 1:  # sprite global
-            text = ["Sprite tile ", format(tileID, "03X"), "\n"
-                    "VRAM ", format(0x06010000 + tileID*0x20, "08X")]
+            vram = 0x06010000 + tileID*0x20
+            text = f"Sprite tile {tileID:03X}\nVRAM {vram:08X}"
 
         elif self.page == 2:  # stripes
             stripeID = Adv3Visual.spritegraphics.stripeIDs[stripeindex]
             vram = 0x06010200 + stripeindex*0x800 + tileID*0x20 +\
                    (tileID&0x10)*0x20
-            text = ["Sprite stripe ", format(stripeID, "02X"),
-                    " tile ", format(tileID, "02X"), "\n"
-                    "VRAM ", format(vram, "08X")]
+            text = (f"Sprite stripe {stripeID:02X} tile {tileID:02X}\n"
+                    f"VRAM {vram:08X}")
 
-        self.tileinfo.setText("".join(text))
+        self.tileinfo.setText(text)
 
         if not pixmap:
             pixmap = QTransparentPixmap(8, 8)
@@ -421,10 +378,10 @@ class Q8x8TileViewer(QTileViewer):
             if not applied:
                 self.headerdropdowns[1].setCurrentIndex(0xF)
 
-class Q16x16TileViewer(QTileViewer):
+class Q16x16TileViewer(QDialogViewerBase):
     "Dialog for displaying and selecting layer 1 16x16 tiles."
 
-    actionkey = "Toggle 16x16"
+    actionkey = "16x16 Viewer"
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -443,14 +400,16 @@ class Q16x16TileViewer(QTileViewer):
         self.layerlabel = QLabel()
 
         jumplabel = QLabel("Scroll to high byte")
-        self.jumpinput = QLineEditByte("00", maxvalue=0xFF)
+        self.jumpinput = QLineEditHex("00", maxvalue=0xFF, absorbEnter=True)
         self.jumpinput.editingFinished.connect(self.scrolltojumpinput)
 
         self.currenttile = QLabel()
         self.currenttile.setPixmap(QTransparentPixmap(16, 16))
-        self.tileinfo = QLabel()
-        self.tileinfo.setMinimumWidth(QtAdvFunc.basewidth(self.tileinfo) * 46)
-        self.settileinfo(None)
+        self.tileinfoheader = QLabel()
+        self.tile8x8info = QLabel("\n\n\n")
+        self.tile8x8info.setMinimumWidth(
+            QtAdvFunc.basewidth(self.tile8x8info) * 46)
+        self.tileinteract = QLabel()
 
         insertlabel = QLabel("Insert tile as object")
         self.insertbutton = QPushButton("Insert")
@@ -474,10 +433,15 @@ class Q16x16TileViewer(QTileViewer):
         layoutSidebar[-1].addWidget(self.jumpinput)
         layoutSidebar[-1].addStretch()
 
+        layoutSidebar.addWidget(QHorizLine())
+
         layoutSidebar.addRow()
         layoutSidebar[-1].addWidget(self.currenttile)
-        layoutSidebar[-1].addWidget(self.tileinfo)
+        layoutSidebar[-1].addWidget(self.tileinfoheader)
         layoutSidebar[-1].addStretch()
+
+        layoutSidebar.addWidget(self.tile8x8info)
+        layoutSidebar.addWidget(self.tileinteract)
 
         layoutSidebar.addRow()
         layoutSidebar[-1].addWidget(insertlabel)
@@ -564,41 +528,39 @@ class Q16x16TileViewer(QTileViewer):
         self.insertbutton.setDisabled(value is None)
 
     def inserttile(self, tileID):
-        """Insert the current selected tile, if any, in the
-        center of the view."""
+        "Insert the current selected tile, if any, in the center of the view."
 
         if tileID is not None:
-            newobj = SMA3.Object(ID=0x65, adjwidth=1, adjheight=1, extID=tileID,
+            newobj = SMA3.Object(ID=0x65, width=0, height=0, extID=tileID,
                                  extIDbytes=2)
             scene = AdvWindow.sublevelscene
             scene.insertitems({newobj}, *scene.centertile())
 
     fliptext = ("", ", X-flip", ", Y-flip", ", XY-flip")
     def settileinfo(self, tileID, pixmap=None):
-        "Set text and image for hovering/selecting a given tile."
+        "Set text and image for hovering/selecting a given 16x16 tile."
 
         if self.selectedtile is not None and tileID != self.selectedtile:
             # selected tile overrides other tiles
             return
 
-        if tileID is None:
-            text = ["16x16 tile "] + [""]*4
-        else:
-            text = ["16x16 tile {tileID}:".format(
-                tileID=format(tileID, "04X"))]
-            for tileprop, layer0 in zip(Adv3Attr.tilemapL1_8x8[tileID],
-                                         Adv3Attr.tilemapL0flags[tileID]):
-                tileID_8, paletterow, _, _ = GBA.splittilemap(tileprop)
-                text.append(
-                    "{tileprop}: 8x8 tile {tileID_8}, palette {pal}"
-                    ", layer {layers}{flip}".format(
-                        tileprop=format(tileprop, "04X"),
-                        tileID_8=format(tileID_8, "03X"),
-                        pal=format(paletterow, "X"),
-                        flip=self.fliptext[(tileprop&0xC00)>>10],
-                        layers="0" if layer0 else "1",
-                        ))
-        self.tileinfo.setText("\n".join(text))
+        self.tileinfoheader.setText(f"16x16 tile {tileID:04X}:")
+
+        # 8x8 tile components
+        lines = []
+        for tileprop, layer0 in zip(Adv3Attr.tilemapL1_8x8[tileID],
+                                    Adv3Attr.tilemapL0flags[tileID]):
+            tileID_8, paletterow, _, _ = GBA.splittilemap(tileprop)
+            lines.append(
+                f"{tileprop:04X}: 8x8 tile {tileID_8:03X}, "
+                f"palette {paletterow:X}, layer {'0' if layer0 else '1'}"
+                + self.fliptext[(tileprop&0xC00)>>10]
+                )
+        self.tile8x8info.setText("\n".join(lines))
+
+        # tile interaction properties
+        self.tileinteract.setText("Interaction:\n" + SMA3.tile16interactstr(
+            tileID, Adv3Attr.tile16interact, numprefix=True))
 
         if not pixmap:
             pixmap = QTransparentPixmap(16, 16)
@@ -697,7 +659,8 @@ class Q16x16TileViewerItem(QGraphicsPixmapItem):
     def itemChange(self, change, value):
         if change == self.GraphicsItemChange.ItemSelectedChange:
             if value:
-                self.setZValue(1)
+                self.viewer.scene.clearSelection()  # prevent multiple selection
+                self.setZValue(1)  # display dashed border above other items
                 self.viewer.selectedtile = self.tileID
                 self.viewer.settileinfo(self.tileID, self.pixmap())
             else:

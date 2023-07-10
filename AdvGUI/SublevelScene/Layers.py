@@ -2,10 +2,14 @@
 Includes the various displayed layers of the sublevel scene:
 background gradient, GBA layers 1-3, sprites, and screen border grid."""
 
+# standard library imports
+from collections.abc import Iterable
+from collections import defaultdict
+
 # import from other files
-import AdvMetadata
+import AdvMetadata, AdvGame
 from AdvEditor import AdvSettings, AdvWindow, Adv3Attr, Adv3Visual
-from AdvGame import AdvGame, GBA, SMA3
+from AdvGame import GBA, SMA3
 from AdvGUI.GeneralQt import *
 from AdvGUI import QtAdvFunc
 
@@ -53,13 +57,13 @@ class QSMA3BackgroundGradient(QAbstractLayer):
 class QSMA3Layer1(QAbstractLayer):
     """Handles displaying a sublevel's layer 1 from its objects.
     Specified width and height are in 16x16 tiles, not pixels."""
-    def __init__(self, *args, width=0x100, height=0x80, allowYoverflow=False,
+    def __init__(self, *args, width=0x100, height=0x80, is_sidebar=False,
                  sublevelscene=False, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.width = width
         self.height = height
-        self.allowYoverflow = allowYoverflow
+        self.is_sidebar = is_sidebar
         self.sublevelscene = sublevelscene
 
         self.tilemap = []
@@ -90,7 +94,7 @@ class QSMA3Layer1(QAbstractLayer):
                 item.setPen(QPen(Qt.PenStyle.NoPen))
                 item.setBrush(QColor(0, 0, 0, 0))
                 item.setPos((screen&0xF) * 0x100, (screen>>4) * 0x100)
-                item.setZValue(99)
+                item.setZValue(50)
                 self.scene.addItem(item)
                 self.screenrects.append(item)
 
@@ -100,8 +104,10 @@ class QSMA3Layer1(QAbstractLayer):
         if AdvMetadata.printtime: timer = QtAdvFunc.timerstart()  # debug
 
         self.tilemapold = self.tilemap
-        self.tilemap = SMA3.L1Constructor(
-            sublevel, allowYoverflow=self.allowYoverflow).tilemap
+        self.tilemap = SMA3.L1Tilemap(sublevel, 
+            loopsetting = "crop" if self.is_sidebar else "exception",
+            alt = True if self.is_sidebar else False,
+            fixver = AdvSettings.fix_objects)
 
         if AdvMetadata.printtime and self.sublevelscene == True:
             print("Layer 1 tilemap generation:", QtAdvFunc.timerend(timer), "ms")  # debug
@@ -145,6 +151,8 @@ class QSMA3Layer1(QAbstractLayer):
 
     def updateTileGraphics(self, x, y, forcereload=False):
         tileID = self.tilemap[y][x]
+        if hasattr(tileID, "displayID"):
+            tileID = tileID.displayID
         if not forcereload and tileID == self.tilemapold[y][x]:
             # don't update identical tiles
             return
@@ -153,8 +161,8 @@ class QSMA3Layer1(QAbstractLayer):
 
     _transparent = QColor(0, 0, 0, 0)
     screentype = {
-        1:(_transparent, QColor(132, 132, 132, 51), _transparent),
-        2:(QColor(0, 0, 255, 51), QColor(255, 0, 0, 51), QColor(255, 255, 0, 51)),
+        1: (_transparent, QColor(132, 132, 132, 51), _transparent),
+        2: (QColor(0, 0, 255, 51), QColor(255, 0, 0, 51), QColor(255, 255, 0, 51)),
         }
     def setDimScreens(self, newvalue=None):
         if newvalue is not None:
@@ -168,9 +176,9 @@ class QSMA3Layer1(QAbstractLayer):
         # set rectangle colors
         enabledcolor, disabledcolor, duplicatedcolor = self.screentype[AdvSettings.visual_dimscreens]
         for i in range(0x80):
-            if self.tilemap.screens[i] == 1:
+            if self.tilemap.screenstatus[i] == 1:
                 self.screenrects[i].setBrush(enabledcolor)
-            elif self.tilemap.screens[i] == 0xFB:
+            elif self.tilemap.screenstatus[i] == 0xFB:
                 self.screenrects[i].setBrush(duplicatedcolor)
             else:
                 self.screenrects[i].setBrush(disabledcolor)
@@ -191,11 +199,6 @@ class QSMA3Layer23(QAbstractLayer):
         self.height = 0x400
         self.width = 0x200
         self.layer = layer
-        self.layerIDoffset = 0
-        if layer == 3:
-            self.layerIDoffset = 0x200
-
-        self.tilemap = [None]*0x800
 
         # initialize background copies
         self.blankpixmap = QTransparentPixmap(self.width, self.height)
@@ -215,45 +218,14 @@ class QSMA3Layer23(QAbstractLayer):
 
         if AdvMetadata.printtime: timer = QtAdvFunc.timerstart()  # debug
 
-        self.tilemap = Adv3Visual.layergraphics.tilemap[self.layer]
-
-        if len(self.tilemap) > 0x800:
-            del self.tilemap[0x800:]
-        if len(self.tilemap) < 0x800:
-            self.tilemap[0:0] = [None]*(0x800-len(self.tilemap))
-
-        layerpixmap = QPixmap(self.blankpixmap)
-
         # display layer only if it's a background/foreground image
         enabletilemap = SMA3.Constants.layer23enable[self.layer][
             Adv3Attr.sublevel.header[self.layer*2 - 1]]
         if enabletilemap:
-          with QPainterSource(layerpixmap) as painter:
-
-            # iterate over 16x16 tiles in tilemap
-            for y in range(self.height//0x10):
-                for x in range(self.width//0x10):
-                    tileprop = self.tilemap[y*self.width//0x10 + x]
-                    if tileprop is None:
-                        continue
-                    tileID_8, paletterow, xflip, yflip = GBA.splittilemap(
-                        tileprop)
-
-##                    painter.drawPixmap(x<<4, y<<4, Adv3Visual.getstaticrect(
-##                        16, 16, self.layerIDoffset+tileID_8, paletterow,
-##                        xflip, yflip))
-
-                    xflip >>= 10  # convert True from 0x400 to 1
-                    yflip >>= 10  # convert True from 0x800 to 2
-
-                    for i, offset16 in enumerate((0, 1, 0x10, 0x11)):
-                        tilepixmap = Adv3Visual.get8x8(
-                            self.layerIDoffset+tileID_8+offset16,
-                            paletterow, xflip, yflip)
-                        painter.drawPixmap(
-                            (i&1^xflip)<<3 | x<<4,
-                            (i&2^yflip)<<2 | y<<4,
-                            tilepixmap)
+            layerpixmap = Adv3Visual.getlayerpixmap(
+                self.layer, self.width, self.height)
+        else:
+            layerpixmap = self.blankpixmap
 
         for item in self.pixmapitemgrid:
             item.setPixmap(layerpixmap)
@@ -301,19 +273,19 @@ class QSublevelScreenGrid(QGraphicsPixmapItem):
 
         if labels:
             for num in range(0x80):
-                self.drawnumbox(screen=num, data=((num, 1),),
-                    pixelarray=pixelarray, arraywidth=width,
-                    bgcolor=1, numcolor=2)
+                self.drawnumbox(
+                    screen=num, string=f"{num:02X}", pixelarray=pixelarray,
+                    arraywidth=width, bgcolor=1, numcolor=2)
 
         pixmap = QPixmap.fromImage(self.gridimage)
         self.setPixmap(pixmap)
 
-    def drawnumbox(self, screen, data, pixelarray, arraywidth,
+    def drawnumbox(self, screen, string, pixelarray, arraywidth,
                    bgcolor, numcolor):
         """Create a box of numbers or ASCII strings in the top-left corner of
         a screen, with data specified as a tuple of (string, x) pairs."""
 
-        width = max(i[1] for i in data) + 10
+        width = sum(AdvMetadata.fontwidths[ord(char)] for char in string) + 1
         height = 9
 
         startX = (screen&0xF) * 0x100
@@ -330,29 +302,26 @@ class QSublevelScreenGrid(QGraphicsPixmapItem):
             for y in yrange:
                 pixelarray[y*arraywidth + x] = bgcolor
         # draw text
-        for value, x in data:
-            if isinstance(value, int):
-                value = format(value, "02X")
-            self.dispstr(value, pixelarray, arraywidth, startX+x, startY+1,
-                         color=numcolor)
+        self.dispstr(string, pixelarray, arraywidth, startX+1, startY+1,
+                     color=numcolor)
 
-    def dispstr(self, inputstr, pixelarray, arraywidth, startX, startY, color):
+    def dispstr(self, string, pixelarray, arraywidth, startX, startY, color):
         "Draw an ASCII string at the given startX, startY."
 
-        with open(AdvMetadata.datapath("font", "5x8font.bin"), "rb") as bitmap:
-            for char in bytes(inputstr, encoding="ASCII"):
-                bitmap.seek(char*8)
+        widths = [AdvMetadata.fontwidths[ord(char)] for char in string]
+        with open(AdvMetadata.datapath("font", "advpixelfont.bin"), "rb") as bitmap:
+            for char, charwidth in zip(string, widths, strict=True):
+                bitmap.seek(ord(char) * 8)
 
                 y = startY
                 for byte in bitmap.read(8):
                     x = startX
-                    for bitindex in range(5):
-                        bit = (byte >> (7-bitindex)) & 1
-                        if bit:
+                    for bitindex in range(charwidth):
+                        if byte & (1 << (7-bitindex)):
                             pixelarray[arraywidth*y + x] = color
                         x += 1
                     y += 1
-                startX += 5
+                startX += charwidth
 
     def dispScreenExits(self, exits):
         """Display a sublevel's screen exits on their corresponding screens.
@@ -370,13 +339,55 @@ class QSublevelScreenGrid(QGraphicsPixmapItem):
         pixelarray = gridimage.bits().asarray(width*height)
 
         for screen, entr in exits.items():
-            self.drawnumbox(screen=screen,
-                data=((screen,1), (":", 12),
-                      (entr[0], 18), (SMA3.coordstoscreen(*entr[1:3]), 30)),
+            strparts = [f"{screen:02X} : {entr.sublevelID:02X}"]
+            if entr.sublevelID > SMA3.Constants.maxsublevelID:
+                # Bandit minigame
+                strparts.append(f"({entr.anim:02X})")
+                if entr.anim > SMA3.Constants.maxsublevelID:
+                    # nested minigame
+                    strparts.append("(00)")
+            strparts.append(f" {SMA3.coordstoscreen(*entr[1:3]):02X}")
+            self.drawnumbox(screen=screen, string="".join(strparts),
                 pixelarray=pixelarray, arraywidth=width, bgcolor=3, numcolor=2)
 
         pixmap = QPixmap.fromImage(gridimage)
         self.setPixmap(pixmap)
+
+class QSMA3EntranceLayer(QAbstractLayer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # initialize list of entrance items
+        self.entranceitems = []
+
+    def loadEntrances(self, entrs: Iterable[SMA3.Entrance]):
+        # remove old pixmap items
+        for item in self.entranceitems:
+            self.scene.removeItem(item)
+        self.entranceitems.clear()
+
+        # combine strings of entrances with the same destination coords
+        entrsbyloc = defaultdict(list)
+        for string, entr in entrs:
+            entrsbyloc[(entr.x, entr.y)].append(string)
+
+        # create new pixmap items
+        for (x, y), strings in entrsbyloc.items():
+            item = self.scene.addPixmap(Adv3Visual.getfontpixmap(
+                "; ".join(strings),
+                qRgba(0, 0, 255, 181),  # blue, for background
+                qRgb(255, 255, 255),    # white, for text
+                qRgba(0, 0, 0, 181),    # black, for border
+                ))
+            item.setVisible(self.visibility)
+            item.setZValue(self.zvalue)
+            item.setPos(x*16, y*16)
+            self.entranceitems.append(item)
+
+    def setVisible(self, visibility):
+        self.visibility = visibility
+        for item in self.entranceitems:
+            item.setVisible(self.visibility)
 
 class QSMA3SpriteLayer(QAbstractLayer):
     """Handles displaying a sublevel's sprites."""
@@ -393,7 +404,7 @@ class QSMA3SpriteLayer(QAbstractLayer):
 
         for spriteitem in self.spriteitems:
             self.scene.removeItem(spriteitem)
-        self.spriteitems = []
+        self.spriteitems.clear()
 
         for spr in sublevel.sprites:
             self.addSprite(spr)
@@ -413,13 +424,14 @@ class QSMA3SpriteLayer(QAbstractLayer):
             QtAdvFunc.timerend(timer), "ms")  # debug
 
     def reloadSpriteIDs(self, spriteIDset):
-        "Reload graphics of a specific set of sprite IDs."
+        "Reload graphics of a specific collection of sprite IDs."
         for spriteitem in self.spriteitems:
             if spriteitem.ID in spriteIDset:
                 spriteitem.reloadGraphics()
 
     def addSprite(self, spr):
-        spriteitem = QSMA3SpriteItem(spr, mouseinteract=self.mouseinteract)
+        spriteitem = QSMA3SpriteItem(spr, self.scene,
+                                     mouseinteract=self.mouseinteract)
         spriteitem.setVisible(self.visibility)
         self.scene.addItem(spriteitem)
         self.spriteitems.append(spriteitem)
@@ -442,15 +454,16 @@ class QSMA3SpriteLayer(QAbstractLayer):
 
     def setVisible(self, visibility):
         self.visibility = visibility
-        for spriteitem in self.spriteitems:
-            spriteitem.setVisible(self.visibility)
+        for item in self.spriteitems:
+            item.setVisible(self.visibility)
 
 class QSMA3SpriteItem(QGraphicsPixmapItem):
     "Graphics of a single sprite."
-    def __init__(self, spr, *args, mouseinteract=False):
+    def __init__(self, spr, scene, *args, mouseinteract=False):
         super().__init__(*args)
 
         self.spr = spr
+        self.scene = scene
 
         if mouseinteract:
             self.setAcceptHoverEvents(True)
@@ -480,10 +493,16 @@ class QSMA3SpriteItem(QGraphicsPixmapItem):
         self.setPixmap(pixmap)
         self.setOffset(offsetX, offsetY)
 
+        # if item is out of bounds, use filler pixmap to ensure selectability
+        if (hasattr(self.scene, "mousehandler") and
+                not self.collidesWithItem(self.scene.mousehandler)):
+            self.setPixmap(Adv3Visual.getspritefallbackpixmap(
+                self.spr.ID, self.spr.parity()))
+            self.setOffset(0, 0)
+
         # reload tooltip
         if SMA3.SpriteMetadata[(self.spr.ID, None)].parity:
-            self.setToolTip(SMA3.SpriteMetadata[
-                (self.spr.ID, self.spr.parity())].tooltiplong.format(
+            self.setToolTip(SMA3.SpriteMetadata[self.spr].tooltiplong.format(
                 extprefix=AdvSettings.extprefix))
 
     def update(self):
@@ -493,16 +512,16 @@ class QSMA3SpriteItem(QGraphicsPixmapItem):
 
     def hoverMoveEvent(self, event):
         "Propagate event to mouse handler, with current sprite."
-        self.scene().mousehandler.hoverMoveEvent(event, self.spr)
+        self.scene.mousehandler.hoverMoveEvent(event, self.spr)
 
     def mousePressEvent(self, event):
         "Propagate event to mouse handler, with this item itself."
-        self.scene().mousehandler.mousePressEvent(event, self)
+        self.scene.mousehandler.mousePressEvent(event, self)
 
     def mouseMoveEvent(self, event):
         "Propagate event to mouse handler, with current sprite."
-        self.scene().mousehandler.mouseMoveEvent(event, self.spr)
+        self.scene.mousehandler.mouseMoveEvent(event, self.spr)
 
     def mouseReleaseEvent(self, event):
         "Propagate event to mouse handler."
-        self.scene().mousehandler.mouseReleaseEvent(event)
+        self.scene.mousehandler.mouseReleaseEvent(event)

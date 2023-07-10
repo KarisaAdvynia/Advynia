@@ -11,7 +11,7 @@ from AdvGame import SMA3
 from AdvGUI.GeneralQt import *
 from .MouseHandler import (QSublevelMouseHandler, QResizeHandle)
 from .Layers import (QSMA3BackgroundGradient, QSMA3Layer1, QSMA3Layer23,
-                     QSMA3SpriteLayer, QSublevelScreenGrid)
+                     QSMA3SpriteLayer, QSMA3EntranceLayer, QSublevelScreenGrid)
 from .Selection import QSublevelSelection, QSublevelRectSelect
 
 # Z values:
@@ -19,9 +19,10 @@ from .Selection import QSublevelSelection, QSublevelRectSelect
 # -100: layer 2
 #  -50: layer 3 (should vary with the layer 3 image ID)
 #    0: layer 1
-#   99: shaded screens
+#   50: shaded screens
 #  100: mouse handler
 #  200: sprites
+#  230: entrances
 #  250: grid
 #  300: selection
 #  301: rectangle for drag-selection, resize handles
@@ -40,6 +41,7 @@ class QSMA3SublevelScene(QGraphicsScene):
         self.layer1 = QSMA3Layer1(scene=self, sublevelscene=True)
         self.layer2 = QSMA3Layer23(layer=2, scene=self, zvalue=-100)
         self.layer3 = QSMA3Layer23(layer=3, scene=self, zvalue=-50)
+        self.entrancelayer = QSMA3EntranceLayer(scene=self, zvalue=230)
         self.spritelayer = QSMA3SpriteLayer(scene=self, mouseinteract=True)
 
         self.grid = QSublevelScreenGrid(labels=True)
@@ -79,18 +81,16 @@ class QSMA3SublevelScene(QGraphicsScene):
         self.selection.clear()
         self.layer1.createTilemap(Adv3Attr.sublevel)
         self.layer1.updateLayerGraphics()
-        AdvWindow.statusbar.setActionText("".join(
-            ("Refreshed sublevel ", format(Adv3Attr.sublevel.ID, "02X"),
-             ".")))
+        AdvWindow.statusbar.setActionText(
+            f"Refreshed sublevel {Adv3Attr.sublevel.ID:02X}.")
 
     def screenshot(self):
         """Save a screenshot of the current scene."""
         image = QImage(0x1000, 0x800, QImage.Format.Format_ARGB32)
         self.render(QPainter(image))
 
-        filepath = "".join((
-            os.path.splitext(Adv3Attr.filepath)[0], "-Sublevel",
-            format(Adv3Attr.sublevel.ID, "02X"), ".png"))
+        filepath = (os.path.splitext(Adv3Attr.filepath)[0] +
+                    f"-Sublevel{Adv3Attr.sublevel.ID:02X}.png")
         image.save(filepath)
 
         AdvWindow.statusbar.setActionText("Saved screenshot to " + filepath)
@@ -98,16 +98,16 @@ class QSMA3SublevelScene(QGraphicsScene):
     def updateobjects(self, updateobjs=frozenset()):
         """updateobjs: collection of modified objects, to retrieve tiles
         before and after recalculating the tilemap"""
+
+        # account for objects' old tiles
         updatetiles = set()
-        for obj in updateobjs:
-            # account for objects' old tiles
-            updatetiles |= obj.alltiles
+        for obj in updateobjs: updatetiles |= obj.alltiles
 
         self.layer1.createTilemap(Adv3Attr.sublevel)
 
-        for obj in updateobjs:
-            # account for objects' new tiles
-            updatetiles |= obj.alltiles
+        # account for objects' new tiles
+        for obj in updateobjs: updatetiles |= obj.alltiles
+
         if updatetiles:
             # also update the 8 tiles surrounding each tile
             # any overflows are filtered out in updateLayerRegion
@@ -121,7 +121,7 @@ class QSMA3SublevelScene(QGraphicsScene):
             for x, y in updatetiles:
                 if 0 <= x < 0x100 and 0 <= y < 0x80:
                     tilemapnew[y][x] = self.layer1.tilemap[y][x]
-            tilemapnew.screens = self.layer1.tilemap.screens
+            tilemapnew.screenstatus = self.layer1.tilemap.screenstatus
             self.layer1.tilemap = tilemapnew
 
             # update graphics in this region

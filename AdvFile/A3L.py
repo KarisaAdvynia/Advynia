@@ -4,6 +4,7 @@ A3L data keys:
 04: Sublevel sprite data
 05: Sublevel stripes
 06: Sublevel tileset high byte
+07: Sublevel layer 2/3 Y offsets
 0D: Sublevel music ID
 0F: Sublevel ID
 10: Level ID, if single level
@@ -88,6 +89,9 @@ class A3LFileData(AdvyniaFileData):
         data[4] = sublevel.exportspritedata()
         if sublevel.ID is not None:
             data[0xF] = sublevel.ID.to_bytes(1, "little")
+        if sublevel.layerYoffsets:
+            data[7] = (sublevel.layerYoffsets[2].to_bytes(2, "little") +
+                       sublevel.layerYoffsets[3].to_bytes(2, "little"))
 
         # process patch data
         if stripeIDs is not None:
@@ -130,6 +134,9 @@ class A3LFileData(AdvyniaFileData):
         sublevel.importmaindata(io.BytesIO(self[1]))
         sublevel.importspritedata(io.BytesIO(self[4]))
         if 0xF in self: sublevel.ID = self[0xF][0]
+        if 7 in self:
+            sublevel.layerYoffsets[2] = int.from_bytes(self[7][0:2], "little")
+            sublevel.layerYoffsets[3] = int.from_bytes(self[7][2:4], "little")
 
         # import patch data
         if 5 in self: sublevel.stripeIDs = bytearray(self[5])
