@@ -1,36 +1,36 @@
 ID	extID	name	tooltipbase	enabled	x	y	adjwidth	adjheight	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11	t_anim	graphicstype	wmin	wmax	wstep	hmin	hmax	hstep	itemmemory	rng	overlap	layer0	nointeract	solid	slope	destroy	danger	warp
-0x00	0x00	Jungle plant, large 3-tall, left		2	3	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
-0x00	0x01	Jungle plant, large 3-tall, right		2	4	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
-0x00	0x02	Jungle plant, large 2-tall, left		2	3	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
-0x00	0x03	Jungle plant, large 2-tall, right		2	3	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
-0x00	0x04	Jungle plant, small 2-tall, left		2	4	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
-0x00	0x05	Jungle plant, small 2-tall, right		2	4	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
-0x00	0x06	Jungle plant, small 1-tall, left		2	4	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
-0x00	0x07	Jungle plant, small 1-tall, right		2	4	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
-0x00	0x08	Jungle plant, 3-cluster		2	3	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
-0x00	0x09	Jungle plant, 2-cluster		2	3	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
-0x00	0x0A	Mud interior grass, slope -		2	3	3	None	None						5																0			0	0	0	0	1			0	0	0	0
-0x00	0x0B	Mud interior grass, slope +		2	3	3	None	None						5																0			0	0	0	0	1			0	0	0	0
-0x00	0x0C	Jungle land, surface with vines		2	3	2	None	None						5																0			0	0	0	1	1	0	2	0	0	0	0
-0x00	0x0D	Kamek room ceiling+floor+pillar?		2	0	0	None	None																			Layer effects=A			0			0	0	0	0	1	0	2	0	0	0	0
-0x00	0x0E	Kamek room ceiling+floor+pillar?		2	0	0	None	None																			Layer effects=A			0			0	0	0	0	1	0	2	0	0	0	0
-0x00	0x0F	Single flower decoration		2	4	4	None	None			2										C									0			0	0	0	0	0						0
-0x00	0x10	Froggy battle background		1	0	0	None	None				3																		0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x11	Lever platform hub	Commonly used with sprite 03D.	2	3	4	None	None							6				A											0			0	0	0	0	0						0
-0x00	0x12	Red bridge outline, right	Used with sprite 0BB.	2	2	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x13	Red bridge outline, left	Used with sprite 0BB.	2	2	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x14	Red stairs outline, up-right	Used with sprite 0BA.	2	2	6	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x15	Red stairs outline, up-left	Used with sprite 0BA.	2	2	2	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x16	Red coin in poundable post	Tile modifier. Should be placed on a poundable post (object 0C).	2	4	4	None	None	0	1			4	5		7	8	9			C	D		F	11					0			0	2	0	2		0	2	0	1	0	0
-0x00	0x17	Red coin, single	A red coin disguised as a yellow coin. Objects 82-84 create multiple red coins, while sprite 065 can be used to place a disguised red coin on terrain.	2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	2	0	0	1	0	0	0	1	0	0
-0x00	0x18	Intro cutscene layer 1		1	0	0	None	None																			Intro			0			0	0	0	0	1						0
-0x00	0x19	Bowser phase 2 platform		2	0	6	None	None																			Bowser			0			0	0	0	0	0	0	2	-1	0	0	0
-0x00	0x1A	Post-Bowser platform		2	-0x17	0	None	None																			Bowser			0			0	0	0	0	0	0	2	-1	0	0	0
-0x00	0x1B	Bone pile, on land surface		2	3	3	None	None																	11					0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x1C	Bone pile, on {bg} wall, 1		2	3	3	None	None																	11					0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x1D	Bone pile, on {bg} wall, 2		2	3	3	None	None																	11					0			0	0	0	0	1	1	0	0	0	0	0
-0x00	0x1E	Kamek room pit with sides		2	0	3	None	None																			Layer effects=A			0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x1F	Kamek room ?		2	2	2	None	None																			Layer effects=A			0			0										0
+0x00	0x00	Jungle plant, large 3-tall, left	Foreground decoration.	3	3	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
+0x00	0x01	Jungle plant, large 3-tall, right	Foreground decoration.	3	4	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
+0x00	0x02	Jungle plant, large 2-tall, left	Foreground decoration.	3	3	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
+0x00	0x03	Jungle plant, large 2-tall, right	Foreground decoration.	3	3	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
+0x00	0x04	Jungle plant, small 2-tall, left	Foreground decoration.	3	4	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
+0x00	0x05	Jungle plant, small 2-tall, right	Foreground decoration.	3	4	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
+0x00	0x06	Jungle plant, small 1-tall, left	Foreground decoration.	3	4	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
+0x00	0x07	Jungle plant, small 1-tall, right	Foreground decoration.	3	4	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
+0x00	0x08	Jungle plant, 3-cluster	Foreground decoration.	3	3	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
+0x00	0x09	Jungle plant, 2-cluster	Foreground decoration.	3	3	3	None	None						5																0			0	0	0	0	1	1	0	0	0	0	0
+0x00	0x0A	Mud interior grass, slope -		3	3	3	None	None						5																0			0	0	0	0	1	0	2	0	0	0	0
+0x00	0x0B	Mud interior grass, slope +		3	3	3	None	None						5																0			0	0	0	0	1	0	2	0	0	0	0
+0x00	0x0C	Mud, grassy surface with vines		3	3	2	None	None						5																0			0	0	0	1	1	0	2	0	0	0	0
+0x00	0x0D	Kamek room ceiling+floor+pillar?		3	0	0	None	None																			Special Tileset=A			0			0	0	0	0	1	0	2	0	0	0	0
+0x00	0x0E	Kamek room ceiling+floor+pillar?		3	0	0	None	None																			Special Tileset=A			0			0	0	0	0	1	0	2	0	0	0	0
+0x00	0x0F	Relay Boo Guy end / Single flower	A flower tile. This is tile 00B6, so it can be used with Relay Boo Guys (sprite 105-106).	3	4	4	None	None			2										C									0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x10	Froggy battle background		2	0	0	None	None				3																		0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x11	Lever platform hub	Commonly used with sprite 03D.	3	3	4	None	None							6				A											0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x12	Red bridge outline, right	Used with sprite 0BB.	3	2	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x13	Red bridge outline, left	Used with sprite 0BB.	3	2	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x14	Red stairs outline, up-right	Used with sprite 0BB.	3	2	6	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x15	Red stairs outline, up-left	Used with sprite 0BA.	3	2	2	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x16	Red coin in poundable post	Tile modifier. Should be placed on a poundable post (object 0C).	3	4	4	None	None	0	1			4	5		7	8	9			C	D		F	11					0			0	2	0	2		0	2	0	1	0	0
+0x00	0x17	Red coin, single	A red coin disguised as a yellow coin. Objects 82-84 create multiple red coins, while sprite 065 can be used to place a disguised red coin on terrain.	3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	2	0	0	1	0	0	0	1	0	0
+0x00	0x18	Intro cutscene layer 1		2	0	0	None	None																			Intro			0			0	0	0	0	1	0	-1	0	0	0	0
+0x00	0x19	Bowser phase 2 platform		3	0	6	None	None																			Bowser			0			0	0	0	0	0	0	2	-1	0	0	0
+0x00	0x1A	Post-Bowser platform		3	-0x17	0	None	None																			Bowser			0			0	0	0	0	0	0	2	-1	0	0	0
+0x00	0x1B	Bone pile, on land surface		3	3	3	None	None																	11					0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x1C	Bone pile, on {bg} wall, 1		3	3	3	None	None																	11					0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x1D	Bone pile, on {bg} wall, 2		3	3	3	None	None																	11					0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x1E	Kamek room pit with sides		3	0	3	None	None																			Special Tileset=A			0			0	0	0	0	1	0	0	0	0	0	0
+0x00	0x1F	Kamek room ?		3	2	2	None	None																			Special Tileset=A			0			0						0	0	0	0	0
 0x00	0x20	Unused object ID		0			None	None																						0			0										
 0x00	0x21	Unused object ID		0			None	None																						0			0										
 0x00	0x22	Unused object ID		0			None	None																						0			0										
@@ -47,155 +47,155 @@ ID	extID	name	tooltipbase	enabled	x	y	adjwidth	adjheight	0	1	2	3	4	5	6	7	8	9	A	B
 0x00	0x2D	Unused object ID		0			None	None																						0			0										
 0x00	0x2E	Unused object ID		0			None	None																						0			0										
 0x00	0x2F	Unused object ID		0			None	None																						0			0										
-0x00	0x30	Castle bricks, tileset-specific decoration	Decoration varies between the three castle tilesets.	2	3	2	None	None							6				A				E							0			0	0	0	1	0						0
-0x00	0x31	Castle wooden {bg} wall, stationary	The falling version is sprite 036.	2	1	1	None	None							6				A				E							0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x32	Train track, vertical + ledge	Used by train morph. Allows train tracks to cross ledges from below.	2	4	4	None	None																			train			0			0	0	0	0	0	0	1	0	0	0	0
-0x00	0x33	Train track, corner, top-left	Used by train morph.	2	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x34	Train track, corner, bottom-right	Used by train morph.	2	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x35	Train track, corner, bottom-left	Used by train morph.	2	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x36	Train track, corner, top-right	Used by train morph.	2	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x37	Train track, 3-way, horizontal+up	Used by train morph.	2	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x38	Train track, 3-way, vertical+right	Used by train morph.	2	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x39	Train track, 3-way, vertical+left	Used by train morph.	2	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x3A	Train track, 3-way, horizontal+down	Used by train morph.	2	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x3B	Train drawing, flower		2	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x30	Castle bricks, tileset-specific decoration	Decoration varies between the three castle tilesets.	3	3	2	None	None							6				A				E							0			0	0	0	1	0	0	2	0	0	0	0
+0x00	0x31	Castle wooden {bg} wall, stationary	The falling version is sprite 036.	3	1	1	None	None							6				A				E							0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x32	Train track, vertical + ledge	Used by train morph. Allows train tracks to cross ledges from below.	3	4	4	None	None																			train			0			0	0	0	0	0	0	1	0	0	0	0
+0x00	0x33	Train track, corner, top-left	Used by train morph.	3	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x34	Train track, corner, bottom-right	Used by train morph.	3	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x35	Train track, corner, bottom-left	Used by train morph.	3	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x36	Train track, corner, top-right	Used by train morph.	3	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x37	Train track, 3-way, horizontal+up	Used by train morph.	3	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x38	Train track, 3-way, vertical+right	Used by train morph.	3	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x39	Train track, 3-way, vertical+left	Used by train morph.	3	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x3A	Train track, 3-way, horizontal+down	Used by train morph.	3	4	4	None	None																			train			0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x3B	Train drawing, flower		3	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
 0x00	0x3C	Train drawing, flower (duplicate)		2	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x3D	Train drawing, rock?		2	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x3D	Train drawing, rock?		3	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
 0x00	0x3E	Train drawing, rock? (duplicate)		2	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x3F	Train drawing, sun		2	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x40	Train drawing, person?		2	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x41	Train drawing, mountain, top-left		2	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x42	Train drawing, mountain, top-right		2	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x43	Train drawing, mountain, bottom-left		2	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x44	Train drawing, mountain, bottom-right		2	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x45	Train drawing, mountain, small		2	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x3F	Train drawing, sun		3	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x40	Train drawing, person?		3	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x41	Train drawing, mountain, top-left		3	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x42	Train drawing, mountain, top-right		3	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x43	Train drawing, mountain, bottom-left		3	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x44	Train drawing, mountain, bottom-right		3	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x45	Train drawing, mountain, small		3	4	4	None	None																			train			0			0	0	0	0	0	1	0	0	0	0	0
 0x00	0x46	Unfinished random-color egg block	Glitched effects when hit.	1	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	1	0	0	0	2	0	1	0	0
-0x00	0x47	Bandit/ski hut	Decorative. Bandit minigame depends on screen exit destination. Skiing depends on &lt;<i>conditions TBD</i>&gt;.	2	3	5	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x48	Unused object, glitch		1	2	8	None	None																						0			0	0	0	0	0						
-0x00	0x49	Forest tree, treetop leaves		2	4	4	None	None										9												0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x4A	Forest tree, rightward leaf		2	4	4	None	None										9												0			0	0	0	1	0	1	0	0	0	0	0
-0x00	0x4B	Forest tree, leftward leaf		2	4	4	None	None										9												0			0	0	0	1	0	1	0	0	0	0	0
-0x00	0x4C	Land {bg} wall, mouse hole		1	4	4	None	None	0	1						7														0			0	0	0	0	0						0
-0x00	0x4D	Unused object, glitch		1	3	3	None	None																						0			0	0	0	0	0						
-0x00	0x4E	Unused object, glitch		1	4	3	None	None																						0			0	0	0	0	0						
-0x00	0x4F	Unused object, glitch		1	4	4	None	None																						0			0	0	0	0	0						
-0x00	0x50	Right arrow sign	Auto-joins to most ground types.	2	3	3	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	1	0	1	0	0	0	0	0
-0x00	0x51	Hub for rotating spike mace	Commonly used with sprite 101 or 102, rotating spike maces.	2	4	4	None	None							6				A				E							0			0	0	0	0	0						0
-0x00	0x52	Castle bricks, Shy Guy chamber	Commonly used with sprite 103, working Boo Guys.	2	2	3	None	None							6				A				E							0			0	0	0	1	0						0
-0x00	0x53	Castle bricks, Shy Guy chamber, cracked floor	Commonly used with sprite 10C, Boo Guy raising a spiked ball on chain.	2	2	3	None	None							6				A				E							0			0	0	0	1	0						0
-0x00	0x54	Meadow tree, small top, left side larger		2	3	3	None	None																F						0			0	0	0	1	0	1	0	0	0	0	0
-0x00	0x55	Meadow tree, small top, right side larger		2	3	3	None	None																F						0			0	0	0	1	0	1	0	0	0	0	0
-0x00	0x56	Meadow tree, large top, right-leaning		2	2	3	None	None																F						0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x57	Meadow tree, large top, left-leaning		2	2	3	None	None																F						0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x58	Meadow tree, left leaves, small		2	2	4	None	None																F						0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x59	Meadow tree, left leaves, large		2	2	4	None	None																F						0			0	0	0	1	0	1	0	0	0	0	0
-0x00	0x5A	Meadow tree, left leaves, extended		2	2	3	None	None																F						0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x5B	Meadow tree, right leaves, small		2	4	4	None	None																F						0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x5C	Meadow tree, right leaves, large		2	4	4	None	None																F						0			0	0	0	1	0	1	0	0	0	0	0
-0x00	0x5D	Meadow tree, right leaves, extended		2	4	3	None	None																F						0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x47	Bandit/ski hut	Decorative. Bandit minigame depends on screen exit destination. Skiing behavior is hardcoded, to level 5-3 or 5-Extra, if the current sublevel is snow tileset + item memory index 3.	3	3	5	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x48	Unused object, glitch		1	2	8	None	None																						0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x49	Forest tree, treetop leaves		3	4	4	None	None										9												0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x4A	Forest tree, rightward leaf		3	4	4	None	None										9												0			0	0	0	1	0	1	0	0	0	0	0
+0x00	0x4B	Forest tree, leftward leaf		3	4	4	None	None										9												0			0	0	0	1	0	1	0	0	0	0	0
+0x00	0x4C	Land {bg} wall, mouse hole		1	4	4	None	None	0	1						7														0			0	0	0	0	0		0	0	0	0	0
+0x00	0x4D	Unused object, glitch		1	3	3	None	None																						0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0x4E	Unused object, glitch		1	4	3	None	None																						0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x4F	Unused object, glitch		1	4	4	None	None																						0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0x50	Right arrow sign	Auto-joins to most ground types.	3	3	3	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	1	0	1	0	0	0	0	0
+0x00	0x51	Hub for rotating spike mace	Commonly used with sprite 101 or 102, rotating spike maces.	3	4	4	None	None							6				A				E							0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0x52	Castle bricks, Shy Guy chamber	Commonly used with sprite 103, working Boo Guys.	3	2	3	None	None							6				A				E							0			0	0	0	1	0	1	0	0	0	0	0
+0x00	0x53	Castle bricks, Shy Guy chamber, cracked floor	Commonly used with sprite 10C, Boo Guy raising a spiked ball on chain.	3	2	3	None	None							6				A				E							0			0	0	0	1	0	0	-1	0	0	0	0
+0x00	0x54	Meadow tree, small top, left side larger		3	3	3	None	None																F						0			0	0	0	1	0	1	0	0	0	0	0
+0x00	0x55	Meadow tree, small top, right side larger		3	3	3	None	None																F						0			0	0	0	1	0	1	0	0	0	0	0
+0x00	0x56	Meadow tree, large top, right-leaning		3	2	3	None	None																F						0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x57	Meadow tree, large top, left-leaning		3	2	3	None	None																F						0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x58	Meadow tree, left leaves, small		3	2	4	None	None																F						0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x59	Meadow tree, left leaves, large		3	2	4	None	None																F						0			0	0	0	1	0	1	0	0	0	0	0
+0x00	0x5A	Meadow tree, left leaves, extended		3	2	3	None	None																F						0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x5B	Meadow tree, right leaves, small		3	4	4	None	None																F						0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x5C	Meadow tree, right leaves, large		3	4	4	None	None																F						0			0	0	0	1	0	1	0	0	0	0	0
+0x00	0x5D	Meadow tree, right leaves, extended		3	4	3	None	None																F						0			0	0	0	0	0	1	0	0	0	0	0
 0x00	0x5E	Donut Lift, 1x1, single	Falls if Yoshi stands on one for more than a short time.<br><i>Outclassed by object 9E (horizontal line of Donut Lifts, still 4 bytes).</i>	1	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11		Stripe 4C			1			0	0	0	0	0	0	1	0	1	0	0
-0x00	0x5F	Snow/meadow rock, 4x2		2	2	4	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
-0x00	0x60	Snow/meadow rock, 5x3		2	2	3	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
-0x00	0x61	Snow/meadow rock, 3x2 large		2	3	4	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
-0x00	0x62	Snow/meadow rock, 3x2 small		2	3	4	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
-0x00	0x63	Snow/meadow rock, 5x4 small		2	2	2	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
-0x00	0x64	Snow/meadow rock, 5x4 large		2	2	2	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
-0x00	0x65	Snow/meadow rock, 4x3		2	2	3	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
-0x00	0x66	Snow/meadow rock, 2x2		2	3	4	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
-0x00	0x67	Forest diagonal log, broken branch	Tile modifier. Must be placed overlapping a forest diagonal log (object 8F or 90).	2	4	4	None	None										9												0			0	0	0	2	0	0	1	1	0	0	0
-0x00	0x68	Cave waterfall, small rock cluster on surface		2	4	4	None	None	0																					0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x69	Cave waterfall, small rock on surface		2	4	4	None	None	0																					0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x6A	Meadow shrub, 3x2		2	3	4	None	None								7														0			0	0	0	0	1						0
-0x00	0x6B	Meadow shrub, 4x3		2	2	3	None	None								7														0			0	0	0	0	1						0
-0x00	0x6C	Meadow shrub, 5x3		2	2	3	None	None								7														0			0	0	0	0	1						0
-0x00	0x6D	Sewer pipe, top end, enterable	Automatically entered when touched.	2	3	3	None	None												B										0			0	0	0	0	0	0	0	0	0	0	1
-0x00	0x6E	Sewer pipe, bottom end, enterable	Automatically entered when touched.	2	3	3	None	None												B										0			0	0	0	0	0	0	0	0	0	0	1
-0x00	0x6F	Sewer pipe, left end, enterable		2	3	3	None	None												B										0			0	0	0	0	0	0	0	0	0	0	1
-0x00	0x70	Sewer pipe, right end, enterable		2	3	3	None	None												B										0			0	0	0	0	0	0	0	0	0	0	1
-0x00	0x71	Sewer pipe, narrowing downward		2	1	4	None	None												B										0			0	0	0	0	0	0	2	1	0	0	0
-0x00	0x72	Sewer pipe, narrowing upward		2	1	4	None	None												B										0			0	0	0	0	0	0	2	1	0	0	0
-0x00	0x73	Sewer pipe, narrowing leftward		2	4	1	None	None												B										0			0	0	0	0	0	0	2	1	0	0	0
-0x00	0x74	Sewer pipe, narrowing rightward		2	4	1	None	None												B										0			0	0	0	0	0	0	2	1	0	0	0
-0x00	0x75	Sewer pipe, room left exit, 2-high		2	3	2	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
-0x00	0x76	Sewer pipe, room right exit, 2-high		2	3	2	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
-0x00	0x77	Sewer pipe, room left exit, 4-high		2	3	1	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
-0x00	0x78	Sewer pipe, room right exit, 4-high		2	3	1	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
-0x00	0x79	Sewer pipe, room top exit, 2-wide		2	2	3	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
-0x00	0x7A	Sewer pipe, room bottom exit, 2-wide		2	2	3	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
-0x00	0x7B	Sewer pipe, room top exit, 4-wide		2	1	3	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
-0x00	0x7C	Sewer pipe, room bottom exit, 4-wide		2	1	3	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
-0x00	0x7D	Sewer grate		2	3	4	None	None												B										0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x7E	Sewer pipe, {bg} shadow, top-right concave	Background wall shadow transition, near a concave corner. Used if a slope -1 pipe joins to the top of a vertical pipe.	2	4	4	None	None												B										0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x7F	Sewer pipe, {bg} shadow, bottom-left concave	Background wall shadow transition, near a concave corner. Used if a slope -1 pipe joins to the bottom of a vertical pipe.	2	4	4	None	None												B										0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x80	Wall Lakitu spawn tile	Blank tile, used to designate a spawn point for the wall Lakitu generator (sprite 1EA).<br>Only works if object X,Y low digits are any of these pairs: (2,3) (3,6) (5,2) (6,5) (9,4) (9,7) (C,6) (D,3)	2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11		None			0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x81	Unused object, glitch		1	2	4	None	None																						0			0	0	0	0	0						
-0x00	0x82	Yoshi's House		2	0	6	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0x83	Large sloping cloud, 32x22		2	-1	7	None	None														D								0			0	0	0	0	0	0	1	1	0	0	0
-0x00	0x84	Large sloping cloud, 19x11		2	-1	4	None	None														D								0			0	0	0	0	0	0	1	1	0	0	0
-0x00	0x85	Large sloping cloud, 10x7		2	-1	4	None	None														D								0			0	0	0	0	0	0	1	1	0	0	0
-0x00	0x86	Large sloping cloud, 8x7		2	0	4	None	None														D								0			0	0	0	0	0	0	1	1	0	0	0
-0x00	0x87	Large sloping cloud, 13x8		2	-1	4	None	None														D								0			0	0	0	0	0	0	1	1	0	0	0
-0x00	0x88	Sewer pipe door	<i>Unimplemented</i>	2	2	2	None	None																						0			0										1
-0x00	0x89	Sewer pipe, {bg} wall arrow, left	Tile modifier. Adds an arrow to a sewer pipe background wall.	2	3	4	None	None												B										0			0	0	0	2	0	1	0	0	0	0	0
-0x00	0x8A	Sewer pipe, {bg} wall arrow, right	Tile modifier. Adds an arrow to a sewer pipe background wall.	2	3	4	None	None												B										0			0	0	0	2	0	1	0	0	0	0	0
-0x00	0x8B	Sewer pipe, {bg} wall arrow, up	Tile modifier. Adds an arrow to a sewer pipe background wall.	2	4	3	None	None												B										0			0	0	0	2	0	1	0	0	0	0	0
-0x00	0x8C	Sewer pipe, {bg} wall arrow, down	Tile modifier. Adds an arrow to a sewer pipe background wall.	2	4	3	None	None												B										0			0	0	0	2	0	1	0	0	0	0	0
-0x00	0x8D	Regular land, narrow top corner	Tile modifier. Should be placed on the corner of a regular land surface (object 02/03). Reduces the corner's width, to not intersect adjacent walls.	2	4	4	None	None	0	1			4			7	8	9				D		F	11					0			0	0	0	2	0	0	1	0	0	0	0
-0x00	0x8E	Line-guide, circle r1, top-left		2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x8F	Line-guide, circle r1, top-right		2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x90	Line-guide, circle r1, bottom-left		2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x91	Line-guide, circle r1, bottom-right		2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x92	Line-guide, circle r2, top-left		2	3	3	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x93	Line-guide, circle r2, top-right		2	3	3	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x94	Line-guide, circle r2, bottom-left		2	3	3	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x95	Line-guide, circle r2, bottom-right		2	3	3	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x96	Line-guide, circle r8, top-left		2	1	1	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x97	Line-guide, circle r8, top-right		2	0	1	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x98	Line-guide, circle r8, bottom-left		2	1	0	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x99	Line-guide, circle r8, bottom-right		2	0	0	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x9A	Line-guide, left end		2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x9B	Line-guide, right end		2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x9C	Line-guide, top end		2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x9D	Line-guide, bottom end		2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0x9E	Sewer room, water flow, left to down	Tile modifier. Should be placed in front of a sewer room background wall (object D3). Has no overflow check, so it may crash otherwise!	2	4	3	None	None												B										0			0	0	0	2		0	0	0	0	0	0
-0x00	0x9F	Sewer room, water flow, right to down	Tile modifier. Should be placed in front of a sewer room background wall (object D3). Has no overflow check, so it may crash otherwise!	2	4	3	None	None												B										0			0	0	0	2		0	0	0	0	0	0
-0x00	0xA0	Sewer room, bottom-right concave corner?	<i>Unimplemented</i>	2	4	3	None	None																						0			0										0
-0x00	0xA1	Sewer room, bottom-left concave corner?	<i>Unimplemented</i>	2	3	3	None	None																						0			0										0
-0x00	0xA2	Sewer room, top-right concave corner?	<i>Unimplemented</i>	2	4	2	None	None																						0			0										0
-0x00	0xA3	Sewer room, top-left concave corner?	<i>Unimplemented</i>	2	3	2	None	None																						0			0										0
-0x00	0xA4	Meadow flower patch		2	3	3	None	None								7														0			0	0	0	0	0						0
-0x00	0xA5	Snowy tree, large	Animation/sound when Yoshi passes through.	2	4	8	None	None					4																	0			0	0	0	0	1	0	0	0	0	0	0
-0x00	0xA6	Snowy tree, small	Animation/sound when Yoshi passes through.	2	4	6	None	None					4																	0			0	0	0	0	1	0	0	0	0	0	0
-0x00	0xA7	Cave ice, frozen Shy Guy		2	4	4	None	None									8													0			0	0	0	0	0			0	0	0	0
-0x00	0xA8	Left arrow sign	Auto-joins to most ground types.<br>In tileset C (flower), this becomes a right arrow sign!	2	3	3	None	None	0	1	2	3	4	5	6	7	8	9	A	B		D	E	F	11					0			0	0	0	1	0	1	0	0	0	0	0
-0x00	0xA9	Icicle, 4 tiles long	Icicle tip hurts Yoshi if touched. Falls if hit with an egg. Sprite 190 causes the icicle to fall when Yoshi's nearby.	2	4	2	None	None									8													0			0	0	0	0	0	0	2	0	1	1	0
-0x00	0xAA	Icicle, 3 tiles long	Icicle tip hurts Yoshi if touched. Falls if hit with an egg. Sprite 190 causes the icicle to fall when Yoshi's nearby.	2	4	2	None	None									8													0			0	0	0	0	0	0	2	0	1	1	0
-0x00	0xAB	Icicle, 2 tiles long	Icicle tip hurts Yoshi if touched. Falls if hit with an egg. Sprite 190 causes the icicle to fall when Yoshi's nearby.	2	4	3	None	None									8													0			0	0	0	0	0	0	2	0	1	1	0
-0x00	0xAC	Icicle, broken		2	4	3	None	None									8													0			0	0	0	0	0	0	2	0	0	0	0
-0x00	0xAD	Cave crystal, large single	Random color.	2	3	3	None	None									8													0			0	0	1	0	1	1	0	0	0	0	0
-0x00	0xAE	Cave crystal, large 2-cluster	Random color.	2	3	3	None	None									8													0			0	0	1	0	1	1	0	0	0	0	0
-0x00	0xAF	Cave crystal, small single	Random color.	2	3	3	None	None									8													0			0	0	1	0	1	1	0	0	0	0	0
-0x00	0xB0	Cave crystal, small 2-cluster (left)	Random color.	2	3	3	None	None									8													0			0	0	1	0	1	1	0	0	0	0	0
-0x00	0xB1	Cave crystal, small 2-cluster (right)	Random color.	2	3	3	None	None									8													0			0	0	1	0	1	1	0	0	0	0	0
-0x00	0xB2	Cave crystal, small 3-cluster	Random color.	2	3	3	None	None									8													0			0	0	1	0	1	1	0	0	0	0	0
-0x00	0xB3	Cave lava, small rock on surface		2	3	4	None	None									8													0			0	0	0	0	0			0	0		0
-0x00	0xB4	Cave mushroom, 2x2, left-leaning	Random color.	2	3	3	None	None									8													0			0	0	1	0	0	0			0	0	0
-0x00	0xB5	Cave mushroom, 2x2, right-leaning	Random color.	2	3	3	None	None									8													0			0	0	1	0	0	0			0	0	0
-0x00	0xB6	Cave mushroom, 3x3, left-leaning	Random color.	2	3	3	None	None									8													0			0	0	1	0	0	0			0	0	0
-0x00	0xB7	Cave mushroom, 3x3, right-leaning	Random color.	2	3	3	None	None									8													0			0	0	1	0	0	0			0	0	0
-0x00	0xB8	Cave mushroom, 4x4, 3-cluster		2	2	2	None	None									8													0			0	0	0	0	0	0			0	0	0
-0x00	0xB9	Cave mushroom, 5x6, 4-cluster		2	2	1	None	None									8													0			0	0	0	0	0	0			0	0	0
-0x00	0xBA	Cave glowlight, 2-tall, right stem	Random color.	2	4	3	None	None									8													0			0	0	1	0	0	1	0	0	0	0	0
-0x00	0xBB	Cave glowlight, 3-tall, right stem	Random color.	2	4	3	None	None									8													0			0	0	1	0	0	1	0	0	0	0	0
-0x00	0xBC	Cave glowlight, 4-tall, right stem	Random color.	2	4	2	None	None									8													0			0	0	1	0	0	1	0	0	0	0	0
-0x00	0xBD	Cave glowlight, 4-tall, left stem	Random color.	2	4	2	None	None									8													0			0	0	1	0	0	1	0	0	0	0	0
-0x00	0xBE	Cave glowlight, 3-tall, left stem	Random color.	2	4	3	None	None									8													0			0	0	1	0	0	1	0	0	0	0	0
-0x00	0xBF	Cave glowlight, 2-tall, left stem	Random color.	2	4	3	None	None									8													0			0	0	1	0	0	1	0	0	0	0	0
-0x00	0xC0	Rock spire, small platform	Normally stable, but if placed above object {extprefix}.C1, becomes unstable.	2	3	3	None	None														D					L1=D [+Dynamic, if unstable]			0			0	0	0	1	0	0		0	0	0	0
-0x00	0xC1	Rock spire, tip	Typically placed below an unstable platform.	2	3	4	None	None														D								0			0	0	0	1	0	0		0	0	0	0
-0x00	0xC2	Rock spire, large platform, stable		2	2	2	None	None														D								0			0	0	0	0	0	0		0	0	0	0
-0x00	0xC3	Rock spire, large platform, unstable	Falls if Yoshi stands on it.	2	2	2	None	None														D					L1=D + Dynamic			0			0	0	0	0	0	0		0	1	0	0
-0x00	0xC4	Egg block, green	When bumped from below, spawns a green egg, if less than 6 eggs are already present.	2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0x5F	Snow/meadow rock, 4x2		3	2	4	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
+0x00	0x60	Snow/meadow rock, 5x3		3	2	3	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
+0x00	0x61	Snow/meadow rock, 3x2 large		3	3	4	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
+0x00	0x62	Snow/meadow rock, 3x2 small		3	3	4	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
+0x00	0x63	Snow/meadow rock, 5x4 small		3	2	2	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
+0x00	0x64	Snow/meadow rock, 5x4 large		3	2	2	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
+0x00	0x65	Snow/meadow rock, 4x3		3	2	3	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
+0x00	0x66	Snow/meadow rock, 2x2		3	3	4	None	None					4											F						0			0	0	0	0	0	0	2	1	0	0	0
+0x00	0x67	Forest log, broken branch	Tile modifier. Must be placed overlapping a forest diagonal log (object 8F or 90).	3	4	4	None	None										9												0			0	0	0	2	0	0	1	1	0	0	0
+0x00	0x68	Cave waterfall, small rock cluster on surface		3	4	4	None	None	0																					0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x69	Cave waterfall, small rock on surface		3	4	4	None	None	0																					0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x6A	Meadow shrub, 3x2	Foreground decoration.	3	3	4	None	None								7														0			0	0	0	0	1	0	2	0	0	0	0
+0x00	0x6B	Meadow shrub, 4x3	Foreground decoration.	3	2	3	None	None								7														0			0	0	0	0	1	0	2	0	0	0	0
+0x00	0x6C	Meadow shrub, 5x3	Foreground decoration.	3	2	3	None	None								7														0			0	0	0	0	1	0	2	0	0	0	0
+0x00	0x6D	Sewer pipe, top end, enterable	Automatically entered when touched.	3	3	3	None	None												B										0			0	0	0	0	0	0	0	0	0	0	1
+0x00	0x6E	Sewer pipe, bottom end, enterable	Automatically entered when touched.	3	3	3	None	None												B										0			0	0	0	0	0	0	0	0	0	0	1
+0x00	0x6F	Sewer pipe, left end, enterable		3	3	3	None	None												B										0			0	0	0	0	0	0	0	0	0	0	1
+0x00	0x70	Sewer pipe, right end, enterable		3	3	3	None	None												B										0			0	0	0	0	0	0	0	0	0	0	1
+0x00	0x71	Sewer pipe, narrowing downward		3	1	4	None	None												B										0			0	0	0	0	0	0	2	1	0	0	0
+0x00	0x72	Sewer pipe, narrowing upward		3	1	4	None	None												B										0			0	0	0	0	0	0	2	1	0	0	0
+0x00	0x73	Sewer pipe, narrowing rightward		3	4	1	None	None												B										0			0	0	0	0	0	0	2	1	0	0	0
+0x00	0x74	Sewer pipe, narrowing leftward		3	4	1	None	None												B										0			0	0	0	0	0	0	2	1	0	0	0
+0x00	0x75	Sewer pipe, 2-high connector, right		3	3	2	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0x76	Sewer pipe, 2-high connector, left		3	3	2	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0x77	Sewer pipe, 4-high connector, right		3	3	1	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0x78	Sewer pipe, 4-high connector, left		3	3	1	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0x79	Sewer pipe, 2-wide connector, down		3	2	3	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0x7A	Sewer pipe, 2-wide connector, up		3	2	3	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0x7B	Sewer pipe, 4-wide connector, down		3	1	3	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0x7C	Sewer pipe, 4-wide connector, up		3	1	3	None	None												B										0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0x7D	Sewer grate		3	3	4	None	None												B										0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x7E	Sewer pipe, {bg} shadow, top-right concave	Background wall shadow transition, near a concave corner. Used if a slope -1 pipe joins to the top of a vertical pipe.	3	4	4	None	None												B										0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x7F	Sewer pipe, {bg} shadow, bottom-left concave	Background wall shadow transition, near a concave corner. Used if a slope -1 pipe joins to the bottom of a vertical pipe.	3	4	4	None	None												B										0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x80	Wall Lakitu spawn tile	Blank tile, used to designate a spawn point for the wall Lakitu generator (sprite 1EA).<br>Only works if object X,Y low digits are any of these pairs: (2,3) (3,6) (5,2) (6,5) (9,4) (9,7) (C,6) (D,3)	3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11		None			0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x81	Unused object, glitch		1	2	4	None	None																						0			0	0	0	0	0	0	2	0			
+0x00	0x82	Yoshi's House		3	0	6	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0x83	Large sloping cloud, 32x22		3	-1	7	None	None														D								0			0	0	0	0	0	0	1	1	0	0	0
+0x00	0x84	Large sloping cloud, 19x11		3	-1	4	None	None														D								0			0	0	0	0	0	0	1	1	0	0	0
+0x00	0x85	Large sloping cloud, 10x7		3	-1	4	None	None														D								0			0	0	0	0	0	0	1	1	0	0	0
+0x00	0x86	Large sloping cloud, 8x7		3	0	4	None	None														D								0			0	0	0	0	0	0	1	1	0	0	0
+0x00	0x87	Large sloping cloud, 13x8		3	-1	4	None	None														D								0			0	0	0	0	0	0	1	1	0	0	0
+0x00	0x88	Sewer pipe doorway	Tile modifier. Adds a doorway to a sewer pipe/room background wall. Has no overflow check, so it may crash otherwise! If in midair, the door requires a solid sprite underneath it, such as a crate, to be enterable.	3	2	2	None	None												B										0			0	0	0	2	0	0	0	0	0	0	1
+0x00	0x89	Sewer pipe, {bg} wall arrow, left	Tile modifier. Adds an arrow to a sewer pipe background wall.	3	3	4	None	None												B										0			0	0	0	2	0	1	0	0	0	0	0
+0x00	0x8A	Sewer pipe, {bg} wall arrow, right	Tile modifier. Adds an arrow to a sewer pipe background wall.	3	3	4	None	None												B										0			0	0	0	2	0	1	0	0	0	0	0
+0x00	0x8B	Sewer pipe, {bg} wall arrow, up	Tile modifier. Adds an arrow to a sewer pipe background wall.	3	4	3	None	None												B										0			0	0	0	2	0	1	0	0	0	0	0
+0x00	0x8C	Sewer pipe, {bg} wall arrow, down	Tile modifier. Adds an arrow to a sewer pipe background wall.	3	4	3	None	None												B										0			0	0	0	2	0	1	0	0	0	0	0
+0x00	0x8D	Regular land, narrow top corner	Tile modifier. Should be placed on the corner of a regular land surface (object 02/03). Reduces the corner's width, to not intersect adjacent walls.	3	4	4	None	None	0	1			4			7	8	9				D		F	11					0			0	0	0	2	0	0	1	0	0	0	0
+0x00	0x8E	Line-guide, circle r1, top-left		3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x8F	Line-guide, circle r1, top-right		3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x90	Line-guide, circle r1, bottom-left		3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x91	Line-guide, circle r1, bottom-right		3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x92	Line-guide, circle r2, top-left		3	3	3	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x93	Line-guide, circle r2, top-right		3	3	3	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x94	Line-guide, circle r2, bottom-left		3	3	3	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x95	Line-guide, circle r2, bottom-right		3	3	3	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x96	Line-guide, circle r8, top-left		3	1	1	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x97	Line-guide, circle r8, top-right		3	0	1	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x98	Line-guide, circle r8, bottom-left		3	1	0	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x99	Line-guide, circle r8, bottom-right		3	0	0	None	None																F						0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x9A	Line-guide, left end		3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x9B	Line-guide, right end		3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x9C	Line-guide, top end		3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x9D	Line-guide, bottom end		3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0x9E	Sewer room, water flow, left to down	Tile modifier. Should be placed in front of a sewer room background wall (object D3). Has no overflow check, so it may crash otherwise!	3	4	3	None	None												B										0			0	0	0	2	0	0	0	0	0	0	0
+0x00	0x9F	Sewer room, water flow, right to down	Tile modifier. Should be placed in front of a sewer room background wall (object D3). Has no overflow check, so it may crash otherwise!	3	4	3	None	None												B										0			0	0	0	2	0	0	0	0	0	0	0
+0x00	0xA0	Sewer room, bottom-right concave corner		3	4	4	None	None												B										0			0	0	0	1	1	0	1	0	0	0	0
+0x00	0xA1	Sewer room, bottom-left concave corner		3	3	4	None	None												B										0			0	0	0	1	1	0	1	0	0	0	0
+0x00	0xA2	Sewer room, top-right concave corner		3	4	3	None	None												B										0			0	0	0	1	1	0	1	0	0	0	0
+0x00	0xA3	Sewer room, top-left concave corner		3	3	3	None	None												B										0			0	0	0	1	1	0	1	0	0	0	0
+0x00	0xA4	Meadow flower patch		3	3	3	None	None								7														0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0xA5	Snowy tree, large	Foreground decoration. Animation/sound when Yoshi passes through.	3	4	8	None	None					4																	0			0	0	0	0	1	0	0	0	0	0	0
+0x00	0xA6	Snowy tree, small	Foreground decoration. Animation/sound when Yoshi passes through.	3	4	6	None	None					4																	0			0	0	0	0	1	0	0	0	0	0	0
+0x00	0xA7	Cave ice, frozen Shy Guy		3	4	4	None	None									8													0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0xA8	Left arrow sign	Auto-joins to most ground types.<br>In tileset C (flower), this becomes a right arrow sign!	3	3	3	None	None	0	1	2	3	4	5	6	7	8	9	A	B		D	E	F	11					0			0	0	0	1	0	1	0	0	0	0	0
+0x00	0xA9	Icicle, 4 tiles long	Icicle tip hurts Yoshi if touched. Falls if hit with an egg. Sprite 190 causes the icicle to fall when Yoshi's nearby.	3	4	2	None	None									8													0			0	0	0	0	0	0	2	0	1	1	0
+0x00	0xAA	Icicle, 3 tiles long	Icicle tip hurts Yoshi if touched. Falls if hit with an egg. Sprite 190 causes the icicle to fall when Yoshi's nearby.	3	4	2	None	None									8													0			0	0	0	0	0	0	2	0	1	1	0
+0x00	0xAB	Icicle, 2 tiles long	Icicle tip hurts Yoshi if touched. Falls if hit with an egg. Sprite 190 causes the icicle to fall when Yoshi's nearby.	3	4	3	None	None									8													0			0	0	0	0	0	0	2	0	1	1	0
+0x00	0xAC	Icicle, broken		3	4	3	None	None									8													0			0	0	0	0	0	0	2	0	0	0	0
+0x00	0xAD	Cave crystal, large single	Foreground decoration. Random color.	3	3	3	None	None									8													0			0	0	1	0	1	1	0	0	0	0	0
+0x00	0xAE	Cave crystal, large 2-cluster	Foreground decoration. Random color.	3	3	3	None	None									8													0			0	0	1	0	1	1	0	0	0	0	0
+0x00	0xAF	Cave crystal, small single	Foreground decoration. Random color.	3	3	3	None	None									8													0			0	0	1	0	1	1	0	0	0	0	0
+0x00	0xB0	Cave crystal, small 2-cluster, left	Foreground decoration. Random color.	3	3	3	None	None									8													0			0	0	1	0	1	1	0	0	0	0	0
+0x00	0xB1	Cave crystal, small 2-cluster, right	Foreground decoration. Random color.	3	3	3	None	None									8													0			0	0	1	0	1	1	0	0	0	0	0
+0x00	0xB2	Cave crystal, small 3-cluster	Foreground decoration. Random color.	3	3	3	None	None									8													0			0	0	1	0	1	1	0	0	0	0	0
+0x00	0xB3	Cave lava, small rock on surface		3	3	4	None	None									8													0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0xB4	Cave mushroom, 2x2, left-leaning	Random color.	3	3	3	None	None									8													0			0	0	1	0	0	0	1	1	0	0	0
+0x00	0xB5	Cave mushroom, 2x2, right-leaning	Random color.	3	3	3	None	None									8													0			0	0	1	0	0	0	1	1	0	0	0
+0x00	0xB6	Cave mushroom, 3x3, left-leaning	Random color.	3	3	3	None	None									8													0			0	0	1	0	0	0	1	1	0	0	0
+0x00	0xB7	Cave mushroom, 3x3, right-leaning	Random color.	3	3	3	None	None									8													0			0	0	1	0	0	0	1	1	0	0	0
+0x00	0xB8	Cave mushroom, 4x4, 3-cluster		3	2	2	None	None									8													0			0	0	0	0	0	0	1	1	0	0	0
+0x00	0xB9	Cave mushroom, 5x6, 4-cluster		3	2	1	None	None									8													0			0	0	0	0	0	0	1	1	0	0	0
+0x00	0xBA	Cave glowlight, 2-tall, right stem	Random color.	3	4	3	None	None									8													0			0	0	1	0	0	1	0	0	0	0	0
+0x00	0xBB	Cave glowlight, 3-tall, right stem	Random color.	3	4	3	None	None									8													0			0	0	1	0	0	1	0	0	0	0	0
+0x00	0xBC	Cave glowlight, 4-tall, right stem	Random color.	3	4	2	None	None									8													0			0	0	1	0	0	1	0	0	0	0	0
+0x00	0xBD	Cave glowlight, 4-tall, left stem	Random color.	3	4	2	None	None									8													0			0	0	1	0	0	1	0	0	0	0	0
+0x00	0xBE	Cave glowlight, 3-tall, left stem	Random color.	3	4	3	None	None									8													0			0	0	1	0	0	1	0	0	0	0	0
+0x00	0xBF	Cave glowlight, 2-tall, left stem	Random color.	3	4	3	None	None									8													0			0	0	1	0	0	1	0	0	0	0	0
+0x00	0xC0	Rock spire, small platform	Normally stable, but if placed above object {extprefix}.C1, becomes unstable.	3	3	3	None	None														D					L1=D [+Dynamic, if unstable]			0			0	0	0	1	0	0	-1	0	0	0	0
+0x00	0xC1	Rock spire, tip	Typically placed below an unstable platform. If placed below object {extprefix}.C0, the platform becomes unstable.	3	3	4	None	None														D								0			0	0	0	1	0	1	0	0	0	0	0
+0x00	0xC2	Rock spire, large platform, stable		3	2	2	None	None														D								0			0	0	0	0	0	0	1	0	0	0	0
+0x00	0xC3	Rock spire, large platform, unstable	Falls if Yoshi stands on it.	3	2	2	None	None														D					L1=D + Dynamic			0			0	0	0	0	0	0	1	0	1	0	0
+0x00	0xC4	Egg block, green	When bumped from below, spawns a green egg, if less than 6 eggs are already present.	3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			0	0	0	0	0	0	2	0	0	0	0
 0x00	0xC5	Unused object, glitch		1	3	3	None	None																						0			0	0	0	0	0						
 0x00	0xC6	Unused object, glitch		1	3	3	None	None																						0			0	0	0	0	0						
 0x00	0xC7	Unused object, glitch		1	3	3	None	None																						0			0	0	0	0	0						
@@ -211,19 +211,19 @@ ID	extID	name	tooltipbase	enabled	x	y	adjwidth	adjheight	0	1	2	3	4	5	6	7	8	9	A	B
 0x00	0xD1	Interior flower tuft, manual		1	4	4	None	None													C									0			0	0	0	0	0						
 0x00	0xD2	Interior flower tuft, manual		1	4	4	None	None													C									0			0	0	0	0	0						
 0x00	0xD3	Interior flower tuft, manual		1	4	4	None	None													C									0			0	0	0	0	0						
-0x00	0xD4	Flower rock, 5x5 small, rightward		2	2	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
-0x00	0xD5	Flower rock, 5x5 large, rightward		2	2	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
-0x00	0xD6	Flower rock, 5x6, rightward		2	2	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
-0x00	0xD7	Flower rock, 3x4, rightward		2	3	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
-0x00	0xD8	Flower rock, 3x3, rightward		2	3	3	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
-0x00	0xD9	Flower rock, 5x5 small, leftward		2	2	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
-0x00	0xDA	Flower rock, 5x5 large, leftward		2	2	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
-0x00	0xDB	Flower rock, 5x6, leftward		2	2	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
-0x00	0xDC	Flower rock, 3x4, leftward		2	3	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
-0x00	0xDD	Flower rock, 3x3, leftward		2	3	3	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
-0x00	0xDE	Flower rock, 6x6 up-right		2	0	1	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
-0x00	0xDF	Flower rock, 6x6 up-left		2	1	1	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
-0x00	0xE0	2.5D vertical pipe, key entrance	Used with sprite 1A4.	2	3	3	None	None				3																		0			0	0	0	0	1	0	2	0	0	0	0
+0x00	0xD4	Flower rock, 5x5 small, rightward		3	2	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
+0x00	0xD5	Flower rock, 5x5 large, rightward		3	2	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
+0x00	0xD6	Flower rock, 5x6, rightward		3	2	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
+0x00	0xD7	Flower rock, 3x4, rightward		3	3	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
+0x00	0xD8	Flower rock, 3x3, rightward		3	3	3	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
+0x00	0xD9	Flower rock, 5x5 small, leftward		3	2	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
+0x00	0xDA	Flower rock, 5x5 large, leftward		3	2	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
+0x00	0xDB	Flower rock, 5x6, leftward		3	2	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
+0x00	0xDC	Flower rock, 3x4, leftward		3	3	2	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
+0x00	0xDD	Flower rock, 3x3, leftward		3	3	3	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
+0x00	0xDE	Flower rock, 6x6 up-right		3	0	1	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
+0x00	0xDF	Flower rock, 6x6 up-left		3	1	1	None	None													C									0			0	0	0	1	0	0	2	1	0	0	0
+0x00	0xE0	2.5D vertical pipe, key entrance	Used with sprite 1A4.	3	3	3	None	None				3																		0			0	0	0	0	1	0	2	0	0	0	0
 0x00	0xE1	Unused object ID		0			None	None																						0			0										
 0x00	0xE2	Unused object ID		0			None	None																						0			0										
 0x00	0xE3	Unused object ID		0			None	None																						0			0										
@@ -250,264 +250,264 @@ ID	extID	name	tooltipbase	enabled	x	y	adjwidth	adjheight	0	1	2	3	4	5	6	7	8	9	A	B
 0x00	0xF8	Unused object ID		0			None	None																						0			0										
 0x00	0xF9	Unused object ID		0			None	None																						0			0										
 0x00	0xFA	Unused object ID		0			None	None																						0			0										
-0x00	0xFB	Screen linker	Links this object's screen with another screen, corresponding to this object's low digit of Y and X position.	2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11		None			0			0	0	0	1	0	0	-1	0	0	0	0
+0x00	0xFB	Screen linker	Links this object's screen with another screen, corresponding to this object's low digit of Y and X position.	3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11		None			0			0	0	0	1	0	0	-1	0	0	0	0
 0x00	0xFC	Unused object ID		0			None	None																						0			0										
-0x00	0xFD	Single blank tile / enable scrolling	Generates a blank tile (tile 0000). Commonly placed in empty screens to enable scrolling.	2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11		None			0			0	0	0	0	0	1	0	0	0	0	0
-0x00	0xFE	Disable scrolling	Prevents the game from scrolling into this object's screen.	2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11		None			0			0	0	0	0	0	0	0	0	0	0	0
-0x00	0xFF	Disable scrolling + clear screen	Prevents the game from scrolling into this object's screen, and clears all tiles on that screen.	2	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11		None			0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0xFD	Single blank tile / enable scrolling	Generates a blank tile (tile 0000). Commonly placed in empty screens to enable scrolling.	3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11		None			0			0	0	0	0	0	1	0	0	0	0	0
+0x00	0xFE	Disable scrolling	Prevents the game from scrolling into this object's screen.	3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11		None			0			0	0	0	0	0	0	0	0	0	0	0
+0x00	0xFF	Disable scrolling + clear screen	Prevents the game from scrolling into this object's screen, and clears all tiles on that screen.	3	4	4	None	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11		None			0			0	0	0	0	0	0	0	0	0	0	0
 0x00	None	Extended object	<b><i>This object should not occur without a valid extended ID. If this message is being displayed, something's wrong.</i></b>	0			None	None																						0			0										
-0x01	None	Regular land, flat	<i>Partially implemented</i>	2	2	3	4	3	0	1			4			7	8	9				D		F	11					1			1	0	1	1	0	0	2	0	0	0	0
-0x02	None	Regular land, left wall + surface	Auto-joins to ground.	2	4	3	None	4	0	1			4			7	8	9				D		F	11					0			1	0	1	1	0	0	2	0	0	0	0
-0x03	None	Regular land, right wall + surface	Auto-joins to ground.	2	4	3	None	4	0	1			4			7	8	9				D		F	11					0			1	0	1	1	0	0	2	0	0	0	0
-0x04	None	Regular land, slope -½		2	2	3	4	3	0	1			4			7	8	9						F	11					1			1	0	1	1	0	0	2	1	0	0	0
-0x05	None	Regular land, slope +½		2	2	5	4	1	0	1			4			7	8	9						F	11					1			1	0	1	1	0	0	2	1	0	0	0
-0x06	None	Regular land, slope -1		2	3	3	3	4	0	1			4			7	8	9						F	11					1			1	0	1	1	0	0	2	1	0	0	0
-0x07	None	Regular land, slope +1		2	3	6	3	1	0	1			4			7	8	9						F	11					1			1	0	1	1	0	0	2	1	0	0	0
-0x08	None	Regular land, slope -2		2	3	2	2	5					4				8													1			1	0	1	1	0	0	2	1	0	0	0
-0x09	None	Regular land, slope +2		2	3	5	2	2					4				8													1			1	0	1	1	0	0	2	1	0	0	0
-0x0A	None	Regular land, left wall + undecorated surface	Auto-joins to ground.	2	4	3	None	3	0	1			4			7	8	9				D		F	11					0			1	0	1	1	0	0	2	0	0	0	0
-0x0B	None	Regular land, right wall + undecorated surface	Auto-joins to ground.	2	4	3	None	3	0	1			4			7	8	9				D		F	11					0			1	0	1	1	0	0	2	0	0	0	0
-0x0C	None	Poundable post	Can be ground pounded. Use object {extprefix}.16 to add a red coin.	2	4	3	None	3	0	1			4	5		7	8	9			C	D		F	11					0			1	0	0	0		0	2	0	1	0	0
-0x0D	None	Thin horizontal platform	Auto-joins to regular land walls.	2	3	4	3	None	0	1			4	5		7	8	9			C	D		F	11					1			0	0	0	1	0	0	1	0	0	0	0
-0x0E	None	Ski lift pole, left end		2	4	3	None	4					4																	0			1	0	0	0	1	1	0	0	0	0	0
-0x0F	None	Ski lift pole, right end		2	4	3	None	4					4																	0			1	0	0	0	1	1	0	0	0	0	0
-0x10	None	Ski lift cable, slope ±½	Can support ski lifts (sprite 01A/01D). Slope -½ if width is positive, or slope +½ if width is negative.	2	1	3	6	2					4															-0x81		1	2	2	0	0	0	1	1	0	0	0	0	0	0
-0x11	None	Ski lift cable, slope ±1	Can support ski lifts (sprite 01A/01D). Slope -1 if width is positive, or slope +1 if width is negative.	2	2	3	5	2					4															-0x81		1	2	2	0	0	0	1	1	0	0	0	0	0	0
-0x12	None	Ski lift cable, slope ±2	Can support ski lifts (sprite 01A/01D). Slope -2 if width is positive, or slope +2 if width is negative.	2	2	2	4	3					4															-0x81		1	3	3	0	0	0	1	1	0	0	0	0	0	0
-0x13	None	Ski lift cable, horizontal	Can support ski lifts (sprite 01A/01D).	2	2	4	5	None					4																	1			0	0	0	1	1	0	0	0	0	0	0
-0x14	None	Land {bg} wall carver	Creates a background wall when placed on various regular land objects.	2	3	3	3	3	0	1						7									11					1			1	0	0	2	0	0	0	0	0	0	0
-0x15	None	Horizontal cloud platform		2	3	3	3	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			0	0	0	0	1	0	1	0	0	0	0
-0x16	None	Submarine water	Invisible water tiles. Intended to line up with the water graphics in layer 2 image 02 and layer 3 image 01.	2	0	0	0x10	0x10																			L2=02			1			1	0	0	0	0	0	-1	0	0	0	0
-0x17	None	Submarine block, with vines	Changes color/texture if submerged.	2	2	3	4	3			2																			1			1	0	0	1	0	0	2	0	0	0	0
-0x18	None	Submarine block	Changes color/texture if submerged.	2	2	3	4	3			2																			1			1	0	0	1	0	0	2	0	0	0	0
-0x19	None	Submarine water, rock {bg} tiles		2	2	2	4	5																			L2=02			1			1	0	0	0	0			0	0	0	0
-0x1A	None	Submarine horizontal platform	Auto-joins to vertical log (object 1B).	2	3	4	3	None			2																			1			0	0	0	1	0	0	1	0	0	0	0
-0x1B	None	Submarine semisolid vertical log	Auto-joins to horizontal platform (object 1A). Changes color/texture if submerged.	2	4	3	None	3			2																			0			1	0	0	1	0	0	1	0	0	0	0
-0x1C	None	Submarine log platform on rope		2	3	2	None	4			2																			0			1	0	0	0	0	0	1	0	0	0	0
-0x1D	None	Submarine red mushroom decorations		2	3	4	3	None			2																			1			0	0	0	0	0			0	0	0	0
-0x1E	None	Submarine white tulip decorations		2	3	4	3	None			2																			1			0	0	0	0	0			0	0	0	0
-0x1F	None	2.5D lava, interior?																																									
-0x20	None	2.5D stone blocks, ?	<i>Unimplemented</i>																																								
-0x21	None	Mud, grassy surface	Auto-joins to mud slopes.	2	2	2	4	4						5																1			1	0	1	1	1	0	2	0	0	0	0
-0x22	None	Mud, left wall + grassy surface		2	3	2	None	4						5																0			1	0	1	1	1	0	2	0	0	0	0
-0x23	None	Mud, right wall + grassy surface		2	4	2	None	4						5																0			1	0	1	1	1	0	2	0	0	0	0
-0x24	None	Mud, flat		2	2	2	4	4						5																1			1	0	1	0	1	0	2	0	0	0	0
-0x25	None	Mud, left wall + surface	Auto-joins to left side of grassy mud (object 21).	2	4	3	None	3						5																0			1	0	1	1	1	0	2	0	0	0	0
-0x26	None	Mud, right wall + surface	Auto-joins to right side of grassy mud (object 21).	2	4	3	None	3						5																0			1	0	1	1	1	0	2	0	0	0	0
-0x27	None	Mud, slope +1	Auto-joins to sides of grassy mud (object 21)	2	5	2	-3	4						5														-0x81	1	1			1	0	1	1	1	0	2	1	0	0	0
-0x28	None	Mud, slope -1	Auto-joins to sides of grassy mud (object 21)	2	3	2	3	4						5																1			1	0	1	1	1	0	2	1	0	0	0
-0x29	None	Jungle canopy, slope -1		2	7	6	-6	-6						5														-0x81	1	1	-0x80	1	1	0	0	0	1	1	0	0	0	0	0
-0x2A	None	Jungle canopy, slope +1		2	1	6	6	-6						5																1	-0x80	1	1	0	0	0	1	1	0	0	0	0	0
-0x2B	None	Poundable post, glitch if height 1	Can be ground pounded. Use object {extprefix}.16 to add a red coin.	1	4	3	None	3	0	1			4	5		7	8	9			C	D		F	11					0			1	0	0	0		0	2	0	1	0	0
-0x2C	None	Jungle stone pillar		2	3	3	None	3						5																0			1	0	1	0	0	0	2		0	0	0
-0x2D	None	Vine in grassy mud		2	4	2	None	6						5																0			1	0	1	1	1	0	2	0	0	0	0
-0x2E	None	Vine in grassy mud, random leaves	Leaves can extend 1 tile left or right, but not from the first 4 or last 2 tiles. If height &lt; 7, identical to object 2D.	2	4	1	None	8						5																0			1	0	1	1	1	0	2	0	0	0	0
-0x2F	None	Jungle tree platform		2	4	2	None	5						5																0			1	0	1	0	1	0	1		0	0	0
-0x30	None	Monkey vine?	<i>Unimplemented</i>				None																							0													
-0x31	None	Monkey vine?	<i>Unimplemented</i>				None																							0													
-0x32	None	Jungle stone block, textured surface	<i>Unimplemented</i>																																								
-0x33	None	Jungle stone block	<i>Unimplemented</i>																																								
-0x34	None	Jungle reeds	Auto-joins to flat mud.	2	2	3	4	None						5																1			0	0	1	1	1	1	0	0	0	0	0
-0x35	None	Water	Generates solid tiles if overlapping a poundable post and/or jungle terrain.	2	2	3	4	3																		0x0C				1			1	0	1	1	1	0	-1	0	0	0	0
-0x36	None	Monkey vine?	<i>Unimplemented</i>				None																							0													
-0x37	None	Red bridge, horizontal	Object only fills empty tiles.	2	3	4	3	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			0	0	0	1	0	0	1	0	0	0	0
-0x38	None	Hookbill/4-Secret block?	<i>Unimplemented</i>																																								
-0x39	None	Hookbill/4-Secret block?	<i>Unimplemented</i>																																								
-0x3A	None	Regular land, ceiling, slope +2?	<i>Unimplemented</i>																																								
-0x3B	None	Regular land, ceiling, slope -2?	<i>Unimplemented</i>																																								
-0x3C	None	Vertical pipe, enterable	If height is positive, the entrance is on top. If height is negative, the entrance is on the bottom.	2	3	3	None	4	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0	-0x80		1	0	0	0	0	0	2	0	0	0	1
+0x01	None	Regular land, flat		3	2	3	4	3	0	1			4			7	8	9				D		F	11					1			1	0	1	1	0	0	2	0	0	0	0
+0x02	None	Regular land, left wall + surface	Auto-joins to ground.	3	4	3	None	4	0	1			4			7	8	9				D		F	11					0			1	0	1	1	0	0	2	0	0	0	0
+0x03	None	Regular land, right wall + surface	Auto-joins to ground.	3	4	3	None	4	0	1			4			7	8	9				D		F	11					0			1	0	1	1	0	0	2	0	0	0	0
+0x04	None	Regular land, slope -½		3	2	3	4	3	0	1			4			7	8	9						F	11					1			1	0	1	1	0	0	2	1	0	0	0
+0x05	None	Regular land, slope +½		3	2	5	4	1	0	1			4			7	8	9						F	11					1			1	0	1	1	0	0	2	1	0	0	0
+0x06	None	Regular land, slope -1		3	3	3	3	4	0	1			4			7	8	9						F	11					1			1	0	1	1	0	0	2	1	0	0	0
+0x07	None	Regular land, slope +1		3	3	6	3	1	0	1			4			7	8	9						F	11					1			1	0	1	1	0	0	2	1	0	0	0
+0x08	None	Regular land, slope -2		3	3	2	2	5					4				8													1			1	0	1	1	0	0	2	1	0	0	0
+0x09	None	Regular land, slope +2		3	3	5	2	2					4				8													1			1	0	1	1	0	0	2	1	0	0	0
+0x0A	None	Regular land, left wall + plain surface	Auto-joins to ground.	3	4	3	None	3	0	1			4			7	8	9				D		F	11					0			1	0	1	1	0	0	2	0	0	0	0
+0x0B	None	Regular land, right wall + plain surface	Auto-joins to ground.	3	4	3	None	3	0	1			4			7	8	9				D		F	11					0			1	0	1	1	0	0	2	0	0	0	0
+0x0C	None	Poundable post	Can be ground pounded. Use object {extprefix}.16 to add a red coin.	3	4	3	None	3	0	1			4	5		7	8	9			C	D		F	11					0			1	0	0	0		0	2	0	1	0	0
+0x0D	None	Thin horizontal platform	Auto-joins to regular land walls.	3	3	4	3	None	0	1			4	5		7	8	9			C	D		F	11					1			0	0	0	1	0	0	1	0	0	0	0
+0x0E	None	Ski lift pole, left end		3	4	3	None	4					4																	0			1	0	0	0	1	1	0	0	0	0	0
+0x0F	None	Ski lift pole, right end		3	4	3	None	4					4																	0			1	0	0	0	1	1	0	0	0	0	0
+0x10	None	Ski lift cable, slope ±½	Can support ski lifts (sprite 01A/01D).<br>Slope -½ if width is positive, or slope +½ if width is negative. Edges auto-join to double ski lift poles (object 3E).	3	1	3	6	2					4															-0x81		1	2	2	0	0	0	1	1	0	0	0	0	0	0
+0x11	None	Ski lift cable, slope ±1	Can support ski lifts (sprite 01A/01D).<br>Slope -1 if width is positive, or slope +1 if width is negative. Edges auto-join to double ski lift poles (object 3E).	3	2	3	5	2					4															-0x81		1	2	2	0	0	0	1	1	0	0	0	0	0	0
+0x12	None	Ski lift cable, slope ±2	Can support ski lifts (sprite 01A/01D).<br>Slope -2 if width is positive, or slope +2 if width is negative. Edges auto-join to double ski lift poles (object 3E).	3	2	2	4	3					4															-0x81		1	3	3	0	0	0	1	1	0	0	0	0	0	0
+0x13	None	Ski lift cable, horizontal	Can support ski lifts (sprite 01A/01D). Auto-joins to double ski lift poles (object 3E).	3	2	4	5	None					4																	1			0	0	0	1	1	0	0	0	0	0	0
+0x14	None	Land {bg} wall carver	Creates a background wall when placed on various regular land objects.	3	3	3	3	3	0	1						7									11					1			1	0	0	1	0	0	0	0	0	0	0
+0x15	None	Horizontal cloud platform		3	3	3	3	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			0	0	0	0	1	0	1	0	0	0	0
+0x16	None	Submarine water	Invisible water tiles. Intended to line up with the water graphics in layer 2 image 02 and layer 3 image 01.	3	0	0	0x10	0x10																			L2=02			1			1	0	0	0	0	0	3	0	0	0	0
+0x17	None	Submarine block, with vines	Changes color/texture if submerged.	3	2	3	4	3			2																			1			1	0	0	1	0	0	2	0	0	0	0
+0x18	None	Submarine block	Changes color/texture if submerged.	3	2	3	4	3			2																			1			1	0	0	1	0	0	2	0	0	0	0
+0x19	None	Submarine water, rock {bg} tiles		3	2	2	4	5																			L2=02			1			1	0	0	0	0	0	3	0	0	0	0
+0x1A	None	Submarine horizontal platform	Auto-joins to vertical log (object 1B).	3	3	4	3	None			2																			1			0	0	0	1	0	0	1	0	0	0	0
+0x1B	None	Submarine semisolid vertical log	Auto-joins to horizontal platform (object 1A). Changes color/texture if submerged.	3	4	3	None	3			2																			0			1	0	0	1	0	0	1	0	0	0	0
+0x1C	None	Submarine log platform on rope		3	3	2	None	4			2																			0			1	0	0	0	0	0	1	0	0	0	0
+0x1D	None	Submarine red mushroom decorations		3	3	4	3	None			2																			1			0	0	0	0	0	1	0	0	0	0	0
+0x1E	None	Submarine white tulip decorations		3	3	4	3	None			2																			1			0	0	0	0	0	1	0	0	0	0	0
+0x1F	None	2.5D lava, glitched wavy surface	Instant death if touched.<br> The top tiles of this object have a glitched vertical shift, and are typically covered with object FE.	3	2	1	4	7				3																		1			1	0	0	0	0	0	3	0	0	1	0
+0x20	None	2.5D stone bricks, unshaded		3	2	2	4	5				3																		1			1	0	0	1	0	0	2	0	0	0	0
+0x21	None	Mud, grassy surface	Auto-joins to mud slopes.	3	2	2	4	4						5																1			1	0	1	1	1	0	2	0	0	0	0
+0x22	None	Mud, left wall + grassy surface	Mud wall auto-joins to jungle grass.	3	3	2	None	4						5																0			1	0	1	1	1	0	2	0	0	0	0
+0x23	None	Mud, right wall + grassy surface	Mud wall auto-joins to jungle grass.	3	4	2	None	4						5																0			1	0	1	1	1	0	2	0	0	0	0
+0x24	None	Mud, flat		3	2	2	4	4						5																1			1	0	1	0	1	0	2	0	0	0	0
+0x25	None	Mud, left wall + sloped surface	Surface auto-joins to left side of grassy mud (object 21). Mud wall auto-joins to jungle grass.	3	4	3	None	3						5																0			1	0	1	1	1	0	2	1	0	0	0
+0x26	None	Mud, right wall + sloped surface	Surface auto-joins to right side of grassy mud (object 21). Mud wall auto-joins to jungle grass.	3	4	3	None	3						5																0			1	0	1	1	1	0	2	1	0	0	0
+0x27	None	Mud, slope +1	Auto-joins to sides of grassy mud (object 21).	3	5	2	-3	4						5														-0x81	1	1			1	0	1	1	1	0	2	1	0	0	0
+0x28	None	Mud, slope -1	Auto-joins to sides of grassy mud (object 21).	3	3	2	3	4						5																1			1	0	1	1	1	0	2	1	0	0	0
+0x29	None	Jungle canopy, slope -1	Foreground decoration.	3	7	6	-6	-6						5														-0x81	1	1	-0x80	1	1	0	1	0	1	1	0	0	0	0	0
+0x2A	None	Jungle canopy, slope +1	Foreground decoration.	3	1	6	6	-6						5																1	-0x80	1	1	0	1	0	1	1	0	0	0	0	0
+0x2B	None	Poundable post, glitch if height 1	Can be ground pounded. Use object {extprefix}.16 to add a red coin.	2	4	3	None	3	0	1			4	5		7	8	9			C	D		F	11					0			1	0	0	0		0	2	0	1	0	0
+0x2C	None	Jungle stone pillar		3	3	3	None	3						5																0			1	0	1	0	0	0	2	1	0	0	0
+0x2D	None	Vine in grassy mud		3	4	2	None	6						5																0			1	0	1	1	1	0	2	0	0	0	0
+0x2E	None	Vine in grassy mud, random leaves	Leaves can randomly extend 1 tile left or right, but not from the first 4 or last 2 tiles. If height &lt; 7, identical to object 2D.	3	4	1	None	8						5																0			1	0	1	1	1	0	2	0	0	0	0
+0x2F	None	Jungle tree platform		3	4	2	None	5						5																0			1	0	1	0	1	0	1	0	0	0	0
+0x30	None	Jungle vine	Top auto-joins to canopy; bottom auto-joins to jungle grass.	3	4	2	None	5						5																0			1	0	1	1	1		0	0	0	0	0
+0x31	None	Jungle vine, random leaves	Leaves can randomly extend 1 tile left and/or right, but not from the first 2 tiles or last tile. Top auto-joins to canopy; bottom auto-joins to jungle grass.	3	4	2	None	5						5																0			1	0	1	1	1		0	0	0	0	0
+0x32	None	Jungle stone block, textured surface	Auto-joins to jungle grass.	3	2	3	4	3						5																1			1	0	1	1	0	0	2	0	0	0	0
+0x33	None	Jungle stone block	Auto-joins to jungle grass.	3	2	3	4	3						5																1			1	0	1	1	0	0	2	0	0	0	0
+0x34	None	Jungle reeds	Auto-joins to flat mud.	3	2	3	4	None						5																1			0	0	1	1	1	1	0	0	0	0	0
+0x35	None	Water	Can generate solid tiles or slopes, if overlapping a poundable post and/or jungle terrain.	3	2	3	4	3																		0x0C,0x0E,0x11				1			1	0	1	1	1	0	3	0	0	0	0
+0x36	None	Jungle vine, random leaves, reduced RNG	Leaves can randomly extend 1 tile left and/or right, but not from the first 2 tiles or last tile. Top auto-joins to canopy; bottom auto-joins to jungle grass.<br> Same as object 31, but with a slightly smaller pool of random tiles.	3	4	2	None	5						5																0			1	0	1	1	1		0	0	0	0	0
+0x37	None	Red bridge, horizontal	Object only fills empty tiles.	3	3	4	3	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			0	0	0	1	0	0	1	0	0	0	0
+0x38	None	Hookbill/4-Secret block, rectangle	Randomly chooses between 2 colors. Corners auto-join to other objects 38/39.	3	2	3	4	3				3								B										1			1	0	1	1	0	0	2	0	0	0	0
+0x39	None	Hookbill/4-Secret blocks, 2x2	Top corners auto-join to other objects 38/39.	3	2	2	4	4				3								B								2		2	2		2	0	0	1	0	0	2	0	0	0	0
+0x3A	None	Regular land, ceiling, slope +2		3	3	2	2	5									8													1			1	0	1	1	0	0	2	1	0	0	0
+0x3B	None	Regular land, ceiling, slope -2	Object height is affected by its width.	3	3	2	2	7									8													1			1	0	1	1	0	0	2	1	0	0	0
+0x3C	None	Vertical pipe, enterable	If height is positive, the entrance is on top. If height is negative, the entrance is on the bottom.	3	3	3	None	4	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0	-0x80		1	0	0	0	0	0	2	0	0	0	1
 0x3D	None	Unused object, glitch		1	2	3	4	None																						1			0	0	0	1	0						
-0x3E	None	Ski lift pole, double		2	4	3	None	4					4																	0			1	0	0	1	1	1	0	0	0	0	0
-0x3F	None	Yellow death spikes, rightward	Instant death if touched.	2	4	3	None	3				3																		0			1	0	0	1	0	0	2	0	0	1	0
-0x40	None	Yellow death spikes, leftward	Instant death if touched.	2	4	3	None	3				3																		0			1	0	0	1	0	0	2	0	0	1	0
-0x41	None	Castle solid platform, horizontal?	<i>Unimplemented</i>					None																									0										
-0x42	None						None																							0													
-0x43	None	Castle {bg} pillar, ?	<i>Unimplemented</i>				None																							0													
-0x44	None	Castle {bg} wall, ?	<i>Unimplemented</i>																																								
-0x45	None	Castle {bg} wall, ?	<i>Unimplemented</i>																																								
-0x46	None	Castle {bg} wall, ?	<i>Unimplemented</i>																																								
-0x47	None	Lava pool	<i>Unimplemented</i>		2	3	4	3																		0x07								0				0	-1	0	0	1	0
-0x48	None	Castle bricks	<i>Unimplemented</i>		2	2	4	4																										0				0	2	0	0	0	0
-0x49	None	Castle {bg} wall, window		2	3	3	None	3							6				A				E							0			1	0	0	0	0	1	0	0	0	0	0
-0x4A	None	Castle {bg} pillar, tileset-specific	Pillar style varies between the three castle tilesets.	2	3	3	None	3							6				A				E							0			1	0	0	0	0	1	0	0	0	0	0
-0x4B	None	Checkered block, width 4		2	2	3	None	3							6				A				E							0			1	0	0	0	0	0	2	0		0	0
-0x4C	None	Checkered block, width 6	Sprite 03F converts this into a Block Slime?	2	1	2	None	4							6				A				E							0			1	0	0	0	0	0	2	0		0	0
-0x4D	None	Checkered block, width 8		2	0	2	None	4							6				A				E							0			1	0	0	0	0	0	2	0		0	0
-0x4E	None	Breakable dirt	Can be destroyed by various means, including eggs, ground pounds, bumping from below, or certain enemies. Object 4F can remove parts of the dirt.<br><i>Partially implemented</i>	2	2	3	4	3																										0		1	0	0	2	0	1	0	0
-0x4F	None	Breakable dirt, hole carver?	<i>Unimplemented</i>																															0									
-0x50	None	Train track, vertical	Used by train morph.	2	4	3	None	3																			train			0			1	0	0	1	0	0	0	0	0	0	0
-0x51	None	Train track, horizontal	Used by train morph.	2	3	4	3	None																			train			1			0	0	0	1	0	0	0	0	0	0	0
-0x52	None	Train track, diagonal, slope ±1	Used by train morph.<br>Slope -1 if width is positive, or slope +1 if width is negative.	2	3	3	3	3																			train	-0x81		1			1	0	0	0	0	0	0	0	0	0	0
-0x53	None	Castle {bg} ledge, horizontal?	<i>Unimplemented</i>					None																									0										
-0x54	None	Castle {bg} ledge, slope ±½?	<i>Unimplemented</i>																																								
-0x55	None	Castle {bg} ledge, slope ±?	<i>Unimplemented</i>																																								
-0x56	None	Castle {bg} ledge, slope ±?	<i>Unimplemented</i>																																								
-0x57	None	Land {bg} ledge	Auto-joins to walls.	2	3	4	3	None	0	1						7									11					1			0	0	0	1	0	0	1	0	0	0	0
-0x58	None	Regular land, ceiling	Normally acts as height 1. If there's a land interior tile at y+1 from either corner, extends a wall downward using its height.	2	2	4	4	1	0	1			4			7	8								11					1			1	0	1	1	0	0	2	0	0	0	0
-0x59	None	{Bg} wall land, slope -½?	<i>Unimplemented</i>																																								
-0x5A	None	{Bg} wall land, slope -1?	<i>Unimplemented</i>																																								
-0x5B	None	{Bg} wall land, slope -2?	<i>Unimplemented</i>																																								
-0x5C	None	{Bg} wall land, slope +½?	<i>Unimplemented</i>																																								
-0x5D	None	{Bg} wall land, slope +1?	<i>Unimplemented</i>																																								
-0x5E	None	{Bg} wall land, slope +2?	<i>Unimplemented</i>																																								
-0x5F	None	Regular land, ceiling, slope +½?	<i>Unimplemented</i>																																								
-0x60	None	Regular land, ceiling, slope +1?	<i>Unimplemented</i>																																								
-0x61	None	Regular land, ceiling, slope -½?	<i>Unimplemented</i>																																								
-0x62	None	Regular land, ceiling, slope -1?	<i>Unimplemented</i>																																								
-0x63	None	Horizontal log		2	3	4	3	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			0	0	0	0	0	0	1	0	0	0	0
+0x3E	None	Ski lift pole, double		3	4	3	None	4					4																	0			1	0	0	1	1	1	0	0	0	0	0
+0x3F	None	Yellow death spikes, rightward	The topmost spike tile is actually safe. Any spikes below that are instant death if touched.	3	4	3	None	3				3																		0			1	0	0	1	0	0	2	0	0	1	0
+0x40	None	Yellow death spikes, leftward	The topmost spike tile is actually safe. Any spikes below that are instant death if touched.	3	4	3	None	3				3																		0			1	0	0	1	0	0	2	0	0	1	0
+0x41	None	Castle solid horizontal platform	Auto-joins to castle BG walls.	3	3	4	3	None							6				A				E										0	0	0	1	0	0	2	0	0	0	0
+0x42	None	Castle {bg} pillar, crumbling, glitch	Can be used with Relay Boo Guys (sprite 105-106). Auto-joins to lava and castle BG walls.	1	4	2	None	5							6															0			1	0	0	1	0	0	0	0	0	0	0
+0x43	None	Castle {bg} pillar	Can be used with Relay Boo Guys (sprite 105-106). Auto-joins to lava and castle BG walls.	3	4	3	None	3							6				A				E							0			1	0	0	1	0	0	0	0	0	0	0
+0x44	None	Castle {bg} wall	Auto-joins to castle bricks.	3	3	3	3	3							6				A				E							1			1	0		1	0	1	0	0	0	0	0
+0x45	None	Castle {bg} wall, top slope -1	Auto-joins to castle bricks.	3	3	3	3	3							6				A				E							1			1	0		1	0	1	0	0	0	0	0
+0x46	None	Castle {bg} wall, top slope +1	Auto-joins to castle bricks.	3	3	5	3	1							6				A				E							1			1	0		1	0	1	0	0	0	0	0
+0x47	None	Lava pool	Instant death if touched, but with buoyant surface. <br>Auto-joins to castle bricks and castle BG walls.	3	3	3	3	3																		0x07,0x0D				1			1	0	1	1	1	0	3	0	0	1	0
+0x48	None	Castle bricks	Auto-joins to other castle bricks, lava, and castle BG walls.	3	3	3	3	3							6				A				E							1			1	0	0	1	0	0	2	0	0	0	0
+0x49	None	Castle {bg} wall, window		3	3	3	None	3							6				A				E							0			1	0	0	0	0	1	0	0	0	0	0
+0x4A	None	Castle {bg} pillar, tileset-specific	Pillar style varies between the three castle tilesets.	3	3	3	None	3							6				A				E							0			1	0	0	0	0	1	0	0	0	0	0
+0x4B	None	Checkered block, width 4		3	2	3	None	3							6				A				E							0			1	0	0	0	0	0	2	0	0	0	0
+0x4C	None	Checkered block, width 6	If this object is height 4 and does not cross a screen boundary, sprite 03F can convert it into a Block Slime.	3	1	2	None	4							6				A				E							0			1	0	0	0	0	0	2	0		0	0
+0x4D	None	Checkered block, width 8		3	0	2	None	4							6				A				E							0			1	0	0	0	0	0	2	0	0	0	0
+0x4E	None	Breakable dirt	Can be destroyed by various means, including eggs, ground pounds, bumping from below, or certain enemies.<br>Auto-joins to other breakable dirt and land BG walls.	3	3	3	3	3	0	1			4		6	7	8	9	A		C	D	E	F	11					1			1	0	0	1	0	0	2	0	1	0	0
+0x4F	None	Breakable dirt, hole carver	Tile modifier. Creates a hole when placed on breakable dirt (object 4E), and fixes the dirt edges.	3	3	3	2	2	0	1			4		6	7	8	9	A		C	D	E	F	11					1			1	0	0	2	0	0	0	0	0	0	0
+0x50	None	Train track, vertical	Used by train morph.	3	4	3	None	3																			train			0			1	0	0	1	0	0	0	0	0	0	0
+0x51	None	Train track, horizontal	Used by train morph.	3	3	4	3	None																			train			1			0	0	0	1	0	0	0	0	0	0	0
+0x52	None	Train track, diagonal, slope ±1	Used by train morph.<br>Slope -1 if width is positive, or slope +1 if width is negative.	3	3	3	3	3																			train	-0x81		1			1	0	0	0	0	0	0	0	0	0	0
+0x53	None	Castle {bg} ledge, flat	Tile modifier. Adds a ledge to a castle BG wall (tiles 00C2-00C7). Edges auto-join to adjacent castle BG ledges.	3	2	4	5	None							6				A				E							1			0	0	0	2	0	0	1	0	0	0	0
+0x54	None	Castle {bg} ledge, slope ±½	Slope -½ if width is positive, or slope +½ if width is negative. Edges auto-join to adjacent castle BG ledges.	3	1	3	6	3							6				A				E					-0x81		1			1	0	0	1	0	0	1	1	0	0	0
+0x55	None	Castle {bg} ledge, slope ±1	Slope -1 if width is positive, or slope +1 if width is negative. Edges auto-join to adjacent castle BG ledges.	3	2	3	5	4							6				A				E					-0x81		1			1	0	0	1	0	0	1	1	0	0	0
+0x56	None	Castle {bg} ledge, slope ±2	Slope -2 if width is positive, or slope +2 if width is negative. Edges auto-join to adjacent castle BG ledges.	3	2	2	4	5							6				A				E					-0x81		1			1	0	0	1	0	0	1	1	0	0	0
+0x57	None	Land {bg} ledge	Auto-joins to walls.	3	3	4	3	None	0	1						7									11					1			0	0	0	1	0	0	1	0	0	0	0
+0x58	None	Regular land, ceiling	Normally acts as height 1. If there's a land interior tile at y+1 from either corner, extends a wall downward using its height. Auto-joins to the bottom edge of carved BG walls.	3	2	4	4	1	0	1			4			7	8								11					1			1	0	1	1	0	0	2	0	0	0	0
+0x59	None	{Bg} wall land, slope -½	Includes left/right edges when placed on carved background walls (object 14).	3	2	4	4	2	0	1						7									11					1			1	0	1	1	0	0	2	1	0	0	0
+0x5A	None	{Bg} wall land, slope -1	Includes left/right edges when placed on carved background walls (object 14).	3	3	4	3	3	0	1						7									11					1			1	0	1	1	0	0	2	1	0	0	0
+0x5B	None	{Bg} wall land, slope -2	Includes left/right edges when placed on carved background walls (object 14).	3	3	3	2	4	0	1						7									11					1			1	0	1	1	0	0	2	1	0	0	0
+0x5C	None	{Bg} wall land, slope +½	Includes left/right edges when placed on carved background walls (object 14).	3	2	5	4	1	0	1						7									11					1			1	0	1	1	0	0	2	1	0	0	0
+0x5D	None	{Bg} wall land, slope +1	Includes left/right edges when placed on carved background walls (object 14).	3	3	6	3	1	0	1						7									11					1			1	0	1	1	0	0	2	1	0	0	0
+0x5E	None	{Bg} wall land, slope +2	Includes left/right edges when placed on carved background walls (object 14).	3	3	6	2	1	0	1						7									11					1			1	0	1	1	0	0	2	1	0	0	0
+0x5F	None	Regular land, ceiling, slope +½	Regular land in tileset 8; BG wall land in other tilesets. Includes left/right edges when placed on carved background walls (object 14).	3	2	3	4	3	0	1						7	8								11					1			1	0	1	1	0	0	2	1	0	0	0
+0x60	None	Regular land, ceiling, slope +1	Regular land in tileset 8; BG wall land in other tilesets. Includes left/right edges when placed on carved background walls (object 14).	3	3	3	3	4	0	1						7	8								11					1			1	0	1	1	0	0	2	1	0	0	0
+0x61	None	Regular land, ceiling, slope -½	Regular land in tileset 8; BG wall land in other tilesets. Includes left/right edges when placed on carved background walls (object 14).	3	2	3	4	3	0	1						7	8								11					1			1	0	1	1	0	0	2	1	0	0	0
+0x62	None	Regular land, ceiling, slope -1	Regular land in tileset 8; BG wall land in other tilesets. Includes left/right edges when placed on carved background walls (object 14).	3	3	3	3	5	0	1						7	8								11					1			1	0	1	1	0	0	2	1	0	0	0
+0x63	None	Horizontal log		3	3	4	3	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			0	0	0	0	0	0	1	0	0	0	0
 0x64	None	Unused duplicate	<b><i>Reserved for future use</i></b>	0	3	4	3	None																						1			0										
-0x65	None	Arbitrary single tile [Advynia]		0	4	4	1	1																						1			1										
-0x66	None	Ice blocks	Slippery terrain. Can be melted with fire breath. Certain sprites (Shy Guy, Bumpty, flower, any melon) at the top-left corner of an ice block become frozen inside.	2	2	2	4	4	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	0	0	0	1	0	2	0	1	0	0
-0x67	None	Regular land, interior	Appearance varies by tileset.<br><i>Partially implemented</i>	2	2	3	4	3	0	1			4			7	8	9			C	D		F	11					1			1	0	1		0	0		0	0	0	0
-0x68	None	Coins, rectangle	Objects C4-C6 provide other shapes, while sprite 1AF can be used to place a coin on terrain.	2	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	1	0	0	0	0	0	0	1	0	0
-0x69	None	Yellow sticky-ceiling platform	Compresses when Yoshi stands on top. Yoshi can get stuck in the bottom of this platform, and chain hovers by releasing-repressing jump while stuck.<br><i>Only width&gt;=04, height&gt;=04 supported</i>	2	2	2	4	4							6				A									4		1	4		1	0	0	0	1	0	-1	0	0	0	0
+0x65	None	Arbitrary single tile [Advynia]		0	4	4	1	1																			Varies			1			1										
+0x66	None	Ice blocks	Slippery terrain. Can be melted with fire breath. Certain sprites (Shy Guy, Bumpty, flower, any melon) at the top-left corner of an ice block become frozen inside.	3	2	2	4	4	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	0	0	0	1	0	2	0	1	0	0
+0x67	None	Regular land, interior	Appearance varies by tileset. Includes edges when placed on carved background walls (object 14).	3	2	3	4	3	0	1			4			7	8	9			C	D		F	11					1			1	0	1	1	0	0	2	0	0	0	0
+0x68	None	Coins, rectangle	Objects C4-C6 provide other shapes, while sprite 1AF can be used to place a coin on terrain.	3	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	1	0	0	0	0	0	0	1	0	0
+0x69	None	Yellow sticky-ceiling platform	Compresses when Yoshi stands on top. Yoshi can get stuck in the bottom of this platform, and chain hovers by releasing-repressing jump while stuck.<br><i>Only width&#x2265;04, height&#x2265;04 supported</i>	3	2	2	4	4							6				A									4		1	4		1	0	0	0	1	0	-1	0	0	0	0
 0x6A	None	Unused object, glitch		1	3	4	3	None																						1			0	0	0	0	0						
-0x6B	None	Goal platform	Top-left corner auto-joins to regular land (objects 01/03).	2	2	3	4	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	0	0	1	0	0	2	0	0	0	0
-0x6C	None	Single-tile stone blocks, gray		2	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	0			0	0	2	0	0	0	0
-0x6D	None	Spiked post	Spike tip hurts Yoshi if touched.	2	4	3	None	3	0	1			4	5		7	8	9			C	D		F	11					0			1	0	0	0	0	0	2	0	0	1	0
-0x6E	None	Single-tile stone blocks, random color		2	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	0	1	0	0	0	2	0	0	0	0
-0x6F	None	Forest tree trunk, vertical	Auto-joins to ground.	2	4	3	None	3										9												0			1	0	1	1	0	1	0	0	0	0	0
-0x70	None	Forest shrubs, above land surface		2	2	3	4	None										9										2		2			0	0	0	0	0	1	0	0	0	0	0
-0x71	None	Forest shrubs, in land surface		2	2	3	4	None										9										2		2			0	0	0	0	0	1	0	0	0	0	0
-0x72	None	Forest shrubs, in land interior		2	2	3	4	None										9										2		2			0	0	0	0	0	1	0	0	0	0	0
-0x73	None	Forest tree trunk, 2x3 leaf clusters		2	3	3	None	4										9												0	2		2	0	0	0	0	1	0	0	0	0	0
-0x74	None	Forest tree trunk, left/right leaves		2	3	3	None	3										9												0			1	0	0	0	0	1	0	0	0	0	0
-0x75	None	Forest tree trunk, leftward leaves		2	3	3	None	3										9												0			1	0	0	0	0	1	0	0	0	0	0
-0x76	None	Forest tree trunk, rightward leaves		2	4	3	None	3										9												0			1	0	0	0	0	1	0	0	0	0	0
-0x77	None	Forest tree trunk, centered leaves		2	4	3	None	3										9												0			1	0	0	0	0	1	0	0	0	0	0
-0x78	None	Forest tree trunk, slope ±1	Slope -1 if width is positive, or slope +1 if width is negative.	2	3	3	4	2										9										-0x81		1	2	2	0	0	0	0	0	1	0	0	0	0	0
-0x79	None	Red stairs, slope ±1	Slope -1 if width is positive, or slope +1 if width is negative.	2	3	3	4	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			-0x81		1			0	0	0	0	0	0	1	1	0	0	0
-0x7A	None	Land {bg} wall, standalone?	<i>Unimplemented</i>																																								
-0x7B	None	Land {bg} wall, top slope ±1?	Slope -1 if width is positive, or slope +1 if width is negative.<br><i>Unimplemented</i>																																								
-0x7C	None	Land {bg} wall, bottom edge?	<i>Unimplemented</i>					None																									0										
-0x7D	None							None																									0										
-0x7E	None	Land {bg} ledge, doesn't join walls	Nearly identical to object 57, but uses slightly different graphics and doesn't auto-join walls.	1	3	4	3	None	0	1						7									11					1			0	0	0	0	0	0	1	0	0	0	0
-0x7F	None	Land {bg} wall, hole carver	Creates a hole when placed on a land background wall (object 14 or 7A-7C).	2	3	3	3	3	0	1						7									11			2		1	2		1	0	0	2	0	1	0	0	0	0	0
-0x80	None							None																									0										
-0x81	None							None																									0										
-0x82	None	Red coins, rectangle	Red coins disguised as yellow coins. Sprite 065 can be used to place a disguised red coin on terrain.<br>This object can be resized vertically, but usually causes an item memory error.	2	3	4	3	1	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	2	0	0	1	0	0	0	1	0	0
-0x83	None	Red coins, horizontal every 2nd tile	Red coins disguised as yellow coins.	2	2	4	5	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			1	0x7F	2			0	2	0	0	1	0	0	0	1	0	0
-0x84	None	Red coins, diagonal every 2nd tile	Red coins disguised as yellow coins.<br>Slope -1 if width is positive, or slope +1 if width is negative.	2	2	2	5	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			-0x81	0x7F	2			0	2	0	0	1	0	0	0	1	0	0
-0x85	None	{Bg} wall land, ceiling, slope +2?	<i>Unimplemented</i>																																								
-0x86	None	{Bg} wall land, ceiling, slope -2?	<i>Unimplemented</i>																																								
-0x87	None																																										
-0x88	None	Regular land, flat, undecorated?	<i>Unimplemented</i>																																								
-0x89	None	Large stone block, unstable	Falls if Yoshi stands on it. Compatible with width/height 1. The stationary variant is object 9D; the pre-falling variants are sprites 137-13A. Unlike the pre-falling variants, this block won't land on the ground.	2	2	2	4	4																F			L1=F + Stripe 20+21			1			1	0	0	0	0	0	2	0	1	0	0
-0x8A	None	! switch coins, rectangle	Coins that are only collectible if an ! switch is active. Objects C7-C9 provide other shapes.	2	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	1	0	0	0	0	0	0	1	0	0
-0x8B	None	! switch blocks	Blocks that are only solid if an ! switch is active.	2	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	0	0	0	0	0	-1	0	0	0	0
-0x8C	None	Relay Boo Guy platform?	<i>Unimplemented</i>					None																																			
-0x8D	None	Meadow tree, trunk		2	4	2	None	4																F						0			1	0	1	0	0	1	0	0	0	0	0
-0x8E	None	Donut Lifts, 2x2	Falls if Yoshi stands on one for more than a short time.	2	2	3	4	None																F			L1=F + Stripe 4C	2		2			0	0	0	0	0	0	1	0	1	0	0
-0x8F	None	Forest diagonal log, slope ±½	Slope -½ if width is positive, or slope +½ if width is negative. Auto-joins to ground and the corresponding slope ±1 log. Otherwise, object only fills empty tiles.	2	2	3	4	3										9										-0x81		1		3	1	0	0	1	0	0	1	1	0	0	0
-0x90	None	Forest diagonal log, slope ±1	Slope -1 if width is positive, or slope +1 if width is negative. Auto-joins to ground.	2	3	3	3	3										9										-0x81		1		3	1	0	0	1	0	0	1	1	0	0	0
-0x91	None	Forest tree with fuzzy top, left stem	Auto-joins to slope +1 and -½  diagonal logs. Loads glitched tile from unrelated RAM otherwise.	2	4	2	None	5										9												0			1	0	0	2	0	1	0	0	0	0	0
-0x92	None	Forest tree with fuzzy top, right stem	Auto-joins to slope +½ and -1  diagonal logs.	2	4	2	None	5										9												0			1	0	0	1	0	1	0	0	0	0	0
-0x93	None	Grassland tree		2	4	2	None	5		1																				0			1	0	0	0	0	1	0	0	0	0	0
-0x94	None	Countdown "1" platforms	When Yoshi stops standing on one, it vanishes.	2	2	3	4	2										9										2		2	2		2	0	0	0	0	0	1	0	1	0	0
-0x95	None	Countdown "2" platforms	When Yoshi stops standing on one, it counts down.	2	2	3	4	2										9										2		2	2		2	0	0	0	0	0	1	0	1	0	0
-0x96	None	Countdown "3" platforms	When Yoshi stops standing on one, it counts down.	2	2	3	4	2										9										2		2	2		2	0	0	0	0	0	1	0	1	0	0
-0x97	None	Countdown "4" platforms	When Yoshi stops standing on one, it counts down.	2	2	3	4	2										9										2		2	2		2	0	0	0	0	0	1	0	1	0	0
-0x98	None	Cave waterfall		2	2	3	4	3	0																					1			1	0	0	0	0	0	2	0	0	0	0
-0x99	None	Cave waterfall, gap with rock		2	4	2	None	4	0																					0			1	0	0	1	0						
-0x9A	None	Cave fungus decoration, ?	<i>Unimplemented</i>				None																							0													
-0x9B	None	Cave fungus decoration, ?	<i>Unimplemented</i>				None																							0													
-0x9C	None	Cave fungus decoration, ?	<i>Unimplemented</i>				None																							0													
-0x9D	None	Large stone block, stationary	<i>Not</i> compatible with width/height 1. Auto-joins to ground. The unstable variant is object 89.	2	2	2	4	4																F				2		1	2		1	0			0	0	2	0	0	0	0
-0x9E	None	Donut Lifts, 1x1	Falls if Yoshi stands on one for more than a short time.	2	3	4	3	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11		Stripe 4C			1			0	0	0	0	0	0	1	0	1	0	0
-0x9F	None	Raven planetoids		2	1	3	6	None																F				2	0x7E	4			0	0	0	0	0	0	1	1	0	0	0
-0xA0	None	Breakout blocks, red	3 hits to destroy; turns yellow if hit with an egg. Resets egg bounce count.	2	2	3	4	3							6				A				E					2		2			1	0	0	0	0	0	2	0	1	0	0
-0xA1	None	Breakout blocks, yellow	2 hits to destroy; turns green if hit with an egg. Resets egg bounce count.	2	2	3	4	3							6				A				E					2		2			1	0	0	0	0	0	2	0	1	0	0
-0xA2	None	Breakout blocks, green	Destroyed if hit with an egg. Resets egg bounce count.	2	2	3	4	3							6				A				E					2		2			1	0	0	0	0	0	2	0	1	0	0
-0xA3	None	Breakable castle blocks	2 hits to destroy; cracks if hit with an egg. Resets egg bounce count.	2	2	2	4	4							6				A				E					2		2	2		2	0	0	0	0	0	2	0	1	0	0
-0xA4	None	Breakable castle blocks, cracked	Destroyed if hit with an egg. Resets egg bounce count.	2	2	2	4	4							6				A				E					2		2	2		2	0	0	0	0	0	2	0	1	0	0
-0xA5	None	Vertical pipe, 2-ended*, enterable	*In tileset 3: 2.5D vertical pipe, entrance on bottom, enterable?<br>If either end is overlapping a non-blank tile, it won't appear.	2	3	2	None	5				3			6				A				E							0			1	0	0	1	0	0	2	0	0	0	1
-0xA6	None	Horizontal pipe, 2-ended, enterable	Appearance varies by tileset.<br>If either end is overlapping a non-blank tile, it won't appear.	2	2	3	5	None				3			6				A				E							1			0	0	0	1	0	0	2	0	0	0	1
-0xA7	None	Blue thorns	Instant death if touched. Destroyed if hit with an egg.	2	3	3	3	3				3			6				A	B			E							1			1	0	0	1	0	0	2	0	1	1	0
-0xA8	None	Blue thorns, hole carver? / empty tiles?																																									
-0xA9	None	2.5D vertical pipe / Chomp signpost?	In tileset 3: 2.5D vertical pipe, enterable, floor connector<br> In other tilesets: ???				None																							0													
-0xAA	None	Sewer pipe, left wall	Corners auto-join, with sloping convex pipe corners.	2	3	2	None	4												B										0			1	0	0	1	0	0	2	-1	0	0	0
-0xAB	None	Sewer pipe, right wall	Corners auto-join, with sloping convex pipe corners.	2	4	2	None	4												B										0			1	0	0	1	0	0	2	-1	0	0	0
-0xAC	None	Sewer pipe, ceiling, flat	Corners auto-join, with sloping convex pipe corners.	2	2	3	4	None												B										1			0	0	0	1	0	0	2	-1	0	0	0
-0xAD	None	Sewer pipe, floor, flat	Corners auto-join, with sloping convex pipe corners.	2	2	4	4	None												B										1			0	0	0	1	0	0	2	-1	0	0	0
-0xAE	None	Sewer pipe, {bg} wall shadow, vertical	Commonly used in the center of vertical 4-wide sewer pipes.	2	3	2	None	4												B										0			1	0	0	0	0	1	0	0	0	0	0
-0xAF	None	Sewer pipe, {bg} wall shadow, horizontal	Commonly used in the center of horizontal 4-high sewer pipes.	2	2	3	4	None												B										1			0	0	0	0	0	1	0	0	0	0	0
-0xB0	None	Sewer pipe, {bg} wall	Object only fills empty tiles.	2	2	2	4	4												B										1			1	0	0	1	0	1	0	0	0	0	0
-0xB1	None	Sewer {bg} ledge	Tile modifier. Adds a ledge to a sewer background wall (e.g. object B0, D3, or most sewer pipe objects).	2	3	4	3	None												B										1			0	0	0	2	0	0	1	0	0	0	0
-0xB2	None	Sewer pipe, ceiling, slope +1	Object only fills empty tiles.	2	5	1	-4	None												B								-0x81	1	1			0	0	0	1	0	0	2	1	0	0	0
-0xB3	None	Sewer pipe, floor, slope +1	Object only fills empty tiles.	2	5	2	-4	None												B								-0x81	1	1			0	0	0	1	0	0	2	1	0	0	0
-0xB4	None	Sewer pipe, ceiling, slope +1, +{bg} wall	Object only fills empty tiles.	2	5	1	-4	None												B								-0x81	1	1			0	0	0	1	0	0	2	1	0	0	0
-0xB5	None	Sewer pipe, floor, slope +1, +{bg} wall	Object only fills empty tiles.	2	5	1	-4	None												B								-0x81	1	1			0	0	0	1	0	0	2	1	0	0	0
-0xB6	None	Sewer pipe, ceiling, slope -1	Object only fills empty tiles.	2	2	1	4	None												B										1			0	0	0	1	0	0	2	1	0	0	0
-0xB7	None	Sewer pipe, floor, slope -1	Object only fills empty tiles.	2	2	2	4	None												B										1			0	0	0	1	0	0	2	1	0	0	0
-0xB8	None	Sewer pipe, ceiling, slope -1, +{bg} wall	Object only fills empty tiles.	2	2	1	4	None												B										1			0	0	0	1	0	0	2	1	0	0	0
-0xB9	None	Sewer pipe, floor, slope -1, +{bg} wall	Object only fills empty tiles.	2	2	1	4	None												B										1			0	0	0	1	0	0	2	1	0	0	0
-0xBA	None	Sewer pipe, top end		2	2	4	4	None												B										1			0	0	0	0	0	0	2	0	0	0	0
-0xBB	None	Sewer pipe, bottom end		2	2	4	4	None												B										1			0	0	0	0	0	0	2	0	0	0	0
-0xBC	None	Sewer pipe, right end		2	4	2	None	4												B										0			1	0	0	0	0	0	2	0	0	0	0
-0xBD	None	Sewer pipe, left end		2	4	2	None	4												B										0			1	0	0	0	0	0	2	0	0	0	0
-0xBE	None	Sewer water flow, vertical?	<i>Unimplemented</i>				None																							0													
-0xBF	None	Sewer water flow, vertical?	<i>Unimplemented</i>				None																							0													
-0xC0	None	Sewer water flow, leftward?	<i>Unimplemented</i>					None																									0										
-0xC1	None	Sewer water flow, rightward?	<i>Unimplemented</i>					None																									0										
-0xC2	None	Sewer water flow, slope +1	Tile modifier for a sewer pipe slope (object B3/B5). Adds a downhill current, which is strong enough to create a one-way passage.	2	5	3	-3	None												B								-0x81	1	1			0	0	0	2	0	0	-1	1	0	0	0
-0xC3	None	Sewer water flow, slope -1	Tile modifier for a sewer pipe slope (object B7/B9). Adds a downhill current, which is strong enough to create a one-way passage.	2	3	3	3	None												B										1			0	0	0	2	0	0	-1	1	0	0	0
-0xC4	None	Coins, horizontal every 2nd tile		2	2	4	5	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			1	0x7F	2			0	1	0	0	0	0	0	0	1	0	0
-0xC5	None	Coins, vertical every 2nd tile		2	4	2	None	5	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0	1	0x7F	2	1	0	0	0	0	0	0	1	0	0
-0xC6	None	Coins, diagonal every 2nd tile	Slope -1 if width is positive, or slope +1 if width is negative.	2	2	2	5	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			-0x81	0x7F	2			0	1	0	0	0	0	0	0	1	0	0
-0xC7	None	! switch coins, horizontal every 2nd tile	Coins that are only collectible if an ! switch is active.	2	2	4	5	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			1	0x7F	2			0	1	0	0	0	0	0	0	1	0	0
-0xC8	None	! switch coins, vertical every 2nd tile	Coins that are only collectible if an ! switch is active.	2	4	2	None	5	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0	1	0x7F	2	1	0	0	0	0	0	0	1	0	0
-0xC9	None	! switch coins, diagonal every 2nd tile	Coins that are only collectible if an ! switch is active.<br>Slope -1 if width is positive, or slope +1 if width is negative.	2	2	2	5	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			-0x81	0x7F	2			0	1	0	0	0	0	0	0	1	0	0
-0xCA	None	Sewer water	Auto-joins to waterfalls.	2	2	2	4	4												B										1			1	0	0	1	1	0	-1	0	0	0	0
-0xCB	None	Castle {bg} wall, ?	<i>Unimplemented</i>																																								
-0xCC	None	Castle {bg} wall, ?	<i>Unimplemented</i>																																								
-0xCD	None	Castle {bg} wall, ?	<i>Unimplemented</i>																																								
-0xCE	None	Line-guide, slope ±1	Slope -1 if width is positive, or slope +1 if width is negative.	2	3	3	3	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			-0x80	0x80	1			0	0	0	0	0	0	0	0	0	0	0
-0xCF	None	Line-guide, slope ±½	Slope -½ if width is positive, or slope +½ if width is negative.	2	2	3	4	None																F				-0x81	0x80	1			0	0	0	0	0	0	0	0	0	0	0
-0xD0	None	Line-guide, slope ±¼	Slope -¼ if width is positive, or slope +¼ if width is negative.	2	2	4	4	None																F				-0x81	0x80	1			0	0	0	0	0	0	0	0	0	0	0
-0xD1	None	Line-guide, vertical		2	4	2	None	4	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			1	0	0	0	0	0	0	0	0	0	0
-0xD2	None	Line-guide, horizontal		2	2	4	4	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			0	0	0	0	0	0	0	0	0	0	0
-0xD3	None	Sewer room, {bg} wall		2	2	2	4	4												B										1			1	0	0	0	0	1	0	0	0	0	0
-0xD4	None	Sewer room, left wall					None																							0													
-0xD5	None	Sewer room, right wall					None																							0													
-0xD6	None	Sewer room, ceiling						None																									0										
-0xD7	None	Sewer room, floor						None																									0										
-0xD8	None	Log bridge, 2-wide logs		2	2	3	4	None														D						2		2			0	0	0	0	0	0	1	0	0	0	0
-0xD9	None	Log bridge, 1-wide logs		2	3	3	3	None														D								1			0	0	0	0	0	0	1	0	0	0	0
-0xDA	None	Super Star blocks	Blocks that are only solid to Super Baby Mario. When solid, they can be hit for stars or coins.	2	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	0	0	0	0	0	-1	0	0	0	0
-0xDB	None	Ice platform, center	Slippery terrain.	2	2	2	4	5					4																	1	2		1	0	1	1	1	0	2	0	0	0	0
-0xDC	None	Ice platform, water-filled gap	Slippery terrain, with water in between.	2	2	3	5	4					4													0x08				1			1	0	0	0	1	0	-1	0	0	0	0
-0xDD	None	Cave ice	Slippery terrain.<br><i>Partially implemented</i>	2	2	2	4	4									8													1			1	0	1			0	2	0	0	0	0
-0xDE	None	Cave ice, gap with rock		2	3	3	None	4									8													0			1	0	0	0	0			0	0	0	0
-0xDF	None	Cave lava	Instant death if touched.	2	2	3	5	None									8													1			0	0	0	0	0	0		0	0	1	0
-0xE0	None	Cave land, lavafall interior		2	4	3	None	4									8													0			1	0	0	0	0			0	0		0
-0xE1	None	Cave mushrooms, 3-wide	Random color, shared by all mushrooms in the object. Stalk auto-joins to cave lava, and cap auto-joins to the stalks of other copies of E1.	2	3	3	3	4									8											2		1			1	0	1	1	0	0	1	-1	0	0	0
-0xE2	None	Rock spire, column		2	2	0	None	9														D								0			1	0	0	0	0	0		0	0	0	0
-0xE3	None	Ice platform, empty gap	Slippery terrain, with blank tiles in between. To create an ice platform's left edge, object A8 is often used to cover up half of this object.	2	2	3	5	4					4																	1			1	0	0	0	1	0	2	0	0	0	0
-0xE4	None	Flower land, flat		2	2	3	4	3													C									1			1	0	1	0	0	0	2	0	0	0	0
-0xE5	None	Flower land, slope +½		2	5	3	-4	3													C							-0x81	1	1			1	0	1	1	0	0	2	1	0	0	0
-0xE6	None	Flower land, slope +1		2	5	3	-3	4													C							-0x81	1	1			1	0	1	1	0	0	2	1	0	0	0
-0xE7	None	Flower land, slope +2		2	4	2	-2	5													C							-0x81	1	1			1	0	1	0	0	0	2	1	0	0	0
-0xE8	None	Flower land, slope -½		2	2	3	4	3													C									1			1	0	1	1	0	0	2	1	0	0	0
-0xE9	None	Flower land, slope -1		2	3	3	3	4													C									1			1	0	1	1	0	0	2	1	0	0	0
-0xEA	None	Flower land, slope -2		2	3	2	2	5													C									1			1	0	1	0	0	0	2	1	0	0	0
-0xEB	None	Flower land, left wall	Topped by a +2 slope.	2	4	2	1	4													C							1	1	0			1	0	1	1	0	0	2	1	0	0	0
-0xEC	None	Flower land, right wall	Topped by a -2 slope.	2	4	2	1	4													C							1	1	0			1	0	1	1	0	0	2	1	0	0	0
-0xED	None	2.5D stone blocks, ?	<i>Unimplemented</i>																																								
-0xEE	None	2.5D stone blocks, ?	<i>Unimplemented</i>																																								
-0xEF	None	2.5D stone blocks, ?	<i>Unimplemented</i>																																								
-0xF0	None	2.5D stone blocks, ?	<i>Unimplemented</i>																																								
-0xF1	None	2.5D stone blocks, ?	<i>Unimplemented</i>																																								
-0xF2	None	2.5D stone blocks, ?	<i>Unimplemented</i>																																								
-0xF3	None	2.5D stone blocks, ?	<i>Unimplemented</i>																																								
-0xF4	None	Vertical pipe, unenterable	If height is positive, the entrance is on top. If height is negative, the entrance is on the bottom.<br>If a Shy Guy, Lantern Ghost, or Boo Guy is placed at the top-left corner of this pipe, it becomes a spawner.	2	3	3	None	4	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0	-0x80		1	0	0	0	1	0	2	0	0	0	0
-0xF5	None	Yellow death spikes	Instant death if touched.	2	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	0	0	0	0	0	2	0	0	1	0
-0xF6	None	Kamek blocks	Can be transformed into a random enemy/star by Kamek's magic. Object only fills empty tiles.	2	3	3	3	3																			Layer effects=A			1			1	0	0	1	0	0	2	0	1	0	0
-0xF7	None	Submarine block, top row, surface line	Used with object 18?	2	2	4	4	None			2																			1			0	0	0	0	0	0		0	0	0	0
-0xF8	None	Submarine block, center row, water texture	Used where object 18 intersects water.	2	2	4	4	None			2																			1			0	0	0	0	0	0		0	0	0	0
-0xF9	None	Submarine block, cobbled row, water texture	Used where object 17 intersects water.	2	2	4	4	None			2																			1			0	0	0	0	0	0		0	0	0	0
-0xFA	None	Submarine block, center row, surface line	Used with object 18?	2	2	4	4	None			2																			1			0	0	0	0	0	0		0	0	0	0
-0xFB	None	Submarine block, bottom row, water texture	Used where object 18 intersects water.	2	2	4	4	None			2																			1			0	0	0	0	0	0		0	0	0	0
-0xFC	None	Submarine block, top row, water texture	Used where object 18 intersects water.	2	2	4	4	None			2																			1			0	0	0	0	0	0		0	0	0	0
+0x6B	None	Goal platform	Top-left corner auto-joins to regular land (objects 01/03).	3	2	3	4	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	0	0	1	0	0	2	0	0	0	0
+0x6C	None	Single-tile stone blocks, gray	Auto-joins to castle BG walls.	3	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	0		1	0	0	2	0	0	0	0
+0x6D	None	Spiked post	Spike tip hurts Yoshi if touched.	3	4	3	None	3	0	1			4	5		7	8	9			C	D		F	11					0			1	0	0	0	0	0	2	0	0	1	0
+0x6E	None	Single-tile stone blocks, random color		3	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	0	1	0	0	0	2	0	0	0	0
+0x6F	None	Forest tree trunk, vertical	Auto-joins to ground.	3	4	3	None	3										9												0			1	0	1	1	0	1	0	0	0	0	0
+0x70	None	Forest shrubs, above land surface		3	2	3	4	None										9										2		2			0	0	0	0	0	1	0	0	0	0	0
+0x71	None	Forest shrubs, in land surface		3	2	3	4	None										9										2		2			0	0	0	0	0	1	0	0	0	0	0
+0x72	None	Forest shrubs, in land interior		3	2	3	4	None										9										2		2			0	0	0	0	0	1	0	0	0	0	0
+0x73	None	Forest tree trunk, 2x3 leaf clusters		3	3	3	None	4										9												0	2		2	0	0	0	0	1	0	0	0	0	0
+0x74	None	Forest tree trunk, left/right leaves		3	3	3	None	3										9												0			1	0	0	0	0	1	0	0	0	0	0
+0x75	None	Forest tree trunk, leftward leaves		3	3	3	None	3										9												0			1	0	0	0	0	1	0	0	0	0	0
+0x76	None	Forest tree trunk, rightward leaves		3	4	3	None	3										9												0			1	0	0	0	0	1	0	0	0	0	0
+0x77	None	Forest tree trunk, centered leaves		3	4	3	None	3										9												0			1	0	0	0	0	1	0	0	0	0	0
+0x78	None	Forest tree trunk, slope ±1	Slope -1 if width is positive, or slope +1 if width is negative.	3	3	3	4	2										9										-0x81		1	2	2	0	0	0	0	0	1	0	0	0	0	0
+0x79	None	Red stairs, slope ±1	Slope -1 if width is positive, or slope +1 if width is negative.	3	3	3	4	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			-0x81		1			0	0	0	0	0	0	1	1	0	0	0
+0x7A	None	Land {bg} wall, rectangle	Corners are glitched by default, and typically covered with other objects. Auto-joins to ground and other non-carved BG walls.	3	2	2	4	4	0	1						7									11					1			1	0	0	1	0	1	0	0	0	0	0
+0x7B	None	Land {bg} wall, top slope ±1	Slope -1 if width is positive, or slope +1 if width is negative. Auto-joins to ground and other non-carved BG walls.	3	3	2	3	4	0	1						7									11			-0x81		1			1	0	0	1	0	1	0	0	0	0	0
+0x7C	None	Land {bg} wall, bottom slope ±1	Slope +1 if width is positive, or slope -1 if width is negative. Auto-joins to other land BG walls.	3	3	3	3	None	0	1						7									11			-0x81		1			0	0	0	1	0	1	0	0	0	0	0
+0x7D	None	Land {bg} wall, semisolid top	Auto-joins to non-carved BG walls.	3	2	3	4	None		1						7									11								0	0	0	1	0	0	1	0	0	0	0
+0x7E	None	Land {bg} ledge, doesn't join walls	Nearly identical to object 57, but uses slightly different graphics and doesn't auto-join walls.	3	3	4	3	None	0	1						7									11					1			0	0	0	0	0	0	1	0	0	0	0
+0x7F	None	Land {bg} wall, hole carver	Tile modifier. Creates a hole when placed on a land background wall (object 14 or 7A-7C).	3	3	3	3	3	0	1						7									11			2		1	2		1	0	0	2	0	1	0	0	0	0	0
+0x80	None	Land {bg} wall, glitched bottom slope ±1	Glitched version of 7C. Overflows its tile data if width&gt;2 or width&lt;-2.	1	3	3	3	None																				-0x81		1			0	0	0	0	0						
+0x81	None	No effect		0				None																									0										
+0x82	None	Red coins, rectangle	Red coins disguised as yellow coins. Sprite 065 can be used to place a disguised red coin on terrain.<br>This object can be resized vertically, but usually causes an item memory error.	3	3	4	3	1	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	2	0	0	1	0	0	0	1	0	0
+0x83	None	Red coins, horizontal every 2nd tile	Red coins disguised as yellow coins.	3	2	4	5	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			1	0x7F	2			0	2	0	0	1	0	0	0	1	0	0
+0x84	None	Red coins, diagonal every 2nd tile	Red coins disguised as yellow coins.<br>Slope -1 if width is positive, or slope +1 if width is negative.	3	2	2	5	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			-0x81	0x7F	2			0	2	0	0	1	0	0	0	1	0	0
+0x85	None	{Bg} wall land, ceiling, slope +2	Includes left/right edges when placed on carved background walls (object 14).	3	3	2	2	5		1															11					1			1	0	1	1	0	0	2	1	0	0	0
+0x86	None	{Bg} wall land, ceiling, slope -2	Includes left/right edges when placed on carved background walls (object 14).	3	3	2	2	5		1															11					1			1	0	1	1	0	0	2	1	0	0	0
+0x87	None	Regular land, flat, plain surface, tileset 1 only	Nearly identical to object 88, but uses slightly different graphics and isn't compatible wtih tileset 9.	2	2	2	4	4		1																				1			1	0	1	1	0	0	2	0	0	0	0
+0x88	None	Regular land, flat, plain surface	Can be placed on regular land (object 01) to auto-join and remove the surface.	3	2	2	4	4		1								9												1			1	0	1	1	0	0	2	0	0	0	0
+0x89	None	Large stone block, unstable	Falls if Yoshi stands on it. Compatible with width/height 1. The stationary variant is object 9D; the pre-falling variants are sprites 137-13A. Unlike the pre-falling variants, this block won't land on the ground.	3	2	2	4	4																F			L1=F + Stripe 20+21			1			1	0	0	0	0	0	2	0	1	0	0
+0x8A	None	! switch coins, rectangle	Coins that are only collectible if an ! switch is active. Objects C7-C9 provide other shapes.	3	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	1	0	0	0	0	0	0	1	0	0
+0x8B	None	! switch blocks	Blocks that are only solid if an ! switch is active.	3	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	0	0	0	0	0	-1	0	0	0	0
+0x8C	None	Relay Boo Guy platform	Auto-joins to castle BG walls.	3	2	3	4	None							6				A				E							1			0	0	0	1	0	0	2	0	0	0	0
+0x8D	None	Meadow tree, trunk		3	4	2	None	4																F						0			1	0	1	0	0	1	0	0	0	0	0
+0x8E	None	Donut Lifts, 2x2	Falls if Yoshi stands on one for more than a short time.	3	2	3	4	None																F			L1=F + Stripe 4C	2		2			0	0	0	0	0	0	1	0	1	0	0
+0x8F	None	Forest log, slope ±½	Slope -½ if width is positive, or slope +½ if width is negative. Auto-joins to ground and the corresponding slope ±1 log. Otherwise, object only fills empty tiles.	3	2	3	4	3										9										-0x81		1			1	0	0	1	0	0	1	1	0	0	0
+0x90	None	Forest log, slope ±1	Slope -1 if width is positive, or slope +1 if width is negative. Auto-joins to ground. Otherwise, object only fills empty tiles.	3	3	3	3	3										9										-0x81		1			1	0	0	1	0	0	1	1	0	0	0
+0x91	None	Forest tree with fuzzy top, left stem	Auto-joins to slope +½ and +1 diagonal logs. Loads glitched tile from unrelated RAM otherwise.	3	4	2	None	5										9												0			1	0	0	2	0	1	0	0	0	0	0
+0x92	None	Forest tree with fuzzy top, right stem	Auto-joins to slope -½ and -1 diagonal logs.	3	4	2	None	5										9												0			1	0	0	1	0	1	0	0	0	0	0
+0x93	None	Grassland tree		3	4	2	None	5		1																				0			1	0	0	0	0	1	0	0	0	0	0
+0x94	None	Countdown "1" platforms	When Yoshi stops standing on a platform, it vanishes.	3	2	3	4	2										9										2		2	2		2	0	0	0	0	0	1	0	1	0	0
+0x95	None	Countdown "2" platforms	When Yoshi stops standing on a platform, it counts down.	3	2	3	4	2										9										2		2	2		2	0	0	0	0	0	1	0	1	0	0
+0x96	None	Countdown "3" platforms	When Yoshi stops standing on a platform, it counts down.	3	2	3	4	2										9										2		2	2		2	0	0	0	0	0	1	0	1	0	0
+0x97	None	Countdown "4" platforms	When Yoshi stops standing on a platform, it counts down.	3	2	3	4	2										9										2		2	2		2	0	0	0	0	0	1	0	1	0	0
+0x98	None	Cave waterfall		3	2	3	4	3	0																					1			1	0	0	0	0	0	2	0	0	0	0
+0x99	None	Cave waterfall, gap with rock		3	4	2	None	4	0																					0			1	0	1	1	0	0	2	0	0	0	0
+0x9A	None	Cave fungus, spread top	Random color.	3	4	2	None	5	0																					0			1	0	1	0	0	1	0	0	0	0	0
+0x9B	None	Cave fungus, spiral top	Random color.	3	4	3	None	4	0																					0			1	0	1	0	0	1	0	0	0	0	0
+0x9C	None	Cave fungus, bud top	Random color.	3	4	2	None	5	0																					0			1	0	1	0	0	1	0	0	0	0	0
+0x9D	None	Large stone block, stationary	<i>Not</i> compatible with width/height 1. Auto-joins to ground. The unstable variant is object 89.	3	2	2	4	4																F				2		1	2		1	0			0	0	2	0	0	0	0
+0x9E	None	Donut Lifts, 1x1	Falls if Yoshi stands on one for more than a short time.	3	3	4	3	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11		Stripe 4C			1			0	0	0	0	0	0	1	0	1	0	0
+0x9F	None	Raven planetoids		3	1	3	6	None																F				2	0x7E	4			0	0	0	0	0	0	1	1	0	0	0
+0xA0	None	Breakout blocks, red	3 hits to destroy; turns yellow if hit with an egg. Resets egg bounce count.	3	2	3	4	3							6				A				E					2		2			1	0	0	0	0	0	2	0	1	0	0
+0xA1	None	Breakout blocks, yellow	2 hits to destroy; turns green if hit with an egg. Resets egg bounce count.	3	2	3	4	3							6				A				E					2		2			1	0	0	0	0	0	2	0	1	0	0
+0xA2	None	Breakout blocks, green	Destroyed if hit with an egg. Resets egg bounce count.	3	2	3	4	3							6				A				E					2		2			1	0	0	0	0	0	2	0	1	0	0
+0xA3	None	Breakable castle blocks	2 hits to destroy; cracks if hit with an egg. Resets egg bounce count.	3	2	2	4	4							6				A				E					2		2	2		2	0	0	0	0	0	2	0	1	0	0
+0xA4	None	Breakable castle blocks, cracked	Destroyed if hit with an egg. Resets egg bounce count.	3	2	2	4	4							6				A				E					2		2	2		2	0	0	0	0	0	2	0	1	0	0
+0xA5	None	Vertical pipe, 2-ended*, enterable	*In tileset 3: 2.5D vertical pipe, entrance on bottom, unenterable<br>In castle tilesets, if either end is overlapping a non-blank tile, it won't appear.	3	3	2	None	5				3			6				A				E							0			1	0	0	1	0	0	2	0	0	0	1
+0xA6	None	Horizontal pipe, 2-ended, enterable	Appearance varies by tileset.<br>In castle tilesets, if either end is overlapping a non-blank tile, it won't appear.	3	2	3	5	None				3			6				A				E							1			0	0	0	1	0	0	2	0	0	0	1
+0xA7	None	Blue thorns	Instant death if touched. Destroyed if hit with an egg.	3	3	3	3	3				3			6				A	B			E							1			1	0	0	1	0	0	2	0	1	1	0
+0xA8	None	Blue thorns, hole carver / blank tiles	Generates blank tiles (tile 0000). When removing thorns (object A7), this object also fixes the thorn edges.	3	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11		None			1			1	0	0	2	0	0	0	0	0	0	0
+0xA9	None	2.5D vertical pipe / Chomp signpost	In tileset 3: 2.5D vertical pipe, enterable, floor connector<br> In other tilesets: Chomp signpost, auto-joins to ground. Often used with sprite 0A8.	3	4	1	None	8		1		3				7									11					0			1	0	0	1	1	1	2	0	0	0	0
+0xAA	None	Sewer pipe, left wall	Corners auto-join, with sloping convex pipe corners.	3	3	2	None	4												B										0			1	0	0	1	0	0	2	-1	0	0	0
+0xAB	None	Sewer pipe, right wall	Corners auto-join, with sloping convex pipe corners.	3	4	2	None	4												B										0			1	0	0	1	0	0	2	-1	0	0	0
+0xAC	None	Sewer pipe, ceiling, flat	Corners auto-join, with sloping convex pipe corners.	3	2	3	4	None												B										1			0	0	0	1	0	0	2	-1	0	0	0
+0xAD	None	Sewer pipe, floor, flat	Corners auto-join, with sloping convex pipe corners.	3	2	4	4	None												B										1			0	0	0	1	0	0	2	-1	0	0	0
+0xAE	None	Sewer pipe, {bg} wall shadow, vertical	Commonly used in the center of vertical 4-wide sewer pipes.	3	3	2	None	4												B										0			1	0	0	0	0	1	0	0	0	0	0
+0xAF	None	Sewer pipe, {bg} wall shadow, horizontal	Commonly used in the center of horizontal 4-high sewer pipes.	3	2	3	4	None												B										1			0	0	0	0	0	1	0	0	0	0	0
+0xB0	None	Sewer pipe, {bg} wall	Object only fills empty tiles.	3	2	2	4	4												B										1			1	0	0	1	0	1	0	0	0	0	0
+0xB1	None	Sewer {bg} ledge	Tile modifier. Adds a ledge to a sewer background wall (e.g. object B0, D3, or most sewer pipe objects).	3	3	4	3	None												B										1			0	0	0	2	0	0	1	0	0	0	0
+0xB2	None	Sewer pipe, ceiling, slope +1	Object only fills empty tiles.	3	5	1	-4	None												B								-0x81	1	1			0	0	0	1	0	0	2	1	0	0	0
+0xB3	None	Sewer pipe, floor, slope +1	Object only fills empty tiles.	3	5	2	-4	None												B								-0x81	1	1			0	0	0	1	0	0	2	1	0	0	0
+0xB4	None	Sewer pipe, ceiling, slope +1, +{bg} wall	Object only fills empty tiles.	3	5	1	-4	None												B								-0x81	1	1			0	0	0	1	0	0	2	1	0	0	0
+0xB5	None	Sewer pipe, floor, slope +1, +{bg} wall	Object only fills empty tiles.	3	5	1	-4	None												B								-0x81	1	1			0	0	0	1	0	0	2	1	0	0	0
+0xB6	None	Sewer pipe, ceiling, slope -1	Object only fills empty tiles. Auto-joins to vertical pipes below.	3	2	1	4	None												B										1			0	0	0	1	0	0	2	1	0	0	0
+0xB7	None	Sewer pipe, floor, slope -1	Object only fills empty tiles. Auto-joins to vertical pipes above.	3	2	2	4	None												B										1			0	0	0	1	0	0	2	1	0	0	0
+0xB8	None	Sewer pipe, ceiling, slope -1, +{bg} wall	Object only fills empty tiles. Auto-joins to vertical pipes below.	3	2	1	4	None												B										1			0	0	0	1	0	0	2	1	0	0	0
+0xB9	None	Sewer pipe, floor, slope -1, +{bg} wall	Object only fills empty tiles. Auto-joins to vertical pipes above.	3	2	1	4	None												B										1			0	0	0	1	0	0	2	1	0	0	0
+0xBA	None	Sewer pipe, top end		3	2	4	4	None												B										1			0	0	0	0	0	0	2	0	0	0	0
+0xBB	None	Sewer pipe, bottom end		3	2	4	4	None												B										1			0	0	0	0	0	0	2	0	0	0	0
+0xBC	None	Sewer pipe, right end		3	4	2	None	4												B										0			1	0	0	0	0	0	2	0	0	0	0
+0xBD	None	Sewer pipe, left end		3	4	2	None	4												B										0			1	0	0	0	0	0	2	0	0	0	0
+0xBE	None	Sewer water flow, vertical, from spout	Includes a spout at the top, if placed on a sewer pipe/room background wall.	3	4	2	None	5												B										0			1	0	0	1	0	0	0	0	0	0	0
+0xBF	None	Sewer water flow, vertical, curved at top	If placed in a sewer room, the top corner is a separate object, {extprefix}.9E/{extprefix}.9F.	3	4	2	None	4												B										0			1	0	0	1	0	0	0	0	0	0	0
+0xC0	None	Sewer water flow, leftward	Tile modifier. Adds a water current to a sewer pipe/room floor, and modifies the floor tiles to push Yoshi/sprites to the left.	3	2	3	4	None												B										1			0	0	0	2	0	0	2	0	0	0	0
+0xC1	None	Sewer water flow, rightward	Tile modifier. Adds a water current to a sewer pipe/room floor, and modifies the floor tiles to push Yoshi/sprites to the right.	3	2	3	4	None												B										1			0	0	0	2	0	0	2	0	0	0	0
+0xC2	None	Sewer water flow, slope +1	Tile modifier for a sewer pipe slope (object B3/B5). Adds a downhill current, which is strong enough to create a one-way passage.	3	5	3	-3	None												B								-0x81	1	1			0	0	0	2	0	0	2	1	0	0	0
+0xC3	None	Sewer water flow, slope -1	Tile modifier for a sewer pipe slope (object B7/B9). Adds a downhill current, which is strong enough to create a one-way passage.	3	3	3	3	None												B										1			0	0	0	2	0	0	2	1	0	0	0
+0xC4	None	Coins, horizontal every 2nd tile		3	2	4	5	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			1	0x7F	2			0	1	0	0	0	0	0	0	1	0	0
+0xC5	None	Coins, vertical every 2nd tile		3	4	2	None	5	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0	1	0x7F	2	1	0	0	0	0	0	0	1	0	0
+0xC6	None	Coins, diagonal every 2nd tile	Slope -1 if width is positive, or slope +1 if width is negative.	3	2	2	5	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			-0x81	0x7F	2			0	1	0	0	0	0	0	0	1	0	0
+0xC7	None	! switch coins, horizontal every 2nd tile	Coins that can only be collected if an ! switch is active.	3	2	4	5	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			1	0x7F	2			0	1	0	0	0	0	0	0	1	0	0
+0xC8	None	! switch coins, vertical every 2nd tile	Coins that can only be collected if an ! switch is active.	3	4	2	None	5	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0	1	0x7F	2	1	0	0	0	0	0	0	1	0	0
+0xC9	None	! switch coins, diagonal every 2nd tile	Coins that can only be collected if an ! switch is active.<br>Slope -1 if width is positive, or slope +1 if width is negative.	3	2	2	5	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			-0x81	0x7F	2			0	1	0	0	0	0	0	0	1	0	0
+0xCA	None	Sewer water	Auto-joins to waterfalls.	3	2	2	4	4												B										1	2		1	0	0	1	1	0	3	0	0	0	0
+0xCB	None	Castle {bg} wall, left/right edges	Auto-joins to castle bricks.	3	2	3	4	3							6				A				E							1			1	0	0	1	0	1	0	0	0	0	0
+0xCC	None	Castle {bg} wall, bottom slope -1	Auto-joins to castle bricks.	3	5	6	-3	-4							6				A				E					-0x81	1	1	-0x80	1	1	0	0	1	0	1	0	0	0	0	0
+0xCD	None	Castle {bg} wall, bottom slope +1	Auto-joins to castle bricks.	3	3	6	3	-4							6				A				E							1	-0x80	1	1	0	0	1	0	1	0	0	0	0	0
+0xCE	None	Line-guide, slope ±1	Slope -1 if width is positive, or slope +1 if width is negative.	3	3	3	3	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11			-0x80	0x80	1			0	0	0	0	0	0	0	0	0	0	0
+0xCF	None	Line-guide, slope ±½	Slope -½ if width is positive, or slope +½ if width is negative.	3	2	3	4	None																F				-0x81	0x80	1			0	0	0	0	0	0	0	0	0	0	0
+0xD0	None	Line-guide, slope ±¼	Slope -¼ if width is positive, or slope +¼ if width is negative.	3	2	4	4	None																F				-0x81	0x80	1			0	0	0	0	0	0	0	0	0	0	0
+0xD1	None	Line-guide, vertical		3	4	2	None	4	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0			1	0	0	0	0	0	0	0	0	0	0
+0xD2	None	Line-guide, horizontal		3	2	4	4	None	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			0	0	0	0	0	0	0	0	0	0	0
+0xD3	None	Sewer room, {bg} wall		3	2	2	4	4												B										1			1	0	0	0	0	1	0	0	0	0	0
+0xD4	None	Sewer room, left wall	Auto-joins to sewer pipes.	3	4	2	None	5												B										0			1	0	1	1	1	0	2	0	0	0	0
+0xD5	None	Sewer room, right wall	Auto-joins to sewer pipes.	3	4	2	None	5												B										0			1	0	1	1	1	0	2	0	0	0	0
+0xD6	None	Sewer room, ceiling	Auto-joins to sewer pipes.	3	2	4	5	None												B										1			0	0	1	1	1	0	2	0	0	0	0
+0xD7	None	Sewer room, floor	Auto-joins to sewer pipes.	3	2	4	5	None												B										1			0	0	1	1	1	0	2	0	0	0	0
+0xD8	None	Log bridge, 2-wide logs		3	2	3	4	None														D						2		2			0	0	0	0	0	0	1	0	0	0	0
+0xD9	None	Log bridge, 1-wide logs		3	3	3	3	None														D								1			0	0	0	0	0	0	1	0	0	0	0
+0xDA	None	Super Star blocks	Blocks that are only solid to Super Baby Mario. When solid, they can be hit for stars or coins.	3	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	0	0	0	0	0	-1	0	0	0	0
+0xDB	None	Ice platform, center	Slippery terrain.	3	2	2	4	5					4																	1	2		1	0	1	1	1	0	2	0	0	0	0
+0xDC	None	Ice platform, water-filled gap	Slippery terrain, with water in between.	3	2	3	5	4					4													0x08				1			1	0	0	0	1	0	3	0	0	0	0
+0xDD	None	Cave ice	Slippery terrain.	3	2	2	4	4									8													1			1	0	1	0	0	0	2	0	0	0	0
+0xDE	None	Cave ice, gap with rock		3	3	3	None	4									8													0			1	0	0	0	0	0	2	0	0	0	0
+0xDF	None	Cave lava	Instant death if touched.	3	2	3	5	None									8													1			0	0	0	0	0	0	2	0	0	1	0
+0xE0	None	Cave land, lavafall interior	Instant death if touched.	3	4	3	None	4									8													0			1	0	0	0	0	0	2	0	0	1	0
+0xE1	None	Cave mushrooms, 3-wide	Random color, shared by all mushrooms in the object. Stalk auto-joins to cave lava, and cap auto-joins to the stalks of other copies of E1.	3	3	3	3	4									8											2		1			1	0	1	1	0	0	1	-1	0	0	0
+0xE2	None	Rock spire, column		3	2	0	None	9														D								0			1	0	0	0	0	1	0	0	0	0	0
+0xE3	None	Ice platform, empty gap	Slippery terrain, with blank tiles in between. To create an ice platform's left edge, object A8 is often used to cover up half of this object.	3	2	3	5	4					4																	1			1	0	0	0	1	0	2	0	0	0	0
+0xE4	None	Flower land, flat		3	2	3	4	3													C									1			1	0	1	0	0	0	2	0	0	0	0
+0xE5	None	Flower land, slope +½	Auto-joins to flower walls on either side.	3	5	3	-4	3													C							-0x81	1	1			1	0	1	1	0	0	2	1	0	0	0
+0xE6	None	Flower land, slope +1	Left edge auto-joins to flower walls.	3	5	3	-3	4													C							-0x81	1	1			1	0	1	1	0	0	2	1	0	0	0
+0xE7	None	Flower land, slope +2		3	4	2	-2	5													C							-0x81	1	1			1	0	1	0	0	0	2	1	0	0	0
+0xE8	None	Flower land, slope -½	Auto-joins to flower walls on either side.	3	2	3	4	3													C									1			1	0	1	1	0	0	2	1	0	0	0
+0xE9	None	Flower land, slope -1	Right edge auto-joins to flower walls.	3	3	3	3	4													C									1			1	0	1	1	0	0	2	1	0	0	0
+0xEA	None	Flower land, slope -2		3	3	2	2	5													C									1			1	0	1	0	0	0	2	1	0	0	0
+0xEB	None	Flower land, left wall + sloped surface	Topped by a +2 slope.	3	4	2	1	4													C							1	1	0			1	0	1	1	0	0	2	1	0	0	0
+0xEC	None	Flower land, right wall + sloped surface	Topped by a -2 slope.	3	4	2	1	4													C							1	1	0			1	0	1	1	0	0	2	1	0	0	0
+0xED	None	2.5D stone bricks, ceiling		3	2	6	4	-5				3																		1	-0x80	1	1	0	1	0	1	0	2	0	0	0	0
+0xEE	None	2.5D stone bricks, non-solid interior	Only the surface of this object is solid.	3	2	2	4	5				3																		1			1	0	1	1	0	0	2	0	0	0	0
+0xEF	None	2.5D stone bricks	Sometimes auto-joins to other 2.5D bricks on this object's left.	3	2	2	4	5				3																		1			1	0	1	1	0	0	2	0	0	0	0
+0xF0	None	2.5D stone bricks, moving, ±2 tiles, up first	Causes all tiles in its columns to move vertically back and forth.<br>A max of 19 (decimal) objects F0-F3 can be used in a sublevel.	3	2	2	4	5				3																2		1			1	0	1	1	0	0	2	0	0	0	0
+0xF1	None	2.5D stone bricks, moving, ±4 tiles, up first	Causes all tiles in its columns to move vertically back and forth.<br>A max of 19 (decimal) objects F0-F3 can be used in a sublevel.	3	2	2	4	5				3																2		1			1	0	1	1	0	0	2	0	0	0	0
+0xF2	None	2.5D stone bricks, moving, ±2 tiles, down first	Causes all tiles in its columns to move vertically back and forth.<br>A max of 19 (decimal) objects F0-F3 can be used in a sublevel.	3	2	2	4	5				3																2		1			1	0	1	1	0	0	2	0	0	0	0
+0xF3	None	2.5D stone bricks, moving, ±4 tiles, down first	Causes all tiles in its columns to move vertically back and forth.<br>A max of 19 (decimal) objects F0-F3 can be used in a sublevel.	3	2	2	4	5				3																2		1			1	0	1	1	0	0	2	0	0	0	0
+0xF4	None	Vertical pipe, unenterable	If height is positive, the entrance is on top. If height is negative, the entrance is on the bottom.<br>If a Shy Guy, Lantern Ghost, or Boo Guy is placed at the top-left corner of this pipe, it becomes a spawner.	3	3	3	None	4	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					0	-0x80		1	0	0	0	1	0	2	0	0	0	0
+0xF5	None	Yellow death spikes	Instant death if touched.	3	3	3	3	3	0	1	2	3	4	5	6	7	8	9	A	B	C	D	E	F	11					1			1	0	0	0	0	0	2	0	0	1	0
+0xF6	None	Kamek blocks	Can be transformed into a random enemy/star by Kamek's magic. Object only fills empty tiles.	3	3	3	3	3																			Special Tileset=A			1			1	0	0	1	0	0	2	0	1	0	0
+0xF7	None	Submarine block, top row, surface line	Used with object 18?	3	2	4	4	None			2																			1			0	0	0	0	0	0	2	0	0	0	0
+0xF8	None	Submarine block, center row, water texture	Used where object 18 intersects water.	3	2	4	4	None			2																			1			0	0	0	0	0	0	2	0	0	0	0
+0xF9	None	Submarine block, cobbled row, water texture	Used where object 17 intersects water.	3	2	4	4	None			2																			1			0	0	0	0	0	0	2	0	0	0	0
+0xFA	None	Submarine block, center row, surface line	Used with object 18?	3	2	4	4	None			2																			1			0	0	0	0	0	0	2	0	0	0	0
+0xFB	None	Submarine block, bottom row, water texture	Used where object 18 intersects water.	3	2	4	4	None			2																			1			0	0	0	0	0	0	2	0	0	0	0
+0xFC	None	Submarine block, top row, water texture	Used where object 18 intersects water.	3	2	4	4	None			2																			1			0	0	0	0	0	0	2	0	0	0	0
 0xFD	None	Unused object ID	<b><i>Reserved for future use</i></b>	0																																							
-0xFE	None	2.5D lava, wavy surface	Instant death if touched.<br> <i>Only height&#x2264;05 supported</i>	2	0	2	8	5																		0x12				1		5	1	0	0	0		0	0	0	0	1	0
+0xFE	None	2.5D lava, wavy surface	Instant death if touched.<br> <i>Only height&#x2264;05 supported</i>	3	0	2	8	5																		0x12				1		5	1	0	0	0		0	3	0	0	1	0
 0xFF	None	End of data	<b><i>This object marks end of data, and should not be imported. If this message is being displayed, something's wrong.</i></b>	0			None	None																						0			0										
