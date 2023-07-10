@@ -21,7 +21,7 @@ Aiming to be a streamlined editor experience, providing what's needed for creati
 
 ## How to run
 If running a prebuilt release (<https://github.com/KarisaAdvynia/Advynia/releases>):
-- Download and run Advynia.exe (Windows) or Advynia.app (Mac), no installation needed.
+- Download and run Advynia.exe (Windows)<!-- or Advynia.app (Mac)-->, no installation needed.
 
 If running from source:
 - Install Python from <https://www.python.org/> (requires Python 3.10 or later)
@@ -31,7 +31,7 @@ If running from source:
 - Run Advynia.py
     - Your computer may have multiple versions of Python installed; make sure it opens in Python 3.10+ by default
 
-Advynia should run natively on any platform that supports Python 3.10+ and PyQt6.
+Advynia should run natively on any platform that supports Python 3.10+ and PyQt6, including Windows, Mac, and Linux.
 
 ## Settings
 Settings are stored in Advynia.cfg in the app folder, and can be modified manually while Advynia is closed.
