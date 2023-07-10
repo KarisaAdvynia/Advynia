@@ -7,7 +7,7 @@ Aiming to be a streamlined editor experience, providing what's needed for creati
 - Sublevel editing, with in-game graphics for objects, sprites, the background gradient, and all 4 GBA layers
 - Level main/midway entrance editing
 - Message editing (including standard messages, level names, file select, story intro, ending, credits)
-- Viewers for palettes, 8x8 tiles, and layer 1 16x16 tiles
+- Viewers for palettes, 8x8 tiles, layer 1 16x16 tiles, and layer 2/3 tilemaps
 - Customizing sprite tileset and music in each sublevel
 - Inserting 16x16 tiles as objects
 - Exporting/importing sublevels, entrances, and messages (using Advynia-format .a3l files), including SNES-GBA porting
