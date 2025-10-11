@@ -53,7 +53,7 @@ class QInsertionSidebar(QDockWidget):
 
         self.objectlist = QListWidgetResized(width=200)
         self.objects = []
-        for key, metadata in SMA3.ObjectMetadata.items():
+        for key, metadata in sorted(SMA3.ObjectMetadata.items(), key=(lambda i : i[1].name)):
             if 0 <= metadata.enabled < 2:
                 continue
             obj = SMA3.Object(**metadata.preview)
@@ -65,7 +65,7 @@ class QInsertionSidebar(QDockWidget):
 
         self.spritelist = QListWidgetResized(width=200)
         self.sprites = []
-        for key, metadata in SMA3.SpriteMetadata.items():
+        for key, metadata in sorted(SMA3.SpriteMetadata.items(), key=(lambda i : i[1].name)):
             if 0 <= metadata.enabled < 2:
                 continue
             if metadata.preview["parityID"] is not None:
