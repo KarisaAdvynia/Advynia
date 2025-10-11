@@ -1,5 +1,5 @@
 appname = "Advynia"
-version = (0, 5, 0)
+version = (0, 5, 0, "sorted")
 printtime = False
 
 aboutadvynia = '''
